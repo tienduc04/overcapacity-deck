@@ -1,5 +1,7 @@
 # Overcapacity in Container Shipping – 3D web slide deck
 
+Brief and source of truth: [HANDOFF.md](HANDOFF.md) (storyboard, rules, phases, Gemini plate prompts).
+
 KLU, "Connecting the World Across Oceans". Vite + Three.js + GSAP, plain JS, runs offline.
 
 ## Run
