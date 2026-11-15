@@ -20,9 +20,10 @@ describe('check-content', () => {
     expect(m).toMatch(/broken\.json: not valid JSON/);
   });
 
-  test('the real content fails today (sample data, missing URLs, pending)', () => {
+  test('the real content fails today (sample data, unverified figure, pending)', () => {
     const m = messages('content').join('\n');
-    expect(m).toMatch(/s02\.json: keyNumbers\[0\] "Container ship orderbook" is verified but has no url/);
+    expect(m).not.toMatch(/keyNumbers\[0\] "Container ship orderbook"/); // 14M+ TEU is verified with a URL
+    expect(m).toMatch(/s02\.json: keyNumbers\[1\] "Of the existing fleet" is unverified/);
     expect(m).toMatch(/s03\.json: pending is true/);
   });
 });
