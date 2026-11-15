@@ -9,12 +9,130 @@
       "model": "z_image",
       "job_id": "aeef037e-bc87-4ac3-a062-c87301129c42",
       "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Aerial three-quarter view of a huge container ship at dusk on a calm dark sea, containers stacked in muted blue and grey with a few orange ones, a long wake behind, orange glow on the horizon.",
-      "parameters": { "aspect_ratio": "16:9", "count": 1, "original_size": "2048x1152" },
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
       "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
       "credits": 0.15,
       "date": "2026-11-15",
       "sources": "AI generated; no stock or third-party images",
       "notes": "Small pseudo-text on the bow ('10-21') and hull; acceptable for a placeholder, fix or replace before the final deck."
+    },
+    {
+      "file": "public/plates/s02.jpg",
+      "original": "assets-src/s02-z_image-bdc9b39e.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "bdc9b39e-a24b-4868-b441-63b1b0cd5640",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Looking out from inside an open shipping container: dark corrugated steel walls converge toward a bright opening, soft cyan-white light pouring in, faint sea horizon in the distance.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Fake HUD text and numbers on the left container door, inside the UI area. Replace before the final deck (s02 shows real orderbook figures)."
+    },
+    {
+      "file": "public/plates/s03.jpg",
+      "original": "assets-src/s03-z_image-cb51e8f4.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "cb51e8f4-39c9-44d3-8f01-3b3f4f6caa6f",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Container terminal at night, tall gantry cranes lifting containers, long rows of stacks, cyan light strips on the cranes, wet ground with reflections.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Good. Tiny logo-like marks on crane cabins."
+    },
+    {
+      "file": "public/plates/s04.jpg",
+      "original": "assets-src/s04-z_image-654bc58a.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "654bc58a-107e-4fdd-9667-8aecc0cb083e",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Top-down dark world map made of glowing dots, shipping lanes as thin orange lines, the Red Sea and Suez region glowing red, cyan radar rings, small node markers on chokepoints.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Map and red Red Sea glow fit, but an off-topic orange truck sits in the foreground. Candidate for redo."
+    },
+    {
+      "file": "public/plates/s05.jpg",
+      "original": "assets-src/s05-z_image-767ac41d.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "767ac41d-b78a-4753-97eb-530fab374f50",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Underwater view of a large bronze ship propeller and rudder from the side, sunlight rays from the surface, rising bubbles, deep blue and teal water.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Good. Propeller looks more like a small vessel than a large ship."
+    },
+    {
+      "file": "public/plates/s06.jpg",
+      "original": "assets-src/s06-z_image-5b2d346c.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "5b2d346c-18c1-47d1-9240-2c876c9cddac",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Ship bridge cockpit at night, three large curved screens showing abstract glowing charts with no readable text, panoramic windows onto a dark sea, a console with levers, cyan and orange glow.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Screens carry unreadable pseudo-text; odd orange toy cart on a console. Acceptable placeholder."
+    },
+    {
+      "file": "public/plates/s07.jpg",
+      "original": "assets-src/s07-z_image-0aa72a9e.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "0aa72a9e-3449-42a4-96f9-c52db3ae07f1",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Hamburg harbour at dawn seen from the river, a container ship arriving, silhouettes of container cranes, brick warehouse district in the distance, soft golden haze.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Good. Left third is a dark out-of-focus pillar (works as UI area)."
     }
   ]
 }
