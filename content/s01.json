@@ -12,29 +12,11 @@
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
   "budgetSec": 40,
-  "headline": "Overcapacity in container shipping",
+  "headline": "Overcapacity",
   "layout": "hero",
-  "tag": "TOPIC 02 // MARITIME LOGISTICS ANALYTICS",
-  "headlineAccent": "Overcapacity",
-  "subtitle": "Structural Challenge or Cyclical Disruption?\nA 2030 Supply–Demand Outlook.",
-  "course": "KLU // CONNECTING THE WORLD ACROSS OCEANS",
-  "crew": "CREW // Tien Duc • Aryan • Ryan • Sanjay • Akib",
-  "hint": "[ PRESS → TO BOARD VESSEL ]",
-  "pins": [
-    {
-      "label": "02 // SUPPLY & ORDERBOOK",
-      "at": "boxes",
-      "lift": 120
-    },
-    {
-      "label": "04 // CHOKEPOINTS",
-      "at": "radar",
-      "lift": 190
-    },
-    {
-      "label": "06 // 2030 SCENARIOS",
-      "at": "bridge",
-      "lift": 80
-    }
-  ]
+  "subtitle": "Structural challenge or cyclical disruption?\nA 2030 supply–demand outlook.",
+  "course": "KLU — Connecting the World Across Oceans",
+  "crew": "Tien Duc · Aryan · Ryan · Sanjay · Akib",
+  "hint": "Press → to board",
+  "kicker": "Topic 02 · Container shipping"
 }

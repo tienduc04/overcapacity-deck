@@ -48,23 +48,23 @@ export function createHud(stage, { total, onPrev, onNext }) {
     if (isSample(content)) slide.append(el('div', 'watermark', 'SAMPLE DATA'));
 
     const groups = [];
-    // Headline lines are masks for the hero's slide-up; an optional accent splits off the first line.
-    const headline = el('h1', 'headline');
-    const accent = content.headlineAccent;
-    const lines = accent && content.headline.startsWith(accent) ? [accent, content.headline.slice(accent.length).trim()] : [content.headline];
-    lines.forEach((text, i) => {
-      const line = el('span', 'line');
-      line.append(el('span', i === 0 && lines.length > 1 ? 'accent' : '', text));
-      headline.append(...(i ? [' ', line] : [line]));
-    });
+    const headline = el('h1', 'headline', content.headline);
     if (content.layout === 'hero') {
+      // Scene 1: masthead centred in the sky (the live world letters it behind the ship and this copy
+      // goes transparent), question bottom left with its second line in orange.
       slide.classList.add('slide--hero');
       const lead = el('div', 'hero-lead');
-      lead.append(el('div', 'hero-tag mono-fx', content.tag), headline, el('p', 'hero-subtitle', content.subtitle));
+      lead.append(el('div', 'hero-kicker', content.kicker), headline);
       groups.push(lead);
-      const course = el('div', 'hero-course');
-      course.append(el('span', 'dot'), el('span', 'mono-fx', content.course));
-      slide.append(course, el('div', 'hero-crew mono-fx', content.crew), el('div', 'hero-hint mono-fx', content.hint), el('div', 'pins'));
+      const sub = el('p', 'hero-subtitle');
+      content.subtitle.split('\n').forEach((text, i) => {
+        const line = el('span', 'line');
+        line.append(el(i ? 'em' : 'span', '', text));
+        sub.append(line);
+      });
+      const foot = el('div', 'hero-foot');
+      foot.append(sub, el('div', 'hero-crew', content.crew));
+      slide.append(el('div', 'hero-course', content.course), foot, el('div', 'hero-hint', content.hint));
     } else groups.push(headline);
     if (content.keyNumbers?.length) {
       const row = el('div', 'numbers');

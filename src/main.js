@@ -136,7 +136,6 @@ function loop(now) {
     hud.updateDebug([`tier     ${tierName}`, `renderer ${view.kind}`, `fx       ${view.fx ?? 'css'}`,`fps      ${fps.toFixed(0)}`, `gpu      ${gpu ?? 'none'}`, `scene    ${body.dataset.scene} step ${body.dataset.step}`]);
   }
   const { scene } = deck.state;
-  scenes[scene].update(now / 1000);
   hud.updateTimer((now - startTime) / 1000, (now - sceneStart) / 1000, scenes[scene].content.budgetSec);
   requestAnimationFrame(loop);
 }

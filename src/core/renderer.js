@@ -259,7 +259,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
   // same transition and finish shaders as a plate.
   const targets = plates.map((_, i) => {
     if (!live[i]) return null;
-    const rt = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType });
+    const rt = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, stencilBuffer: true }); // stencil: hero title behind the ship
     rt.texture.userData.size = new THREE.Vector2(1920, 1080);
     textures[i] = rt.texture;
     live[i].init(renderer);

@@ -13,12 +13,12 @@ const CAM = { angle: -38, radius: 300, height: 34 }; // degrees around the ship,
 const SUN = { elevation: 2, offset: 14 }; // degrees above the horizon / right of the view centre
 const ENV_INTENSITY = 0.8; // HDRI image light on the ship
 
-// Points on the ship the scene 1 pins point at: rig space, metres (bow +x, waterline y = 0), placed by eye.
-const ANCHORS = { boxes: [80, 24, 0], radar: [-34, 45, 0], bridge: [-30, 36, 0] };
+const TITLE_DEPTH = 900; // m from the camera: beyond the ship (about 300 m), in front of the sky
 const DRAUGHT = 14.5; // m below the waterline, typical for this size (the red antifouling stays under water)
 
-export async function createHeroWorld() {
-  const [gltf, hdr] = await Promise.all([new GLTFLoader().loadAsync('models/ship-rm02.glb'), loadHdr()]);
+// title: { word } lettered into the sky behind the ship.
+export async function createHeroWorld(title) {
+  const [gltf, hdr, titleMesh] = await Promise.all([new GLTFLoader().loadAsync('models/ship-rm02.glb'), loadHdr(), createTitle(title)]);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 16 / 9, 5, 12000);
   // Sun low in the frame, just right of where the camera looks: backlit sunset, glitter path on the sea.
@@ -36,6 +36,8 @@ export async function createHeroWorld() {
   ship.scale.setScalar(k);
   ship.position.set((-(box.min.x + box.max.x) / 2) * k, -box.min.y * k - DRAUGHT, 0);
   box = new THREE.Box3().setFromObject(ship);
+  // The ship marks the stencil buffer, so the title behind it is hidden exactly where the ship is.
+  ship.traverse((o) => o.isMesh && Object.assign(o.material, { stencilWrite: true, stencilRef: 1, stencilZPass: THREE.ReplaceStencilOp }));
   const ocean = createOcean({
     envTexture: sky.envTexture,
     sun,
@@ -53,27 +55,30 @@ export async function createHeroWorld() {
   const fill = new THREE.DirectionalLight(0xa9b8cf, 1.1); // cool sky fill on the shaded, lettered side
   fill.position.copy(view).multiplyScalar(-1000).setY(400);
   scene.add(light, fill, new THREE.HemisphereLight(0x8fa6c8, 0x0b1520, 0.6));
+  camera.add(titleMesh); // screen-locked: the ship drifts in front of it
+  scene.add(camera);
+  const titleFx = { alpha: 1, rise: 0 }; // driven by the scene's entrance animation
 
   let ready = false;
   return {
     scene,
     camera,
     init(renderer) {
-      sky.bake(renderer, { hide: [ocean, rig], hdr, envIntensity: ENV_INTENSITY });
+      sky.bake(renderer, { hide: [ocean, rig, titleMesh], hdr, envIntensity: ENV_INTENSITY });
       ready = true;
     },
     resize(w, h) {
       camera.aspect = w / h;
-      camera.setViewOffset(w, h, -w * 0.12, 0, w, h); // shift the shot so the ship sits right of the title
+      camera.setViewOffset(w, h, -w * 0.12, 0, w, h); // shift the shot so the ship sits right of the centre
+      fitToView(titleMesh, camera, TITLE_DEPTH);
     },
-    // Screen position (NDC, into v) of a named anchor, for HTML labels. Valid after a frame is drawn.
-    anchor(name, v) {
-      return v.set(...ANCHORS[name]).applyMatrix4(rig.matrixWorld).project(camera);
-    },
+    titleFx,
     // t: seconds since page load. lean: smoothed pointer tilt (-1..1).
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
       ocean.material.uniforms.uTime.value = t;
+      titleMesh.material.opacity = titleFx.alpha;
+      titleMesh.material.map.offset.y = titleFx.rise;
       rig.rotation.x = Math.sin(t * 0.5) * 0.012; // roll
       rig.rotation.z = Math.sin(t * 0.37 + 1.0) * 0.008; // pitch
       rig.position.y = Math.sin(t * 0.6) * 0.8;
@@ -84,4 +89,52 @@ export async function createHeroWorld() {
       camera.lookAt(-20, 22, 0);
     },
   };
+}
+
+// The title as a full-view quad drawn on a 1920×1080 canvas (same layout units as the HUD). It is
+// drawn after the ship without depth testing, and only where the ship has not marked the stencil.
+async function createTitle({ word }) {
+  await document.fonts.load('800 222px Montserrat');
+  const canvas = document.createElement('canvas');
+  canvas.width = 1920;
+  canvas.height = 1080;
+  const g = canvas.getContext('2d');
+  g.textAlign = 'center';
+  // Dark letters against the bright sunset sky, fading out towards the horizon. Opaque: in HDR even
+  // 5 % of the sky around the sun shows through. (Thin text stays in HTML, after tone mapping.)
+  const fade = g.createLinearGradient(0, 318, 0, 540);
+  fade.addColorStop(0, 'rgb(10, 17, 24)');
+  fade.addColorStop(0.55, 'rgb(14, 18, 24)');
+  fade.addColorStop(1, 'rgba(40, 30, 30, 0)');
+  g.fillStyle = fade;
+  g.font = '800 222px Montserrat';
+  g.letterSpacing = '-2px';
+  g.fillText(word.toUpperCase(), 960, 509);
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshBasicMaterial({
+    map,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    stencilWrite: true, // enables the stencil test; the ops keep the buffer as it is
+    stencilRef: 1,
+    stencilFunc: THREE.NotEqualStencilFunc,
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+  mesh.renderOrder = 10; // after the ship, including its transparent parts
+  mesh.frustumCulled = false;
+  return mesh;
+}
+
+// Stretch a camera-child quad over the whole (offset) view at `depth` metres.
+function fitToView(mesh, camera, depth) {
+  const pos = mesh.geometry.attributes.position;
+  const v = new THREE.Vector3();
+  [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(([x, y], i) => {
+    v.set(x, y, 0.5).applyMatrix4(camera.projectionMatrixInverse);
+    v.multiplyScalar(-depth / v.z);
+    pos.setXYZ(i, v.x, v.y, v.z);
+  });
+  pos.needsUpdate = true;
 }
