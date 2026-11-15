@@ -105,13 +105,46 @@ test('every control works: Space, click, buttons, 1-7, S, T, D, B, Esc, F', asyn
   expect(seen.errors).toEqual([]);
 });
 
-test('a transition finishes on its own within 4 s', async ({ page }) => {
+// Scene n is entered through its own transition (s02 zoomBlur ... s07 dockFade).
+const TRANSITION_SECONDS = { 2: 1.6, 3: 1.8, 4: 2.0, 5: 2.0, 6: 2.2, 7: 2.4 };
+const fromScene1 = async (page) => {
+  await page.keyboard.press('1');
+  await page.keyboard.press('s');
+  await idle(page);
+  await at(page, 0, 0);
+};
+
+test('each transition compiles, finishes on its own within 4 s, mid-frame screenshot', async ({ page }) => {
+  const shaderErrors = [];
+  page.on('console', (m) => /shader|webgl/i.test(m.text()) && m.type() === 'error' && shaderErrors.push(m.text()));
+  await page.goto('/?q=med');
+  await at(page, 0, 0);
+  await page.mouse.move(1500, 300); // tilt on, as in a live talk
+  for (const n of [2, 3, 4, 5, 6, 7]) {
+    await fromScene1(page);
+    await page.keyboard.press(String(n));
+    const t0 = Date.now();
+    await page.waitForTimeout(TRANSITION_SECONDS[n] * 450); // about 45 % through
+    await page.screenshot({ path: join(SHOTS, `t0${n - 1}-0${n}-mid.png`) });
+    await idle(page);
+    expect(Date.now() - t0).toBeLessThan(4500);
+    await at(page, n - 1, 0);
+  }
+  expect(shaderErrors).toEqual([]);
+});
+
+test('S skips every transition at once', async ({ page }) => {
   await page.goto('/');
   await at(page, 0, 0);
-  await page.keyboard.press('2');
-  const t0 = Date.now();
-  await idle(page);
-  expect(Date.now() - t0).toBeLessThan(4500);
+  for (const n of [2, 3, 4, 5, 6, 7]) {
+    await fromScene1(page);
+    await page.keyboard.press(String(n));
+    await page.waitForTimeout(200);
+    const t0 = Date.now();
+    await page.keyboard.press('s');
+    await idle(page);
+    expect(Date.now() - t0).toBeLessThan(600);
+  }
 });
 
 test('no-WebGL fallback: same controls, plates as CSS', async ({ page }) => {
@@ -132,26 +165,37 @@ test('no-WebGL fallback: same controls, plates as CSS', async ({ page }) => {
   expect(seen.errors).toEqual([]);
 });
 
-test('FPS per tier (logged for docs/machine-report.md)', async ({ page }) => {
+const countFps = (page, ms) =>
+  page.evaluate(
+    (ms) =>
+      new Promise((done) => {
+        let n = 0;
+        const t0 = performance.now();
+        const tick = (t) => (t - t0 < ms ? (n++, requestAnimationFrame(tick)) : done(Math.round((n * 1000) / (t - t0))));
+        requestAnimationFrame(tick);
+      }),
+    ms
+  );
+
+test('FPS per tier, at rest and during each transition (logged for docs/machine-report.md)', async ({ page }) => {
+  test.setTimeout(120_000);
   const result = {};
   for (const q of ['low', 'med', 'high']) {
     await page.goto(`/?q=${q}`);
     await at(page, 0, 0);
-    await page.keyboard.press('2');
-    await page.keyboard.press('s');
-    await idle(page);
-    await page.waitForTimeout(1000);
-    result[q] = await page.evaluate(
-      () =>
-        new Promise((done) => {
-          let n = 0;
-          const t0 = performance.now();
-          const tick = (t) => (t - t0 < 2000 ? (n++, requestAnimationFrame(tick)) : done(Math.round((n * 1000) / (t - t0))));
-          requestAnimationFrame(tick);
-        })
-    );
+    await page.mouse.move(1400, 400);
+    const during = {};
+    for (const n of [2, 3, 4, 5, 6, 7]) {
+      await fromScene1(page);
+      await page.keyboard.press(String(n));
+      during[n] = await countFps(page, 1200); // every transition lasts at least 1.6 s
+      await idle(page);
+    }
+    await page.waitForTimeout(500);
+    result[q] = { rest: await countFps(page, 2000), during, minDuring: Math.min(...Object.values(during)) };
   }
   const gpu = await page.evaluate(() => document.body.dataset.gpu);
   console.log(`[fps] ${JSON.stringify(result)} on ${gpu}`);
-  expect(result.med).toBeGreaterThanOrEqual(55); // recommended tier keeps 60 FPS headroom
+  expect(result.med.rest).toBeGreaterThanOrEqual(55);
+  expect(result.med.minDuring).toBeGreaterThanOrEqual(55); // recommended tier keeps 60 FPS headroom
 });

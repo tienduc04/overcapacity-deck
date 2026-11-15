@@ -59,3 +59,21 @@ Phase 6 starts: `winget install BlenderFoundation.Blender --scope user`.
 All tiers hit the 144 Hz display cap: a full-screen plate quad plus a crossfade is cheap. The tiers
 only start to differ once the Phase 3 shaders, Ken Burns and parallax exist; re-measure then.
 The `med` recommendation stands until those numbers are in.
+
+## Phase 3 measurements
+2026-11-15, `npx playwright test` (Vite preview build, Chrome 157 headless, 1920×1080, Intel UHD,
+pointer tilt on). FPS at rest and the lowest FPS while each transition runs (1.2 s sample from
+scene 1 into scene n):
+
+| Tier | At rest | zoomBlur | laserScan | radarWipe | bubbles | glassCrash | dockFade | Lowest |
+|---|---|---|---|---|---|---|---|---|
+| low | 144 | 86 | 115 | 113 | 79 | 71 | 117 | 71 |
+| med | 144 | 73 | 116 | 115 | 78 | 69 | 116 | 69 |
+| high | 144 | 71 | 117 | 112 | 80 | 74 | 111 | 71 |
+
+- Every transition stays above 60 FPS on the integrated GPU, so the governor never steps in.
+  glassCrash (two Voronoi lookups per pixel) and bubbles are the heaviest.
+- At rest the renderer switches back to the crossfade shader, so idle cost is unchanged.
+- Headless Chrome reports devicePixelRatio 1, so `high` renders the same pixel count as `med`
+  here; on a HiDPI screen `high` draws 4× the pixels. The `med` recommendation stands.
+- The e2e test fails if `med` drops below 55 FPS at rest or during any transition.

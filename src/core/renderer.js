@@ -4,20 +4,169 @@ import { MAX_TRANSITION } from './fallback.js';
 
 // Full-screen Three.js canvas that shows one plate (cover-fit) and blends between two plates.
 // Transition API: transition(from, to, { type, duration, onDone }) → { skip() }.
-// Phase 1: every registered type uses the crossfade shader; Phase 3 replaces them one by one.
+// Each type defines vec4 transition(vec2 uv, float p) from fromColor/toColor; p runs 0 → 1 and
+// p = 1 must look like plain toColor (settle() swaps back to the cheap crossfade material).
+// uv.y = 1 is the top of the screen. Loop counts scale with uDetail (0.5 on the low tier).
 
 const crossfade = /* glsl */ `
   vec4 transition(vec2 uv, float p) { return mix(fromColor(uv), toColor(uv), p); }
 `;
+
+// 1 → 2: rush into a bright point. Both plates radially blurred, white bloom at the midpoint.
+const zoomBlur = /* glsl */ `
+  vec4 transition(vec2 uv, float p) {
+    vec2 c = vec2(0.5);
+    float n = mix(6.0, 16.0, uDetail);
+    float s = sin(p * PI); // blur and bloom peak mid-way
+    vec4 a = vec4(0.0), b = vec4(0.0);
+    for (int i = 0; i < 16; i++) {
+      if (float(i) >= n) break;
+      float r = 1.0 - s * 0.35 * float(i) / n;
+      a += fromColor(c + (uv - c) * (1.0 - 0.6 * p) * r); // from: zooms in
+      b += toColor(c + (uv - c) / (1.0 + 0.5 * (1.0 - p)) * r); // to: lands from close up
+    }
+    vec4 col = mix(a, b, smoothstep(0.4, 0.6, p)) / n;
+    float r = length((uv - c) * vec2(aspect(), 1.0));
+    float glow = pow(s, 3.0) * (0.9 * exp(-r * 7.0) + 0.35);
+    return vec4(col.rgb + vec3(1.0, 0.96, 0.88) * glow, 1.0);
+  }
+`;
+
+// 2 → 3: a cyan laser line scans top to bottom; the new plate sits behind it, with a short
+// glitch band at the beam and scanlines that fade out.
+const laserScan = /* glsl */ `
+  vec4 transition(vec2 uv, float p) {
+    float d = uv.y - mix(1.08, -0.08, p); // > 0: above the beam, already scanned
+    float rev = smoothstep(-0.002, 0.002, d);
+    float near = exp(-abs(d) * 40.0);
+    float shift = (hash(vec2(floor(uv.y * 240.0), floor(uTime * 30.0))) - 0.5) * 0.025 * near * uDetail;
+    vec2 q = uv + vec2(shift, 0.0);
+    vec3 col = mix(fromColor(q).rgb, toColor(q).rgb, rev);
+    float fade = 1.0 - smoothstep(0.9, 1.0, p);
+    float band = rev * exp(-d * 14.0) * fade;
+    float lines = 0.75 + 0.25 * sin(uv.y * uScreen.y * 1.6);
+    col = mix(col, col * vec3(0.65, 1.0, 1.1) * lines, band * 0.7);
+    vec3 beam = vec3(0.35, 0.9, 1.0) * (1.6 * exp(-abs(d) * uScreen.y * 0.25) + 0.3 * near);
+    return vec4(col + beam * fade, 1.0);
+  }
+`;
+
+// 3 → 4: radar sweep clockwise from 12 o'clock, green trail and range rings behind the edge.
+const radarWipe = /* glsl */ `
+  vec4 transition(vec2 uv, float p) {
+    vec2 d = (uv - 0.5) * vec2(aspect(), 1.0);
+    float a = fract(atan(d.x, d.y) / (2.0 * PI)); // 0 at 12 o'clock, growing clockwise
+    float behind = p * 1.1 - a; // > 0: already swept
+    float rev = smoothstep(0.0, 0.006, behind);
+    vec3 col = mix(fromColor(uv).rgb, toColor(uv).rgb, rev);
+    float fade = 1.0 - smoothstep(0.85, 1.0, p);
+    float r = length(d);
+    float trail = rev * exp(-behind * 9.0);
+    float rings = pow(0.5 + 0.5 * cos(r * 2.0 * PI * 7.0), 30.0);
+    float edge = exp(-abs(behind) * 220.0 / max(r * 6.0, 0.3));
+    vec3 green = vec3(0.25, 1.0, 0.7);
+    col = mix(col, col * vec3(0.6, 1.05, 0.85), trail * 0.5 * fade);
+    col += green * (edge * 0.9 + trail * rings * 0.35 + exp(-r * 40.0) * 0.6) * fade;
+    return vec4(col, 1.0);
+  }
+`;
+
+// 4 → 5: under water. The old plate wobbles, bubbles rise and grow; inside each one the new
+// plate shows through a lens, with a bright rim and a highlight.
+const bubbles = /* glsl */ `
+  vec4 transition(vec2 uv, float p) {
+    float s = sin(p * PI);
+    vec2 wob = vec2(sin(uv.y * 28.0 + uTime * 2.3), cos(uv.x * 22.0 + uTime * 1.9)) * 0.005 * s;
+    vec3 col = fromColor(uv + wob).rgb;
+    col = mix(col, col * vec3(0.55, 0.85, 1.0), 0.45 * s);
+    vec2 q = uv * vec2(aspect(), 1.0) * 6.0 + vec2(0.0, -p * 2.5); // bubbles drift up
+    vec2 cell = floor(q), f = q - cell;
+    float inside = -1.0;
+    vec2 lens = vec2(0.0);
+    for (int j = -1; j <= 1; j++)
+      for (int i = -1; i <= 1; i++) {
+        vec2 g = vec2(float(i), float(j));
+        vec2 h = hash2(cell + g);
+        vec2 o = g + 0.5 + (h - 0.5) * 0.6 - f; // pixel to bubble centre, in cells
+        float rad = smoothstep(h.x * 0.45, h.x * 0.45 + 0.45, p) * (0.55 + 0.4 * h.y);
+        float m = rad - length(o);
+        if (m > inside) { inside = m; lens = o / max(rad, 1e-3); }
+      }
+    float k = smoothstep(0.0, 0.015, inside);
+    vec3 under = toColor(uv + lens * 0.03 * (1.0 - p)).rgb;
+    float rim = exp(-abs(inside) * 50.0) * 0.5 * (1.0 - p);
+    float spot = smoothstep(0.25, 0.0, length(lens - vec2(-0.35, 0.4))) * 0.35 * k * (1.0 - p);
+    col = mix(col, under, k) + vec3(0.8, 0.95, 1.0) * (rim + spot);
+    return vec4(mix(col, toColor(uv).rgb, smoothstep(0.75, 1.0, p)), 1.0);
+  }
+`;
+
+// 5 → 6: glass crash. Cracks run out from an impact point, then Voronoi shards fly away into
+// depth (each shrinks toward its seed, nearest the impact first), uncovering the new plate.
+// A shard shrunk toward its own seed stays inside its convex cell, so one lookup per pixel works.
+const glassCrash = /* glsl */ `
+  vec3 voronoi(vec2 q) { // nearest seed in xy, F2 - F1 (distance to the nearest edge) in z
+    vec2 cell = floor(q);
+    float f1 = 9.0, f2 = 9.0;
+    vec2 best = vec2(0.0);
+    for (int j = -1; j <= 1; j++)
+      for (int i = -1; i <= 1; i++) {
+        vec2 g = cell + vec2(float(i), float(j));
+        vec2 seed = g + hash2(g);
+        float d = length(seed - q);
+        if (d < f1) { f2 = f1; f1 = d; best = seed; } else if (d < f2) f2 = d;
+      }
+    return vec3(best, f2 - f1);
+  }
+  vec4 transition(vec2 uv, float p) {
+    const float SCALE = 5.0;
+    vec2 asp = vec2(aspect(), 1.0);
+    vec2 hit = vec2(0.56, 0.48) * asp * SCALE;
+    float shake = exp(-p * 30.0) * smoothstep(0.0, 0.02, p) * 0.01;
+    vec2 q = (uv + (hash2(vec2(floor(uTime * 60.0))) - 0.5) * shake) * asp * SCALE;
+    vec2 seed = voronoi(q).xy;
+    float delay = min(length(seed - hit) * 0.08 + hash(seed) * 0.08, 0.45);
+    float k = smoothstep(0.15 + delay, 0.55 + delay, p); // 0 intact, 1 gone
+    float sc = 1.0 - k;
+    if (sc < 0.001) return toColor(uv);
+    float ang = (hash(seed + 7.0) - 0.5) * 1.2 * k;
+    vec2 qq = seed + mat2(cos(ang), -sin(ang), sin(ang), cos(ang)) * (q - seed) / sc;
+    vec3 v = voronoi(qq);
+    if (distance(v.xy, seed) > 0.001) return toColor(uv); // outside the shrunk shard
+    vec3 col = fromColor(qq / asp / SCALE + vec2(0.0, -0.08 * k * k)).rgb;
+    float front = smoothstep(0.0, 0.25, p * 8.0 - length(qq - hit) * 0.25); // cracks spread out
+    float crack = smoothstep(0.06, 0.0, v.z) * front;
+    col = col * (1.0 - 0.5 * k) + vec3(0.9, 0.97, 1.0) * crack * (0.8 - 0.6 * k);
+    col += exp(-p * 25.0) * smoothstep(0.0, 0.02, p) * 0.5 * exp(-length(q - hit)); // impact flash
+    return vec4(col, 1.0);
+  }
+`;
+
+// 6 → 7: docking. Slow push-in; a warm mist rises from the water line and leaves the new plate.
+const dockFade = /* glsl */ `
+  vec4 transition(vec2 uv, float p) {
+    vec2 c = vec2(0.5, 0.45);
+    vec3 a = fromColor(c + (uv - c) * (1.0 - 0.07 * p)).rgb;
+    vec3 b = toColor(c + (uv - c) * (1.0 + 0.05 * (1.0 - p))).rgb;
+    float t = mix(-0.45, 1.45, p);
+    float n = vnoise(uv * vec2(aspect(), 1.0) * 3.0 + vec2(uTime * 0.15, 0.0));
+    float m = 1.0 - smoothstep(t - 0.25, t + 0.25, uv.y + (n - 0.5) * 0.3);
+    vec3 col = mix(a, b, m);
+    float haze = sin(p * PI) * (0.55 + 0.45 * n) * (1.0 - 0.5 * uv.y);
+    col = mix(col, vec3(1.0, 0.82, 0.6) * 0.85, haze * 0.35);
+    return vec4(col, 1.0);
+  }
+`;
+
 export const TRANSITIONS = {
   none: { glsl: crossfade, duration: 0 },
   crossfade: { glsl: crossfade, duration: 1.2 },
-  zoomBlur: { glsl: crossfade, duration: 1.6 },
-  laserScan: { glsl: crossfade, duration: 1.6 },
-  radarWipe: { glsl: crossfade, duration: 1.6 },
-  bubbles: { glsl: crossfade, duration: 1.6 },
-  glassCrash: { glsl: crossfade, duration: 1.6 },
-  dockFade: { glsl: crossfade, duration: 2.0 },
+  zoomBlur: { glsl: zoomBlur, duration: 1.6 },
+  laserScan: { glsl: laserScan, duration: 1.8 },
+  radarWipe: { glsl: radarWipe, duration: 2.0 },
+  bubbles: { glsl: bubbles, duration: 2.0 },
+  glassCrash: { glsl: glassCrash, duration: 2.2 },
+  dockFade: { glsl: dockFade, duration: 2.4 },
 };
 
 const vertexShader = /* glsl */ `
@@ -30,6 +179,15 @@ const fragmentShader = (body) => /* glsl */ `
   uniform vec3 uFromXf, uToXf; // Ken Burns per plate: (scale, offset x, offset y)
   uniform float uProgress, uTime, uDetail, uGrain;
   varying vec2 vUv;
+  #define PI 3.14159265
+  float aspect() { return uScreen.x / uScreen.y; }
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  vec2 hash2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
+  float vnoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + 1.0), f.x), f.y);
+  }
   // object-fit: cover, then the Ken Burns zoom/pan
   vec2 cover(vec2 uv, vec2 img, vec3 xf) {
     float s = uScreen.x / uScreen.y, i = img.x / img.y;
@@ -65,6 +223,7 @@ export function kenBurns(i, t) {
 const FX_LEVELS = ['full', 'no-grain', 'minimal'];
 const SLOW_FPS = 45;
 const SLOW_SECONDS = 3;
+const TILT = 0.03;
 
 // Clip hook (Phase 3): setClipPlayer(fn) where fn(from, to, onDone) returns { skip() } when a
 // clip for that pair exists and is playing, or null to fall back to the shader.
@@ -109,7 +268,16 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
   const started = plates.map(() => 0); // when each plate last came on screen (s)
   const pair = { from: 0, to: 0 };
   const now = () => performance.now() / 1000;
-  const xf = (v, i, t) => (motion && !still[i] ? v.set(...kenBurns(i, t - started[i])) : v.set(1, 0, 0));
+  // Tilt: the pointer leans the view a little. An extra TILT zoom pays for the shift, so the
+  // sampled window stays inside the plate (same bound as Ken Burns). Decorative only.
+  const lean = { x: 0, y: 0, tx: 0, ty: 0 };
+  const xf = (v, i, t) => {
+    if (!motion || still[i]) return v.set(1, 0, 0);
+    const [s, x, y] = kenBurns(i, t - started[i]);
+    const s2 = s * (1 + TILT);
+    const m = 0.5 * (1 / s - 1 / s2);
+    return v.set(s2, x + lean.x * m, y + lean.y * m);
+  };
   const materials = Object.fromEntries(
     Object.entries(TRANSITIONS).map(([name, t]) => [name, new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader: fragmentShader(t.glsl), depthTest: false })])
   );
@@ -129,6 +297,7 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
   const settle = (i) => {
     setPair(i, i);
     uniforms.uProgress.value = 1;
+    quad.material = materials.crossfade; // at rest, no need to run the transition shader
   };
   function show(i) {
     started[i] = now();
@@ -190,7 +359,14 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
       renderer.setSize(w, h, false);
       uniforms.uScreen.value.set(w, h);
     },
+    tilt(x, y) {
+      lean.tx = Math.max(-1, Math.min(1, x));
+      lean.ty = Math.max(-1, Math.min(1, y));
+    },
     render(time) {
+      const ease = Math.min(1, Math.max(0, time - last) * 3); // read before govern() moves `last`
+      lean.x += (lean.tx - lean.x) * ease;
+      lean.y += (lean.ty - lean.y) * ease;
       govern(time);
       uniforms.uTime.value = time;
       xf(uniforms.uFromXf.value, pair.from, time);

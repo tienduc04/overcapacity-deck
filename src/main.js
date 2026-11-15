@@ -112,6 +112,9 @@ addEventListener('click', (e) => {
   apply(deck.next());
 });
 
+// Pointer tilt (decorative; the deck never needs the mouse). The CSS fallback has none.
+addEventListener('pointermove', (e) => view.tilt?.((e.clientX / innerWidth) * 2 - 1, 1 - (e.clientY / innerHeight) * 2));
+
 const resize = () => view.resize(innerWidth, innerHeight);
 addEventListener('resize', resize);
 resize();
