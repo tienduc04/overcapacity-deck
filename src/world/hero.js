@@ -13,6 +13,8 @@ const CAM = { angle: -38, radius: 300, height: 34 }; // degrees around the ship,
 const SUN = { elevation: 2, offset: 14 }; // degrees above the horizon / right of the view centre
 const ENV_INTENSITY = 0.8; // HDRI image light on the ship
 
+// Points on the ship the scene 1 pins point at: rig space, metres (bow +x, waterline y = 0), placed by eye.
+const ANCHORS = { boxes: [80, 24, 0], radar: [-34, 45, 0], bridge: [-30, 36, 0] };
 const DRAUGHT = 14.5; // m below the waterline, typical for this size (the red antifouling stays under water)
 
 export async function createHeroWorld() {
@@ -63,6 +65,10 @@ export async function createHeroWorld() {
     resize(w, h) {
       camera.aspect = w / h;
       camera.setViewOffset(w, h, -w * 0.12, 0, w, h); // shift the shot so the ship sits right of the title
+    },
+    // Screen position (NDC, into v) of a named anchor, for HTML labels. Valid after a frame is drawn.
+    anchor(name, v) {
+      return v.set(...ANCHORS[name]).applyMatrix4(rig.matrixWorld).project(camera);
     },
     // t: seconds since page load. lean: smoothed pointer tilt (-1..1).
     update(t, lean = { x: 0, y: 0 }) {

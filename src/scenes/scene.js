@@ -16,7 +16,7 @@ export function createScene({ title, speaker, transition, content, still = false
     content,
     init(ctx) {
       hud = ctx.hud;
-      slide = hud.mount(content, this, ctx.index);
+      slide = this.slide = hud.mount(content, this, ctx.index);
     },
     enter(tl) {
       slide.hidden = false;

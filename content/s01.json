@@ -1,11 +1,8 @@
 {
-  "steps": 2,
+  "steps": 1,
   "keyNumbers": [],
   "chart": null,
-  "bullets": [
-    "Sample: agenda point one",
-    "Sample: agenda point two"
-  ],
+  "bullets": [],
   "credits": "Ship model: \"Container Ship\" by RM02 (sketchfab.com/RM02), CC BY 4.0, modified",
   "theory": "",
   "case": "",
@@ -15,5 +12,29 @@
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
   "budgetSec": 40,
-  "headline": "Too many ships, too little cargo? Overcapacity 2026–2030"
+  "headline": "Overcapacity in container shipping",
+  "layout": "hero",
+  "tag": "TOPIC 02 // MARITIME LOGISTICS ANALYTICS",
+  "headlineAccent": "Overcapacity",
+  "subtitle": "Structural Challenge or Cyclical Disruption?\nA 2030 Supply–Demand Outlook.",
+  "course": "KLU // CONNECTING THE WORLD ACROSS OCEANS",
+  "crew": "CREW // Tien Duc • Aryan • Ryan • Sanjay • Akib",
+  "hint": "[ PRESS → TO BOARD VESSEL ]",
+  "pins": [
+    {
+      "label": "02 // SUPPLY & ORDERBOOK",
+      "at": "boxes",
+      "lift": 120
+    },
+    {
+      "label": "04 // CHOKEPOINTS",
+      "at": "radar",
+      "lift": 190
+    },
+    {
+      "label": "06 // 2030 SCENARIOS",
+      "at": "bridge",
+      "lift": 80
+    }
+  ]
 }

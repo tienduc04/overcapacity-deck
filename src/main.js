@@ -2,6 +2,7 @@ import '@fontsource/montserrat/latin-500.css';
 import '@fontsource/montserrat/latin-800.css';
 import '@fontsource/fira-code/latin-400.css';
 import '@fontsource/fira-code/latin-500.css';
+import '@fontsource/inter/latin-400.css';
 import './hud/hud.css';
 import gsap from 'gsap';
 import { createDeck } from './core/deck.js';
@@ -135,6 +136,7 @@ function loop(now) {
     hud.updateDebug([`tier     ${tierName}`, `renderer ${view.kind}`, `fx       ${view.fx ?? 'css'}`,`fps      ${fps.toFixed(0)}`, `gpu      ${gpu ?? 'none'}`, `scene    ${body.dataset.scene} step ${body.dataset.step}`]);
   }
   const { scene } = deck.state;
+  scenes[scene].update(now / 1000);
   hud.updateTimer((now - startTime) / 1000, (now - sceneStart) / 1000, scenes[scene].content.budgetSec);
   requestAnimationFrame(loop);
 }

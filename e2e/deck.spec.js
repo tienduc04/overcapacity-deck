@@ -65,16 +65,16 @@ test('every control works: Space, click, buttons, 1-7, S, T, D, B, Esc, F', asyn
   const seen = watch(page);
   await page.goto('/');
   await at(page, 0, 0); // app booted (fonts + plates loaded)
-  await page.keyboard.press(' ');
-  await at(page, 0, 1);
-  await page.mouse.click(900, 500);
+  await page.keyboard.press(' '); // scene 1 has one step: Space moves on
   await at(page, 1, 0);
   await page.keyboard.press('s');
   await idle(page);
-  await page.getByRole('button', { name: 'Next' }).click();
+  await page.mouse.click(900, 500);
   await at(page, 1, 1);
+  await page.getByRole('button', { name: 'Next' }).click();
+  await at(page, 1, 2);
   await page.getByRole('button', { name: 'Previous' }).click();
-  await at(page, 1, 0);
+  await at(page, 1, 1);
 
   for (const n of [5, 3, 7, 1]) {
     await page.keyboard.press(String(n));

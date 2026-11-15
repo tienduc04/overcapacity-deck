@@ -25,7 +25,7 @@ Hiện trạng: dự án mới chưa có dòng mã nào. Thư mục `~/slides3d`
 - **Blender:** chỉ cho một cảnh chủ chốt (mở cửa container rồi bay xuyên qua), render thành clip ngắn. Chỉ làm nếu máy đã cài Blender và các phase trước xong sớm.
 - **Figma:** tùy chọn, để Tiến Đức tự tinh chỉnh HUD. Mặc định dựng HUD thẳng bằng HTML.
 - **Quy tắc nội dung:** mỗi cảnh đọc từ một file JSON riêng; nội dung chưa chốt hiện dấu SAMPLE DATA; build cuối bị chặn nếu còn số sample hoặc chưa xác minh.
-- **Màu:** cam `#F37021` = cung, cyan `#00F0FF` = cầu, đỏ `#FF3333` = rủi ro, Marine Blue `#002C5F` = nền panel HUD, Midnight `#0A1118` = nền. Font: Montserrat 800 in hoa cho tiêu đề, Fira Code cho số.
+- **Màu:** cam `#F37021` = cung, cyan `#00F0FF` = cầu, đỏ `#FF3333` = rủi ro, Marine Blue `#002C5F` = nền panel HUD, Midnight `#0A1118` = nền. Font: Montserrat 800 in hoa cho tiêu đề, Fira Code cho số và nhãn, Inter cho câu dẫn phụ ở cảnh 1. Cảnh 1 có bố cục hero riêng (`layout: "hero"` trong content/s01.json): tag, tiêu đề 2 màu, thẻ crew, nhãn môn học, gợi ý điều hướng, pin trỏ vào tàu.
 - **Logo:** không dùng file logo Hapag-Lloyd trên HUD, chỉ dùng chữ "Hapag-Lloyd". Chữ trên slide là tiếng Anh.
   Cập nhật 2026-11-15 (Tiến Đức): tên "HAPAG-LLOYD" được phép xuất hiện trên thân tàu trong ảnh nền s01, s03, s07
   (bài thuyết trình trong lớp do Hapag-Lloyd giảng dạy). s04 dùng bản đồ thật (Natural Earth) để highlight chính xác.
