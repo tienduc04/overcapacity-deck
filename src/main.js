@@ -24,7 +24,7 @@ const tier = TIERS[tierName];
 await document.fonts.load('800 44px Montserrat'); // placeholder plates draw text with it
 const plates = await Promise.all(scenes.map((s, i) => loadPlate(i + 1, s.title)));
 const canvas = document.getElementById('gl');
-let view = gpu ? createRenderer(canvas, plates, tier) : null;
+let view = gpu ? createRenderer(canvas, plates, tier, { still: scenes.map((s) => s.still) }) : null;
 if (!view) {
   canvas.remove();
   view = createFallback(document.getElementById('plates'), plates);
@@ -127,7 +127,7 @@ function loop(now) {
     fps = (frames * 1000) / (now - fpsAt);
     frames = 0;
     fpsAt = now;
-    hud.updateDebug([`tier     ${tierName}`, `renderer ${view.kind}`, `fps      ${fps.toFixed(0)}`, `gpu      ${gpu ?? 'none'}`, `scene    ${body.dataset.scene} step ${body.dataset.step}`]);
+    hud.updateDebug([`tier     ${tierName}`, `renderer ${view.kind}`, `fx       ${view.fx ?? 'css'}`,`fps      ${fps.toFixed(0)}`, `gpu      ${gpu ?? 'none'}`, `scene    ${body.dataset.scene} step ${body.dataset.step}`]);
   }
   const { scene } = deck.state;
   hud.updateTimer((now - startTime) / 1000, (now - sceneStart) / 1000, scenes[scene].content.budgetSec);

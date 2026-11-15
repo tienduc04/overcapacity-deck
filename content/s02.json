@@ -5,21 +5,20 @@
       "value": "14+",
       "unit": "M TEU",
       "label": "Container ship orderbook",
-      "source": "BIMCO, via Maritime Executive",
-      "url": "",
-      "date": "2026-09",
-      "status": "verified",
-      "todo": "Owner adds the article URL"
+      "source": "BIMCO (Niels Rasmussen), via Maritime Executive",
+      "url": "https://maritime-executive.com/article/container-fleet-smashes-record-as-fleet-growth-accelerates",
+      "date": "2026-09-03",
+      "status": "verified"
     },
     {
       "value": "~42",
       "unit": "%",
       "label": "Of the existing fleet",
-      "source": "BIMCO, via Maritime Executive",
-      "url": "",
-      "date": "2026-09",
-      "status": "verified",
-      "todo": "Owner adds the article URL"
+      "source": "BIMCO (Niels Rasmussen), via Maritime Executive",
+      "url": "https://maritime-executive.com/article/container-fleet-smashes-record-as-fleet-growth-accelerates",
+      "date": "2026-09-03",
+      "status": "unverified",
+      "todo": "In this article 42% is fleet GROWTH over 5.5 years (10M TEU), not orderbook / fleet. Owner decides: relabel to fleet growth, or use 14/34 = ~41% as a derived ratio."
     }
   ],
   "chart": {

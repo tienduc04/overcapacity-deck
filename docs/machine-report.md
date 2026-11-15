@@ -42,12 +42,10 @@ unknown projector laptop.
 | Figma MCP | **Not connected** (not in `claude mcp list`) |
 | Playwright MCP | Connected (not needed: the project uses `@playwright/test` with installed Chrome) |
 | Blender | **Not found**: not on PATH, not in `C:\Program Files\Blender Foundation`, `%LOCALAPPDATA%\Programs`, Steam or WinGet |
-| ffmpeg / ffprobe | **Not found**: not on PATH, not in WinGet packages, not under `C:\Program Files` |
+| ffmpeg / ffprobe | **Installed 2026-11-15**: ffmpeg 9.0.2 full build, `winget install Gyan.FFmpeg --scope user` (owner approved). Exe in `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0.2-full_build\bin\`; on PATH in new terminals |
 
-Blender is only needed for Phase 6 (optional) and ffmpeg for Phase 3 (clip encoding). Both need
-an install outside this folder, so they wait for your approval. Options:
-`winget install Gyan.FFmpeg` and `winget install BlenderFoundation.Blender`, or the portable zips
-unpacked into `tools/` inside this project (no system change).
+Blender is only needed for Phase 6 (optional), so it is not installed yet (about 400 MB). When
+Phase 6 starts: `winget install BlenderFoundation.Blender --scope user`.
 
 ## Phase 1 measurements
 2026-11-15, `npm run e2e` (production build, Chrome 157 headless, 1920×1080, Intel UHD):

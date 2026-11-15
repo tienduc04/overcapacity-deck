@@ -25,7 +25,9 @@ Hiện trạng: dự án mới chưa có dòng mã nào. Thư mục `~/slides3d`
 - **Figma:** tùy chọn, để Tiến Đức tự tinh chỉnh HUD. Mặc định dựng HUD thẳng bằng HTML.
 - **Quy tắc nội dung:** mỗi cảnh đọc từ một file JSON riêng; nội dung chưa chốt hiện dấu SAMPLE DATA; build cuối bị chặn nếu còn số sample hoặc chưa xác minh.
 - **Màu:** cam `#F37021` = cung, cyan `#00F0FF` = cầu, đỏ `#FF3333` = rủi ro, Marine Blue `#002C5F` = nền panel HUD, Midnight `#0A1118` = nền. Font: Montserrat 800 in hoa cho tiêu đề, Fira Code cho số.
-- **Logo:** không dùng logo Hapag-Lloyd, chỉ dùng chữ. Chữ trên slide là tiếng Anh.
+- **Logo:** không dùng file logo Hapag-Lloyd trên HUD, chỉ dùng chữ "Hapag-Lloyd". Chữ trên slide là tiếng Anh.
+  Cập nhật 2026-11-15 (Tiến Đức): tên "HAPAG-LLOYD" được phép xuất hiện trên thân tàu trong ảnh nền s01, s03, s07
+  (bài thuyết trình trong lớp do Hapag-Lloyd giảng dạy). s04 dùng bản đồ thật (Natural Earth) để highlight chính xác.
 
 ## 3. Nhiệm vụ nhóm và quy tắc số liệu
 
