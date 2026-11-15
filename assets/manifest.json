@@ -1,4 +1,20 @@
 {
   "_readme": "One entry per generated or rendered asset: file, tool, model, prompt, parameters, credits, date, sources.",
-  "assets": []
+  "assets": [
+    {
+      "file": "public/plates/s01.jpg",
+      "original": "assets-src/s01-z_image-aeef037e.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "aeef037e-bc87-4ac3-a062-c87301129c42",
+      "prompt": "Cinematic key art, 16:9, photoreal 3D render look, ultra-detailed, volumetric light, shallow depth of field. Palette: deep midnight navy (#0A1118) and marine blue (#002C5F), warm orange (#F37021) as the accent for cargo, cyan (#00F0FF) glow for data. No text, no letters, no numbers, no logos, no watermarks, no people. Leave the left third of the frame calm and darker for UI panels. Aerial three-quarter view of a huge container ship at dusk on a calm dark sea, containers stacked in muted blue and grey with a few orange ones, a long wake behind, orange glow on the horizon.",
+      "parameters": { "aspect_ratio": "16:9", "count": 1, "original_size": "2048x1152" },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Small pseudo-text on the bow ('10-21') and hull; acceptable for a placeholder, fix or replace before the final deck."
+    }
+  ]
 }
