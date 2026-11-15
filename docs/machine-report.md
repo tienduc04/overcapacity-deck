@@ -112,3 +112,10 @@ containers; umhlanga_sunrise 1K HDRI as image-based light, rotated so its sun ma
 at the display cap. **Not re-measured on the Intel UHD:** Chrome's `--force_low_power_gpu` has no
 effect on this Windows setup, so the UHD floor with textures is unknown. Check it on the
 presentation laptop, or switch Chrome back to "Power saving" for one test run.
+
+## Live 3D scene 2 (2026-11-15)
+Scene 2 is a live world too (`src/world/container.js`, model from `scripts/blender/build_container.py`):
+inside a 40 ft container, low sun raking through the doors with real-time shadows (one 2048 map),
+skylight from the opening (RectAreaLight), dust in the beam, harbour water, a ship crossing outside.
+On the RTX 3050: 144 FPS in scene 2 on all tiers; every transition at the display cap. The e2e test
+also fails if `med` drops below 55 FPS in scene 2. Not measured on the Intel UHD (same reason as above).

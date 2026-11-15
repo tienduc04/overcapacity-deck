@@ -6,3 +6,4 @@ playwright-report/
 # originals are large; keep them local (manifest.json records them)
 assets-src/*
 !assets-src/.gitkeep
+__pycache__/

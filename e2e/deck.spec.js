@@ -194,16 +194,23 @@ test('FPS per tier, at rest and during each transition (logged for docs/machine-
       await idle(page);
     }
     await page.waitForTimeout(500);
-    result[q] = { live, rest: await countFps(page, 2000), during, minDuring: Math.min(...Object.values(during)) };
+    const rest = await countFps(page, 2000);
+    await page.keyboard.press('2');
+    await page.keyboard.press('s');
+    await idle(page);
+    await page.waitForTimeout(500);
+    const live2 = await countFps(page, 2000); // scene 2: inside the container
+    result[q] = { live, live2, rest, during, minDuring: Math.min(...Object.values(during)) };
   }
   const gpu = await page.evaluate(() => document.body.dataset.gpu);
   console.log(`[fps] ${JSON.stringify(result)} on ${gpu}`);
   expect(result.med.rest).toBeGreaterThanOrEqual(55);
   expect(result.med.live).toBeGreaterThanOrEqual(55); // scene 1 as a live 3D world
+  expect(result.med.live2).toBeGreaterThanOrEqual(55);
   expect(result.med.minDuring).toBeGreaterThanOrEqual(55); // recommended tier keeps 60 FPS headroom
 });
 
-test('scene 1 is a live 3D world: frames change, no WebGL errors', async ({ page }) => {
+test('scenes 1 and 2 are live 3D worlds: frames change, no WebGL errors', async ({ page }) => {
   const errors = [];
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   page.on('pageerror', (e) => errors.push(e.message));
@@ -218,5 +225,10 @@ test('scene 1 is a live 3D world: frames change, no WebGL errors', async ({ page
   await page.waitForTimeout(700);
   await page.screenshot({ path: join(SHOTS, 'live-s01-to-s02.png') });
   await idle(page);
+  await page.waitForTimeout(500);
+  const c = await page.screenshot({ path: join(SHOTS, 'live-s02-a.png') });
+  await page.waitForTimeout(2000);
+  const d = await page.screenshot({ path: join(SHOTS, 'live-s02-b.png') });
+  expect(c.equals(d)).toBe(false); // dust, door, sea and camera move
   expect(errors).toEqual([]);
 });
