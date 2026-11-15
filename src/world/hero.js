@@ -70,7 +70,8 @@ export async function createHeroWorld(title) {
     resize(w, h) {
       camera.aspect = w / h;
       camera.setViewOffset(w, h, -w * 0.12, 0, w, h); // shift the shot so the ship sits right of the centre
-      fitToView(titleMesh, camera, TITLE_DEPTH);
+      const k = Math.min(w / 1920, h / 1080); // the HUD stage: 16:9, centred, scaled to fit
+      fitToView(titleMesh, camera, TITLE_DEPTH, (1920 * k) / w, (1080 * k) / h);
     },
     titleFx,
     // t: seconds since page load. lean: smoothed pointer tilt (-1..1).
@@ -127,11 +128,12 @@ async function createTitle({ word }) {
   return mesh;
 }
 
-// Stretch a camera-child quad over the whole (offset) view at `depth` metres.
-function fitToView(mesh, camera, depth) {
+// Place a camera-child quad at `depth` metres over the part of the (offset) view the HUD stage covers:
+// sx, sy are its half-size in normalised device coordinates. Keeps the 16:9 canvas undistorted.
+function fitToView(mesh, camera, depth, sx, sy) {
   const pos = mesh.geometry.attributes.position;
   const v = new THREE.Vector3();
-  [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(([x, y], i) => {
+  [[-sx, sy], [sx, sy], [-sx, -sy], [sx, -sy]].forEach(([x, y], i) => {
     v.set(x, y, 0.5).applyMatrix4(camera.projectionMatrixInverse);
     v.multiplyScalar(-depth / v.z);
     pos.setXYZ(i, v.x, v.y, v.z);

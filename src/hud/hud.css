@@ -17,6 +17,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--midnig
 #gl, #plates { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
 .plate-layer { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; }
 
+/* Scrim: keeps HUD text readable on bright plates (sky, haze). It covers the whole window, not just
+   the 16:9 stage, so a wider window shows no darker box in the middle. */
+#scrim { position: fixed; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 17, 24, 0.6) 0%, rgba(10, 17, 24, 0) 40%),
+    linear-gradient(90deg, rgba(10, 17, 24, 0.45) 0%, rgba(10, 17, 24, 0) 55%); }
+body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 17, 24, 0.75) 0%, rgba(10, 17, 24, 0) 35%), linear-gradient(180deg, rgba(10, 17, 24, 0.45) 0%, rgba(10, 17, 24, 0) 25%); }
+
 #stage {
   position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px;
   transform: translate(-50%, -50%) scale(var(--scale, 1)); transform-origin: center;
@@ -28,9 +35,7 @@ body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-f
 .body-text { font-size: 28px; line-height: 1.35; margin: 0; }
 
 .slide { position: absolute; inset: 0; padding: var(--margin); box-sizing: border-box;
-  /* scrim: keeps HUD text readable on bright plates (sky, haze) */
-  background: linear-gradient(180deg, rgba(10, 17, 24, 0.6) 0%, rgba(10, 17, 24, 0) 40%),
-    linear-gradient(90deg, rgba(10, 17, 24, 0.45) 0%, rgba(10, 17, 24, 0) 55%); }
+}
 .slide [data-step] { transition: opacity 0.45s ease, transform 0.45s ease; }
 .slide .is-hidden { opacity: 0; transform: translateY(16px); }
 
@@ -72,7 +77,6 @@ body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-f
 .counter { font-size: 22px; color: var(--muted); min-width: 170px; text-align: center; }
 
 /* Hero (scene 1): masthead in the sky behind the ship, no panels; text sits on the picture. */
-.slide--hero { background: linear-gradient(0deg, rgba(10, 17, 24, 0.75) 0%, rgba(10, 17, 24, 0) 35%), linear-gradient(180deg, rgba(10, 17, 24, 0.45) 0%, rgba(10, 17, 24, 0) 25%); }
 .slide--hero .slide-top { display: none; }
 .slide--hero .sources { left: 96px; }
 .hero-course, .hero-kicker, .hero-crew, .hero-hint { font: 500 20px var(--head); letter-spacing: 0.32em; text-transform: uppercase; }
