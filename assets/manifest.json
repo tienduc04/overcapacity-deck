@@ -211,9 +211,9 @@
       "notes": "Realistic, no fake numbers (fixes v1)."
     },
     {
-      "file": "public/plates/s03.jpg",
+      "file": "(replaced by v4)",
       "original": "assets-src/s03-v3-z_image-ad2b424f.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "ad2b424f-978f-4923-b828-1a455bbc744a",
@@ -287,9 +287,9 @@
       "notes": "Very realistic. Radar screens carry tiny unreadable marks."
     },
     {
-      "file": "public/plates/s07.jpg",
+      "file": "(replaced by v4)",
       "original": "assets-src/s07-v3-z_image-bbac517e.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "bbac517e-3d4f-40db-b6cd-b269ced1d088",
@@ -326,6 +326,50 @@
       "date": "2026-11-15",
       "sources": "AI edit of an AI-generated image; Hapag-Lloyd name added with owner approval (class taught by Hapag-Lloyd)",
       "notes": "Name spelled correctly; rest of the photo preserved."
+    },
+    {
+      "file": "public/plates/s03.jpg",
+      "original": "assets-src/s03-v4-hl-ideogram-9606dca6.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "ideogram_4_5",
+      "job_id": "9606dca6-dc83-4e9e-94d9-205f994c0a12",
+      "prompt": "Keep the photo exactly the same. Replace the text on the bow with the company name HAPAG-LLOYD and paint HAPAG-LLOYD in large white capital letters along the side of the navy hull, as on a real container ship.",
+      "parameters": {
+        "edit_of": "ad2b424f-978f-4923-b828-1a455bbc744a (s03 v3)",
+        "quality": "very_low",
+        "resolution": "2k",
+        "magic_prompt": "off",
+        "aspect_ratio": "16:9",
+        "original_size": "2560x1440"
+      },
+      "processing": "ffmpeg 9.0.2: scale 1920x1080 lanczos, JPEG q3, metadata stripped",
+      "credits": 0.25,
+      "date": "2026-11-15",
+      "sources": "AI edit of an AI-generated image; Hapag-Lloyd name added with owner approval (class taught by Hapag-Lloyd)",
+      "notes": "Name spelled correctly; old pseudo-text on the hull replaced."
+    },
+    {
+      "file": "public/plates/s07.jpg",
+      "original": "assets-src/s07-v4-hl-ideogram-f6606ac0.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "ideogram_4_5",
+      "job_id": "f6606ac0-12f9-4daf-a509-50d45114fbff",
+      "prompt": "Keep the photo exactly the same. Replace the letters on the ship's hull with the company name HAPAG-LLOYD in large white capital letters along the side of the hull, as on a real container ship.",
+      "parameters": {
+        "edit_of": "bbac517e-3d4f-40db-b6cd-b269ced1d088 (s07 v3)",
+        "quality": "very_low",
+        "resolution": "2k",
+        "magic_prompt": "off",
+        "aspect_ratio": "16:9",
+        "original_size": "2560x1440"
+      },
+      "processing": "ffmpeg 9.0.2: scale 1920x1080 lanczos, JPEG q3, metadata stripped",
+      "credits": 0.25,
+      "date": "2026-11-15",
+      "sources": "AI edit of an AI-generated image; Hapag-Lloyd name added with owner approval (class taught by Hapag-Lloyd)",
+      "notes": "Name spelled correctly; old pseudo-text on the hull replaced."
     }
   ]
 }
