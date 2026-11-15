@@ -125,23 +125,36 @@ def build_hull():
         zc = f.calc_center_median().z
         f.material_index = 2 if f is deck_face else (1 if zc < BOOT_TOP else 0)
     bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:  # box projection in metres; Three.js sets the texture repeat per material
+        n = f.normal
+        axis = max(range(3), key=lambda i: abs(n[i]))
+        a, b = {0: (1, 2), 1: (0, 2), 2: (0, 1)}[axis]
+        for loop in f.loops:
+            loop[uv].uv = (loop.vert.co[a], loop.vert.co[b])
     return link("Hull", bm, [M["hull"], M["bottom"], M["deck"]])
 
 
 # ---------- boxes (superstructure, containers) ----------
 FACES = {"-x": (0, 1, 3, 2), "+x": (4, 6, 7, 5), "-y": (0, 4, 5, 1), "+y": (2, 3, 7, 6), "-z": (0, 2, 6, 4), "+z": (1, 5, 7, 3)}
+UV_AXES = {"-x": (1, 2), "+x": (1, 2), "-y": (0, 2), "+y": (0, 2), "-z": (0, 1), "+z": (0, 1)}
 
 
-def box(bm, x0, x1, y0, y1, z0, z1, mat=0, color=None, col_layer=None, skip=()):
-    """Axis-aligned box; `skip` names faces that can never be seen (saves overdraw)."""
+def box(bm, x0, x1, y0, y1, z0, z1, mat=0, color=None, col_layer=None, skip=(), uv_origin=(0, 0, 0), uv_scale=1.0):
+    """Axis-aligned box; `skip` names faces that can never be seen (saves overdraw).
+    UVs are (coordinate - uv_origin) / uv_scale on the two axes of each face (metres by default)."""
+    uv = bm.loops.layers.uv.verify()
     vs = [bm.verts.new((x, y, z)) for x in (x0, x1) for y in (y0, y1) for z in (z0, z1)]
     for name, q in FACES.items():
         if name in skip:
             continue
         f = bm.faces.new([vs[i] for i in q])
         f.material_index = mat
-        if color is not None:
-            for loop in f.loops:
+        a, b = UV_AXES[name]
+        for loop in f.loops:
+            co = loop.vert.co
+            loop[uv].uv = ((co[a] - uv_origin[a]) / uv_scale, (co[b] - uv_origin[b]) / uv_scale)
+            if color is not None:
                 loop[col_layer] = (*color, 1.0)
 
 
@@ -211,7 +224,12 @@ def build_containers():
                 skip = {"-z"} | ({"+z"} if t < tiers - 1 else set())
                 skip |= {"-y"} if t < left else set()
                 skip |= {"+y"} if t < right else set()
-                box(bm, x, x + BOX_L, y - BOX_W / 2, y + BOX_W / 2, zb, zb + BOX_H, 0, pick_color(), col, skip)
+                # cheap ambient occlusion: lower tiers sit in the shade of the stack
+                ao = 0.62 + 0.38 * ((t + 1) / tiers) ** 0.7
+                color = tuple(c * ao for c in pick_color())
+                # UVs per box: one texture tile spans the box height, ribs keep their spacing
+                box(bm, x, x + BOX_L, y - BOX_W / 2, y + BOX_W / 2, zb, zb + BOX_H, 0, color, col, skip,
+                    uv_origin=(x, y - BOX_W / 2, zb), uv_scale=BOX_H)
         x += BOX_L + 0.9  # lashing gap between bays
     link("Hatches", hatch, [M["hatch"]])
     return link("Containers", bm, [M["box"]])

@@ -104,3 +104,11 @@ A fresh Chrome now reports `ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 6GB Laptop GP
 auto-pick chooses `high`. FPS test, all tiers: 144 live in scene 1, 141 or more during every
 transition (display cap). There is now headroom for textures, baked lighting and post effects;
 the Intel UHD numbers above remain the floor for an unknown presentation laptop.
+
+## Scene 1 with textures and HDRI (2026-11-15)
+Poly Haven CC0 textures (1K diffuse detail, normal, ARM) on hull, deck, superstructure and
+containers; umhlanga_sunrise 1K HDRI as image-based light, rotated so its sun matches the sky sun
+(see `docs/third-party-assets.md`). On the RTX 3050: 143-145 FPS on all tiers, every transition
+at the display cap. **Not re-measured on the Intel UHD:** Chrome's `--force_low_power_gpu` has no
+effect on this Windows setup, so the UHD floor with textures is unknown. Check it on the
+presentation laptop, or switch Chrome back to "Power saving" for one test run.

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Sky } from 'three/addons/objects/Sky.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 
 // Scene 1 as a live 3D world: sunset sky, Gerstner-wave ocean, the container ship riding the swell
 // and a slow camera sweep. Units are metres. Rendered into an HDR target by renderer.js, which
@@ -10,7 +11,8 @@ const SHIP_LENGTH = 330; // m, matches L in build_ship.py
 const SHIP_SPEED = 7; // m/s of water flowing past (about 14 kn)
 // Camera: low over the starboard bow quarter (the lettered side), ship on the right third.
 const CAM = { angle: -38, radius: 300, height: 34 }; // degrees around the ship, metres
-const SUN = { elevation: 2, offset: 14 }; // degrees above the horizon / right of the view centre
+const SUN = { elevation: 2, offset: 14 };
+const ENV_INTENSITY = 0.8; // HDRI image light on the ship // degrees above the horizon / right of the view centre
 
 const oceanVertex = /* glsl */ `
   uniform float uTime, uSpeed;
@@ -92,7 +94,12 @@ const oceanFragment = /* glsl */ `
 `;
 
 export async function createHeroWorld() {
-  const gltf = await new GLTFLoader().loadAsync('models/ship.glb');
+  const [gltf, surfaces, hdr] = await Promise.all([
+    new GLTFLoader().loadAsync('models/ship.glb'),
+    loadSurfaces(),
+    new HDRLoader().setDataType(THREE.FloatType).loadAsync('env/umhlanga_sunrise_1k.hdr'),
+  ]);
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 16 / 9, 5, 12000);
   // Sun low in the frame, just right of where the camera looks: backlit sunset, glitter path on the sea.
@@ -145,9 +152,8 @@ export async function createHeroWorld() {
   const box = new THREE.Box3().setFromObject(ship);
   ocean.material.uniforms.uShipBeam.value = (box.max.z - box.min.z) / 2;
   ship.traverse((o) => {
-    if (!o.isMesh) return;
-    o.material.envMapIntensity = 1.0;
-    if (o.material.name === 'Containers') corrugate(o.material);
+    const look = o.isMesh && LOOK[o.material.name];
+    if (look) dress(o.material, surfaces[look.surface], look);
   });
   const rig = new THREE.Group(); // bobbing pivot at the waterline
   rig.add(ship);
@@ -173,9 +179,14 @@ export async function createHeroWorld() {
       ocean.visible = rig.visible = true;
       // Prefilter once. Passing the render-target cube straight to scene.environment can make
       // three rebuild the PMREM every frame, which cost ~20 FPS on the Intel UHD.
+      // Image lighting for the ship comes from a real sunrise-over-the-sea HDRI, turned so its sun
+      // sits where the sky's sun is. The sea keeps reflecting the procedural sky (uEnv).
       const pmrem = new THREE.PMREMGenerator(renderer);
-      scene.environment = pmrem.fromCubemap(envTarget.texture).texture;
+      scene.environment = pmrem.fromEquirectangular(hdr).texture;
+      scene.environmentRotation.y = sunLongitude(hdr) - Math.atan2(sun.z, sun.x);
+      scene.environmentIntensity = ENV_INTENSITY;
       pmrem.dispose();
+      hdr.dispose();
       // The sky is static, so draw it from the bake instead of re-running the Sky shader per pixel.
       scene.background = envTarget.texture;
       sky.visible = false;
@@ -201,16 +212,87 @@ export async function createHeroWorld() {
   };
 }
 
-// Container walls are corrugated: shade stripes every ~0.3 m along the box (x in model metres).
-function corrugate(material) {
+// ---------- materials: Poly Haven CC0 textures (docs/third-party-assets.md) ----------
+// Ship UVs are metres (containers: one tile per box height), so `repeat` = tiles per metre.
+const SURFACES = {
+  rust: { file: 'rusty_painted_metal', repeat: 1 / 5 },
+  plate: { file: 'metal_plate_02', repeat: 1 / 2 },
+  box: { file: 'container_side', repeat: 1 },
+};
+// detail: how much of the texture's light and dark (wear, streaks, ribs) shows through the
+// part's own colour; the texture's colour itself is dropped. Hull wear is kept light on purpose.
+const LOOK = {
+  Hull: { surface: 'rust', detail: 0.35, normal: 0.5 },
+  Antifouling: { surface: 'rust', detail: 0.55, normal: 0.6 },
+  Superstructure: { surface: 'rust', detail: 0.2, normal: 0.3 },
+  Funnel: { surface: 'rust', detail: 0.3, normal: 0.3 },
+  Deck: { surface: 'plate', detail: 0.9, normal: 1 },
+  'Hatch covers': { surface: 'plate', detail: 0.8, normal: 1 },
+  Containers: { surface: 'box', detail: 0.9, normal: 1 },
+};
+
+async function loadSurfaces() {
+  const loader = new THREE.TextureLoader();
+  const entries = await Promise.all(
+    Object.entries(SURFACES).map(async ([key, { file, repeat }]) => {
+      const [diff, nor, arm] = await Promise.all(['diff', 'nor_gl', 'arm'].map((k) => loader.loadAsync(`textures/${file}_${k}_1k.jpg`)));
+      for (const t of [diff, nor, arm]) {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.setScalar(repeat);
+        t.anisotropy = 8;
+      }
+      diff.colorSpace = THREE.SRGBColorSpace;
+      return [key, { diff, nor, arm, mean: meanLuminance(diff.image) }];
+    })
+  );
+  return Object.fromEntries(entries);
+}
+
+// Mean linear luminance of an image, so `detail` darkens and lightens around the part's colour.
+function meanLuminance(img) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 32;
+  const g = c.getContext('2d');
+  g.drawImage(img, 0, 0, 32, 32);
+  const d = g.getImageData(0, 0, 32, 32).data;
+  const lin = (v) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  let sum = 0;
+  for (let i = 0; i < d.length; i += 4) sum += 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+  return sum / (d.length / 4);
+}
+
+function dress(material, s, look) {
+  material.map = s.diff;
+  material.normalMap = s.nor;
+  material.normalScale.setScalar(look.normal);
+  material.roughnessMap = s.arm; // ARM: AO in R, roughness in G
+  material.roughness = 1;
+  material.aoMap = s.arm;
+  material.aoMapIntensity = 0.7;
   material.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vLocal;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvLocal = position;');
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vLocal;')
-      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= 0.84 + 0.16 * smoothstep(-0.8, 0.8, sin(vLocal.x * 21.0));');
+    shader.uniforms.uMapMean = { value: s.mean };
+    shader.uniforms.uDetail = { value: look.detail };
+    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uMapMean, uDetail;').replace(
+      '#include <map_fragment>',
+      `#ifdef USE_MAP
+        float lum = dot(texture2D(map, vMapUv).rgb, vec3(0.2126, 0.7152, 0.0722));
+        diffuseColor.rgb *= mix(1.0, lum / uMapMean, uDetail);
+      #endif`
+    );
   };
+  material.needsUpdate = true;
+}
+
+// Longitude (atan2(z, x)) of the brightest pixel in an equirectangular HDR: where its sun is.
+function sunLongitude(hdr) {
+  const { data, width, height } = hdr.image;
+  let best = 0;
+  let at = 0;
+  for (let i = 0; i < width * height; i++) {
+    const l = data[i * 4] + data[i * 4 + 1] + data[i * 4 + 2];
+    if (l > best) [best, at] = [l, i];
+  }
+  return ((at % width) + 0.5) / width * 2 * Math.PI - Math.PI;
 }
 
 // Square grid with vertices packed near the centre (spacing grows with distance).
