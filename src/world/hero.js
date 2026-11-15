@@ -13,6 +13,9 @@ const CAM = { angle: -38, radius: 300, height: 34 }; // degrees around the ship,
 const SUN = { elevation: 2, offset: 14 }; // degrees above the horizon / right of the view centre
 const ENV_INTENSITY = 0.8; // HDRI image light on the ship
 
+// Fly-in to scene 2: end on an orange box on deck (rig space, m, placed by eye), seen from `dist` m.
+const FLY = { target: [142, 18.6, -16.3], from: [0.3, 0.4, -1], dist: 15 }; // the lettered box near the bow
+
 const TITLE_DEPTH = 900; // m from the camera: beyond the ship (about 300 m), in front of the sky
 const DRAUGHT = 14.5; // m below the waterline, typical for this size (the red antifouling stays under water)
 
@@ -58,6 +61,12 @@ export async function createHeroWorld(title) {
   camera.add(titleMesh); // screen-locked: the ship drifts in front of it
   scene.add(camera);
   const titleFx = { alpha: 1, rise: 0 }; // driven by the scene's entrance animation
+  const fly = { p: 0 }; // 0 = drone shot, 1 = close on the orange box; driven by the scene's lead-out
+  const flyTarget = new THREE.Vector3();
+  const flyEnd = new THREE.Vector3(...FLY.from).normalize();
+  const offset = new THREE.Vector3();
+  const look = new THREE.Vector3();
+  let shift = 0; // view offset, px
 
   let ready = false;
   return {
@@ -69,11 +78,13 @@ export async function createHeroWorld(title) {
     },
     resize(w, h) {
       camera.aspect = w / h;
-      camera.setViewOffset(w, h, -w * 0.12, 0, w, h); // shift the shot so the ship sits right of the centre
+      shift = -w * 0.12; // shift the shot so the ship sits right of the centre
+      camera.setViewOffset(w, h, shift, 0, w, h);
       const k = Math.min(w / 1920, h / 1080); // the HUD stage: 16:9, centred, scaled to fit
       fitToView(titleMesh, camera, TITLE_DEPTH, (1920 * k) / w, (1080 * k) / h);
     },
     titleFx,
+    fly,
     // t: seconds since page load. lean: smoothed pointer tilt (-1..1).
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
@@ -87,7 +98,19 @@ export async function createHeroWorld(title) {
       const a = ca + THREE.MathUtils.degToRad(9 * Math.sin(t * 0.05) + lean.x * 4);
       const r = CAM.radius + 25 * Math.sin(t * 0.031);
       camera.position.set(Math.cos(a) * r, CAM.height + 6 * Math.sin(t * 0.07) + lean.y * 8, Math.sin(a) * r);
-      camera.lookAt(-20, 22, 0);
+      look.set(-20, 22, 0);
+      if (fly.p > 0) {
+        // Swing round to the box and close in; distance shrinks geometrically, so the speed feels even.
+        flyTarget.set(...FLY.target).applyMatrix4(rig.matrixWorld);
+        offset.subVectors(camera.position, flyTarget);
+        const d = offset.length();
+        offset.normalize().lerp(flyEnd, fly.p).normalize().multiplyScalar(d * (FLY.dist / d) ** fly.p);
+        camera.position.addVectors(flyTarget, offset);
+        look.lerp(flyTarget, Math.min(1, fly.p * 1.6));
+      }
+      camera.view.offsetX = shift * (1 - fly.p); // the box ends in the centre, where the zoom blur aims
+      camera.updateProjectionMatrix();
+      camera.lookAt(look);
     },
   };
 }

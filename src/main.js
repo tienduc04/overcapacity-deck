@@ -70,21 +70,36 @@ function apply(ev) {
   to.reveal(ev.step);
   const tl = gsap.timeline();
   from.exit(tl);
-  to.enter(tl);
+  // Lead-in: the leaving world plays a camera move first (on tl, so a skip finishes it); the shader
+  // transition and the new slide follow it.
+  const lead = from.leadOut?.(tl, ev) ?? 0;
+  const inner = gsap.timeline();
+  to.enter(inner);
+  tl.add(inner, lead);
   const r = { tl };
   running = r;
   body.dataset.transition = 'running';
   sceneStart = performance.now();
   markPosition();
-  r.visual = view.transition(ev.from, ev.to, {
-    type,
-    onDone: () => {
-      tl.progress(1);
-      deck.done();
-      if (running === r) running = null;
-      body.dataset.transition = 'idle';
+  const start = () =>
+    (r.visual = view.transition(ev.from, ev.to, {
+      type,
+      onDone: () => {
+        tl.progress(1);
+        deck.done();
+        if (running === r) running = null;
+        body.dataset.transition = 'idle';
+        to.arrive?.(ev.direction); // the new world can animate now: it is no longer held for the shader
+      },
+    }));
+  if (!lead) return start();
+  const wait = gsap.delayedCall(lead, start);
+  r.visual = {
+    skip() {
+      wait.kill();
+      start().skip();
     },
-  });
+  };
 }
 
 // Initial scene: no transition.

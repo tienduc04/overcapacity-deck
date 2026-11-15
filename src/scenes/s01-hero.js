@@ -22,6 +22,7 @@ scene.enter = (tl) => {
   base.enter(tl);
   const q = (s) => scene.slide.querySelectorAll(s);
   gsap.set(q('.hero-foot'), { clearProps: 'transform,opacity,visibility' });
+  if (hero) hero.fly.p = 0;
   if (hero) gsap.fromTo(hero.titleFx, { alpha: 0, rise: 0.035 }, { alpha: 1, rise: 0, duration: 1.6, ease: 'power3.out', delay: 0.3 });
   gsap.fromTo(q('.hero-subtitle .line > *'), { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: 'power3.out', stagger: 0.12, delay: 0.8 });
   gsap.fromTo(q('.hero-course, .hero-crew, .hero-hint'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, stagger: 0.15, delay: 1.1 });
@@ -31,6 +32,15 @@ scene.enter = (tl) => {
 scene.exit = (tl) => {
   tl.to(scene.slide.querySelector('.hero-foot'), { x: -60, autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, 0);
   base.exit(tl);
+};
+
+// Next to scene 2: the camera flies in to an orange box on deck before the zoom blur takes over.
+scene.leadOut = (tl, ev) => {
+  if (!hero || ev.to !== 1) return 0;
+  gsap.killTweensOf(hero.titleFx); // the entrance fade may still be running
+  tl.to(hero.titleFx, { alpha: 0, duration: 0.6, ease: 'power1.in' }, 0);
+  tl.fromTo(hero.fly, { p: 0 }, { p: 1, duration: 2.6, ease: 'power2.inOut' }, 0);
+  return 2.3; // the blur starts as the camera settles
 };
 
 export default scene;

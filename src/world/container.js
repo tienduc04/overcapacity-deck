@@ -6,8 +6,8 @@ import { createOcean, createSky, loadHdr, sunDirection } from './sea.js';
 import { dressAll, loadSurfaces } from './materials.js';
 
 // Scene 2 as a live 3D world: an orange 40 ft container on the quay (scripts/blender/build_container.py).
-// Step 0: the camera has just zoomed in from scene 1 and locks on to the box. Step 1: closer, the figures
-// slide in. Step 2: the doors swing open and the camera glides inside, low sun raking in behind it.
+// Arriving from scene 1 the camera lands outside the shut box, the doors swing open and it glides
+// inside, low sun raking in behind it; the reveal steps all play inside.
 // Three.js axes: x along the container towards the doors, y up, z to the right looking out.
 
 const LI = 12.03; // inside length: the door opening is at x = LI
@@ -26,14 +26,12 @@ const LOOK = {
   Door: { surface: 'rust', detail: 0.5, normal: 0.4 },
 };
 const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings'];
-// Camera poses: position p, look-at t. The look-at point is the view centre, where the HUD reticle sits.
+// Camera poses: position p, look-at t.
 const POSES = {
-  lock: { p: [LI + 7.5, 3.4, 8.5], t: [LI - 4.5, 1.2, 0] },
-  read: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
+  outside: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
   doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
   inside: { p: [LI - 2.4, 1.45, 0.25], t: [0, 1.15, -0.35] },
 };
-const STEP_POSE = ['lock', 'read', 'inside'];
 
 export async function createContainerWorld() {
   RectAreaLightUniformsLib.init();
@@ -100,9 +98,8 @@ export async function createContainerWorld() {
   scene.add(dust);
 
   // Animated state: door 0 = shut, 1 = open as built; cam = pose being shown.
-  const state = { door: 0, cam: pose('lock') };
+  const state = { door: 1, cam: pose('inside') };
   let tl = null;
-  let at = 'lock';
 
   let ready = false;
   return {
@@ -125,24 +122,18 @@ export async function createContainerWorld() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     },
-    // Move to the pose for a reveal step: animated, or at once (entering the scene from elsewhere).
-    // Going in or out passes the doorway, with the doors open.
-    go(step, instant = false) {
-      const to = STEP_POSE[Math.min(step, STEP_POSE.length - 1)];
+    // Outside with the doors shut (arriving from scene 1), or inside at once (any other way in).
+    place(outside) {
       tl?.kill();
-      if (instant) {
-        Object.assign(state, { door: to === 'inside' ? 1 : 0, cam: pose(to) });
-      } else if (to === 'inside') {
-        tl = gsap.timeline()
-          .to(state, { door: 1, duration: 1.4, ease: 'power2.inOut' })
-          .to(state.cam, { ...pose('doorway'), duration: 1.5, ease: 'power2.inOut' }, 0.5)
-          .to(state.cam, { ...pose('inside'), duration: 1.8, ease: 'power2.out' });
-      } else {
-        tl = gsap.timeline();
-        if (at === 'inside') tl.to(state.cam, { ...pose('doorway'), duration: 1.4, ease: 'power2.in' });
-        tl.to(state.cam, { ...pose(to), duration: 1.6, ease: 'power2.inOut' }).to(state, { door: 0, duration: 1.2, ease: 'power2.inOut' }, '<0.4');
-      }
-      at = to;
+      Object.assign(state, { door: outside ? 0 : 1, cam: pose(outside ? 'outside' : 'inside') });
+    },
+    // From outside: the doors swing open, the camera passes the doorway and settles inside.
+    goInside() {
+      tl?.kill();
+      tl = gsap.timeline({ delay: 0.2 })
+        .to(state, { door: 1, duration: 1.6, ease: 'power2.inOut' })
+        .to(state.cam, { ...pose('doorway'), duration: 1.6, ease: 'power2.inOut' }, 0.6)
+        .to(state.cam, { ...pose('inside'), duration: 1.8, ease: 'power2.out' });
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;

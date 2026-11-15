@@ -8,29 +8,13 @@ const world = () =>
     .then((w) => (box = w));
 
 const scene = createScene({ title: 'Orderbook', speaker: 'Tien Duc', transition: 'zoomBlur', content, world });
-const base = { init: scene.init, enter: scene.enter, exit: scene.exit, reveal: scene.reveal };
-let active = false; // on screen: step changes animate the camera; arriving from another scene does not
+const base = { reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
+let active = false; // on screen: step changes leave the camera alone
 
-// Reticle locked on the box and the prompt to inspect it. A click anywhere (or Space, →) advances.
-scene.init = (ctx) => {
-  base.init.call(scene, ctx);
-  const lock = document.createElement('div');
-  lock.className = 'lock';
-  lock.append(...Array.from({ length: 4 }, () => document.createElement('i')));
-  const label = document.createElement('span');
-  label.className = 'lock-label';
-  label.textContent = 'Target locked';
-  lock.append(label);
-  const tap = document.createElement('div');
-  tap.className = 'tap';
-  tap.textContent = '[ Tap to inspect ]';
-  scene.slide.append(lock, tap);
-};
-
+// Coming from scene 1 (forward, step 0) the camera lands outside the shut box; back from scene 3 it is inside.
 scene.reveal = (step) => {
   base.reveal(step);
-  scene.slide.dataset.at = step;
-  box?.go(step, !active);
+  if (!active) box?.place(step === 0);
 };
 scene.enter = (tl) => {
   active = true;
@@ -40,5 +24,7 @@ scene.exit = (tl) => {
   active = false;
   base.exit(tl);
 };
+// After the zoom blur: open the doors and go in.
+scene.arrive = (direction) => direction > 0 && box?.goInside();
 
 export default scene;
