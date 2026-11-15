@@ -5,20 +5,21 @@
       "value": "14+",
       "unit": "M TEU",
       "label": "Container ship orderbook",
-      "source": "BIMCO (Niels Rasmussen), via Maritime Executive",
-      "url": "https://maritime-executive.com/article/container-fleet-smashes-record-as-fleet-growth-accelerates",
-      "date": "2026-09-03",
-      "status": "verified"
+      "source": "BIMCO Container Market Overview & Outlook, Sep 2026, via Maritime Executive",
+      "url": "https://maritime-executive.com/article/overcapacity-looms-over-container-shipping-as-supply-pressure-mounts",
+      "date": "2026-09-23",
+      "status": "verified",
+      "note": "Same figures reposted 24 Sep 2026 (El Estrecho Digital, Hellenic Shipping News). Not the 3 Sep article, where 42% is fleet growth."
     },
     {
       "value": "~42",
       "unit": "%",
       "label": "Of the existing fleet",
-      "source": "BIMCO (Niels Rasmussen), via Maritime Executive",
-      "url": "https://maritime-executive.com/article/container-fleet-smashes-record-as-fleet-growth-accelerates",
-      "date": "2026-09-03",
-      "status": "unverified",
-      "todo": "In this article 42% is fleet GROWTH over 5.5 years (10M TEU), not orderbook / fleet. Owner decides: relabel to fleet growth, or use 14/34 = ~41% as a derived ratio."
+      "source": "BIMCO Container Market Overview & Outlook, Sep 2026, via Maritime Executive",
+      "url": "https://maritime-executive.com/article/overcapacity-looms-over-container-shipping-as-supply-pressure-mounts",
+      "date": "2026-09-23",
+      "status": "verified",
+      "note": "42% = orderbook / existing fleet, so BIMCO's fleet is at least 14 / 0.42 = 33.3M TEU (floor, since the orderbook is 'more than 14')."
     }
   ],
   "chart": {

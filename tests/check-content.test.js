@@ -20,10 +20,10 @@ describe('check-content', () => {
     expect(m).toMatch(/broken\.json: not valid JSON/);
   });
 
-  test('the real content fails today (sample data, unverified figure, pending)', () => {
+  test('the real content fails today (sample data, pending)', () => {
     const m = messages('content').join('\n');
-    expect(m).not.toMatch(/keyNumbers\[0\] "Container ship orderbook"/); // 14M+ TEU is verified with a URL
-    expect(m).toMatch(/s02\.json: keyNumbers\[1\] "Of the existing fleet" is unverified/);
+    expect(m).not.toMatch(/s02\.json: keyNumbers/); // both BIMCO figures are verified with a URL
+    expect(m).toMatch(/s02\.json: chart .* is sample/);
     expect(m).toMatch(/s03\.json: pending is true/);
   });
 });
