@@ -15,4 +15,15 @@ processed versions baked into `public/models/*.glb` ship with the deck.
 Scene 2 (`public/models/container.glb`, `scripts/blender/build_container.py`) is built in Blender; its
 plywood floor grain is procedural (shader), the quay is plain concrete colour.
 
-Not used: the Higgsfield SAM 3D ship test (see credit-ledger.md); the ship is built in Blender.
+Not used: the Higgsfield SAM 3D ship test (see credit-ledger.md).
+
+## Sketchfab (CC-BY-4.0: attribution required, put it on the credits slide)
+
+| Asset | Page | Author | Used for | File |
+|---|---|---|---|---|
+| Container Ship | https://sketchfab.com/3d-models/container-ship-aaa41cca946b4a08bc08cf692b7757be | RM02 (https://sketchfab.com/RM02) | Scene 1 ship (`public/models/ship-rm02.glb`) | `assets-src/models/rm02/container_ship.glb`, 4K textures, 35,454,960 bytes, md5 b020b409… (downloaded 2026-11-15 with the owner's approval, owner's Sketchfab login) |
+
+Changed by `scripts/rebrand_rm02.py` (CC-BY allows changes; say so in the credit): real carriers' marks
+erased from the hull and container textures, yellow boxes repainted orange, HAPAG-LLOYD lettered on
+the hull and the orange boxes, textures reduced to 2K. Credit line: *"Container Ship" by RM02,
+CC BY 4.0, modified.* The Blender ship (`public/models/ship.glb`) is still used in scene 2.

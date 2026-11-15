@@ -119,3 +119,8 @@ inside a 40 ft container, low sun raking through the doors with real-time shadow
 skylight from the opening (RectAreaLight), dust in the beam, harbour water, a ship crossing outside.
 On the RTX 3050: 144 FPS in scene 2 on all tiers; every transition at the display cap. The e2e test
 also fails if `med` drops below 55 FPS in scene 2. Not measured on the Intel UHD (same reason as above).
+
+## Scene 1 with the RM02 ship (2026-11-15)
+Scene 1 now uses the Sketchfab RM02 model (188k triangles, ten 2K textures, 22.6 MB GLB) instead of
+the Blender ship. On the RTX 3050: 143-144 FPS in scene 1 on all tiers, every transition at the
+display cap. Not measured on the Intel UHD.

@@ -9,6 +9,7 @@
     "e2e": "playwright test",
     "check:content": "node scripts/check-content.mjs",
     "build:ship": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_ship.py -- public/models/ship.glb",
+    "build:ship-rm02": "python scripts/rebrand_rm02.py assets-src/models/rm02/container_ship.glb public/models/ship-rm02.glb",
     "build:container": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_container.py -- public/models/container.glb"
   },
   "type": "module",
