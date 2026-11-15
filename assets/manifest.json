@@ -2,9 +2,9 @@
   "_readme": "One entry per generated or rendered asset: file, tool, model, prompt, parameters, credits, date, sources.",
   "assets": [
     {
-      "file": "public/plates/s01.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s01-v2-z_image-3fd9f54a.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "3fd9f54a-7d46-40a6-8bb9-1cd7f2864d3a",
@@ -40,9 +40,9 @@
       "notes": "Small pseudo-text on the bow ('10-21') and hull; acceptable for a placeholder, fix or replace before the final deck."
     },
     {
-      "file": "public/plates/s02.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s02-z_image-bdc9b39e.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "bdc9b39e-a24b-4868-b441-63b1b0cd5640",
@@ -59,9 +59,9 @@
       "notes": "Fake HUD text and numbers on the left container door, inside the UI area. Replace before the final deck (s02 shows real orderbook figures)."
     },
     {
-      "file": "public/plates/s03.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s03-z_image-cb51e8f4.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "cb51e8f4-39c9-44d3-8f01-3b3f4f6caa6f",
@@ -78,9 +78,9 @@
       "notes": "Good. Tiny logo-like marks on crane cabins."
     },
     {
-      "file": "public/plates/s04.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s04-z_image-654bc58a.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "654bc58a-107e-4fdd-9667-8aecc0cb083e",
@@ -97,9 +97,9 @@
       "notes": "Map and red Red Sea glow fit, but an off-topic orange truck sits in the foreground. Candidate for redo."
     },
     {
-      "file": "public/plates/s05.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s05-z_image-767ac41d.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "767ac41d-b78a-4753-97eb-530fab374f50",
@@ -116,9 +116,9 @@
       "notes": "Good. Propeller looks more like a small vessel than a large ship."
     },
     {
-      "file": "public/plates/s06.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s06-z_image-5b2d346c.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "5b2d346c-18c1-47d1-9240-2c876c9cddac",
@@ -135,9 +135,9 @@
       "notes": "Screens carry unreadable pseudo-text; odd orange toy cart on a console. Acceptable placeholder."
     },
     {
-      "file": "public/plates/s07.jpg",
+      "file": "(replaced by v3)",
       "original": "assets-src/s07-z_image-0aa72a9e.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "0aa72a9e-3449-42a4-96f9-c52db3ae07f1",
@@ -171,6 +171,139 @@
       "date": "2026-11-15",
       "sources": "AI generated; no stock or third-party images",
       "notes": "Most realistic (algae at the waterline), but only 1424x800 and the bow fills the left third where the headline sits."
+    },
+    {
+      "file": "public/plates/s01.jpg",
+      "original": "assets-src/s01-v3-z_image-e93b923b.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "e93b923b-44f3-4fea-ba5a-75335c54dfbe",
+      "prompt": "Documentary photograph, 16:9, full-frame camera, natural colour grading, real-world detail, subtle film grain. Aerial three-quarter view from a helicopter at dusk: a large modern container ship under way on a calm dark sea. Well-maintained hull in deep navy paint with light everyday wear and a few faint scuffs near the waterline, no heavy rust. Neatly stacked containers in blue, grey, red and a few orange. White bow wave and long wake, warm orange sunset glow on the horizon, light haze. The ship sits in the right two thirds of the frame; the left third is open, darker sea and sky. No text, no letters, no numbers, no logos, no hull markings, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Light wear, realistic. Tiny pseudo-text ship name on the bow."
+    },
+    {
+      "file": "public/plates/s02.jpg",
+      "original": "assets-src/s02-v3-z_image-c771b8e7.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "c771b8e7-aea1-4616-915c-65909463d0e8",
+      "prompt": "Documentary photograph, 16:9, full-frame camera, natural colour grading, real-world detail, subtle film grain. View from inside an empty 40-foot shipping container standing on a quay, looking out through its open doors: plain dark blue corrugated steel walls and a worn plywood floor converge toward the bright opening; outside, soft evening daylight, a calm harbour and a faint sea horizon. Clean container in regular service with light everyday wear. The left third of the frame is the darker container wall. Plain walls with no labels, no panels, no screens. No text, no letters, no numbers, no logos, no signs, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Realistic, no fake numbers (fixes v1)."
+    },
+    {
+      "file": "public/plates/s03.jpg",
+      "original": "assets-src/s03-v3-z_image-ad2b424f.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "ad2b424f-978f-4923-b828-1a455bbc744a",
+      "prompt": "Documentary photograph, 16:9, full-frame camera, natural colour grading, real-world detail, subtle film grain. Container terminal at night photographed from ground level: tall ship-to-shore gantry cranes lifting containers onto a moored container ship, long rows of container stacks, bright LED floodlights, wet asphalt with reflections, light rain haze. An everyday working port, well-maintained equipment. The left third of the frame is darker sky and stacks. No text, no letters, no numbers, no logos, no signs, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Realistic. Small mirrored pseudo-text ship name on the bow."
+    },
+    {
+      "file": "public/plates/s04.jpg",
+      "original": "assets-src/s04-v3-z_image-42743d61.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "42743d61-3cb4-4d2e-b25e-740fd7fd77d4",
+      "prompt": "Realistic night photograph of Earth taken from the International Space Station over the Red Sea and the Suez Canal region: city lights of Egypt and the Nile delta glowing orange, the dark Red Sea and Mediterranean, a thin blue atmosphere glow along the curved horizon, a few faint ship lights on the water. 16:9, natural colours. The left third of the frame is dark sea and desert. No text, no letters, no numbers, no labels, no logos, no map graphics.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Orbital view of Red Sea, Arabia, Gulf and Hormuz. Geography is approximate, day/night mixed, small label-like artefacts; busy behind the left panel. Candidate for redo."
+    },
+    {
+      "file": "public/plates/s05.jpg",
+      "original": "assets-src/s05-v3-z_image-cfbe6694.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "cfbe6694-7d54-4ae4-af73-5603237c9800",
+      "prompt": "Underwater documentary photograph, 16:9, natural colours, real-world detail. The large bronze propeller and rudder of a container ship seen from the side, sunlight rays from the surface, small rising bubbles, light marine growth on the dark hull, blue-green water with floating particles. Well-maintained ship in regular service. The propeller sits in the right half of the frame; the left third is open, darker water. No text, no letters, no numbers, no logos, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Photoreal half-above-water view; propeller placement is not physically accurate. Left third is dark hull."
+    },
+    {
+      "file": "public/plates/s06.jpg",
+      "original": "assets-src/s06-v3-z_image-c1a91bfc.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "c1a91bfc-2b4c-403a-96f1-b6e8d547258e",
+      "prompt": "Documentary photograph, 16:9, full-frame camera, natural colour grading, real-world detail, subtle film grain. Bridge of a modern container ship at night, photographed from behind the helm: wide panoramic windows onto a dark sea with a distant ship light, a long console with radar and navigation displays glowing softly and out of focus, small orange and cyan indicator lights, dim red night lighting. A real, lived-in workplace. The left third of the frame is darker window and sea. Screens show no readable content. No text, no letters, no numbers, no logos, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Very realistic. Radar screens carry tiny unreadable marks."
+    },
+    {
+      "file": "public/plates/s07.jpg",
+      "original": "assets-src/s07-v3-z_image-bbac517e.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "bbac517e-3d4f-40db-b6cd-b269ced1d088",
+      "prompt": "Documentary travel photograph, 16:9, full-frame camera, natural colour grading, real-world detail, subtle film grain. Hamburg harbour at dawn seen from the river Elbe: a large container ship arriving, port container cranes in silhouette, historic red-brick warehouses in the distance, soft golden haze on the water. The left third of the frame is calm water and sky. No text, no letters, no numbers, no logos, no hull markings, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Realistic, calm left third. Pseudo-letters on the hull."
     }
   ]
 }
