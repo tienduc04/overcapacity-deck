@@ -96,3 +96,11 @@ What got it there (first build ran at 35 FPS on med):
 `high` is below 60 here because it renders the world at full resolution on the Intel UHD; on a
 discrete GPU it has headroom. Keep `med` on this laptop. The e2e test fails if `med` drops
 below 55 FPS in scene 1.
+
+## Chrome on the RTX 3050 (2026-11-15)
+The owner set Chrome to "High performance" in Windows Graphics settings
+(`HKCU\Software\Microsoft\DirectX\UserGpuPreferences`: `chrome.exe` → `GpuPreference=2`).
+A fresh Chrome now reports `ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 6GB Laptop GPU ...)`, and the
+auto-pick chooses `high`. FPS test, all tiers: 144 live in scene 1, 141 or more during every
+transition (display cap). There is now headroom for textures, baked lighting and post effects;
+the Intel UHD numbers above remain the floor for an unknown presentation laptop.
