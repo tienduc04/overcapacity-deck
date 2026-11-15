@@ -1,0 +1,8 @@
+node_modules/
+dist/
+e2e/shots/
+test-results/
+playwright-report/
+# originals are large; keep them local (manifest.json records them)
+assets-src/*
+!assets-src/.gitkeep
