@@ -96,7 +96,8 @@ export function createHud(stage, { total, onPrev, onNext }) {
     const sources = [...(content.keyNumbers ?? []), ...(content.chart ? [content.chart] : [])]
       .filter((x) => x.source)
       .map((x) => `${x.source}${x.date ? `, ${x.date}` : ''}`);
-    if (sources.length) slide.append(el('footer', 'sources', `Sources: ${[...new Set(sources)].join(' · ')}`));
+    const notes = [sources.length && `Sources: ${[...new Set(sources)].join(' · ')}`, content.credits].filter(Boolean);
+    if (notes.length) slide.append(el('footer', 'sources', notes.join(' · ')));
     slides.append(slide);
     return slide;
   }

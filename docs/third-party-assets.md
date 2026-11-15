@@ -17,7 +17,7 @@ plywood floor grain is procedural (shader), the quay is plain concrete colour.
 
 Not used: the Higgsfield SAM 3D ship test (see credit-ledger.md).
 
-## Sketchfab (CC-BY-4.0: attribution required, put it on the credits slide)
+## Sketchfab (CC-BY-4.0: attribution required, shown in scene 1's footer via `credits` in content/s01.json)
 
 | Asset | Page | Author | Used for | File |
 |---|---|---|---|---|
