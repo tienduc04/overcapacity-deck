@@ -39,8 +39,9 @@ scene.leadOut = (tl, ev) => {
   if (!hero || ev.to !== 1) return 0;
   gsap.killTweensOf(hero.titleFx); // the entrance fade may still be running
   tl.to(hero.titleFx, { alpha: 0, duration: 0.6, ease: 'power1.in' }, 0);
-  tl.fromTo(hero.fly, { p: 0 }, { p: 1, duration: 2.6, ease: 'power2.inOut' }, 0);
-  return 2.3; // the blur starts as the camera settles
+  // Never slows down: the blur takes over while the camera is still rushing in (renderer keeps it live).
+  tl.fromTo(hero.fly, { p: 0 }, { p: 1, duration: 3.6, ease: 'none' }, 0);
+  return 2.0;
 };
 
 export default scene;

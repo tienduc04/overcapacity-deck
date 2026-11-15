@@ -263,6 +263,9 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     rt.texture.userData.size = new THREE.Vector2(1920, 1080);
     textures[i] = rt.texture;
     live[i].init(renderer);
+    renderer.setRenderTarget(rt); // compile shaders and upload textures now, not on the first transition frame
+    renderer.render(live[i].scene, live[i].camera);
+    renderer.setRenderTarget(null);
     return rt;
   });
 
@@ -326,6 +329,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
   // During a transition a live world is drawn on the first frame and then held: the transition
   // shader plus a moving 3D world is too much fill rate for an iGPU, and the hold is not visible.
   let liveHold = null; // null | 'first' | 'held'
+  let keepFrom = false;
   let level = 0;
   let size = [1920, 1080];
   let last = 0;
@@ -347,7 +351,8 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     console.info(`[renderer] slow frames, effects level → ${FX_LEVELS[level]}`);
   }
 
-  function transition(from, to, { type = 'crossfade', duration, onDone } = {}) {
+  // liveFrom: keep the leaving world moving under the shader (its camera move carries on into the blur).
+  function transition(from, to, { type = 'crossfade', duration, liveFrom = false, onDone } = {}) {
     const clip = clipPlayer?.(from, to, onDone);
     if (clip) return clip;
     const t = TRANSITIONS[type] ?? TRANSITIONS.crossfade;
@@ -357,6 +362,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     setPair(from, to);
     uniforms.uProgress.value = 0;
     liveHold = 'first';
+    keepFrom = liveFrom;
     const end = () => {
       liveHold = null;
       settle(to); // keeps the Ken Burns clock running from the transition start
@@ -402,7 +408,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
       uniforms.uTime.value = time;
       xf(uniforms.uFromXf.value, pair.from, time);
       xf(uniforms.uToXf.value, pair.to, time);
-      for (const i of liveHold === 'held' ? [] : new Set([pair.from, pair.to])) {
+      for (const i of liveHold === 'held' ? (keepFrom ? [pair.from] : []) : new Set([pair.from, pair.to])) {
         if (!targets[i]) continue;
         live[i].update(time, lean);
         renderer.setRenderTarget(targets[i]);

@@ -5,15 +5,17 @@ import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUnifo
 import { createOcean, createSky, loadHdr, sunDirection } from './sea.js';
 import { dressAll, loadSurfaces } from './materials.js';
 
-// Scene 2 as a live 3D world: an orange 40 ft container on the quay (scripts/blender/build_container.py).
-// Arriving from scene 1 the camera lands outside the shut box, the doors swing open and it glides
-// inside, low sun raking in behind it; the reveal steps all play inside.
+// Scene 2 as a live 3D world: an orange 40 ft container (scripts/blender/build_container.py) at the
+// outer edge of a stack on a ship's deck, the box scene 1 flies to. Arriving, the camera sees its
+// lettered side as scene 1 left it, swings round to the doors, they open and it glides inside, low
+// sun raking in behind it; the reveal steps all play inside.
 // Three.js axes: x along the container towards the doors, y up, z to the right looking out.
 
 const LI = 12.03; // inside length: the door opening is at x = LI
 const DOOR = { w: 2.34, h: 2.58 };
 const WO_HALF = 1.22; // half the outside width (corrugation peaks)
-const WATER_Y = -2.6;
+const WATER_Y = -24; // the deck stands high above the sea
+const DECK_Y = -3.3; // hatch cover under the lowest tier
 const SUN = { elevation: 7, offset: -20 }; // degrees: low, from the front left, so the beam lands on the right
 const ENV_INTENSITY = 0.7; // HDRI image light outside
 const INSIDE_ENV = 0.35; // the walls see little sky
@@ -26,9 +28,17 @@ const LOOK = {
   Door: { surface: 'rust', detail: 0.5, normal: 0.4 },
 };
 const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings'];
-// Camera poses: position p, look-at t.
+// Neighbours in the stack: [bay, tier, row, colour]. Bay -1 is behind the closed end, tier -1 below,
+// row -1 inboard (-z); the sea side (+z) and the door end stay open for the camera.
+const STACK = [
+  [0, -1, 0, '#4a1c22'], [0, 1, 0, '#1d2a52'], [0, -1, -1, '#7d8798'], [0, 0, -1, '#1d2a52'], [0, 1, -1, '#4a1c22'],
+  [-1, -1, 0, '#7d8798'], [-1, 0, 0, '#c9561c'], [-1, 1, 0, '#4a1c22'], [-1, 0, -1, '#7d8798'], [0, 2, -1, '#7d8798'],
+];
+const PITCH = { bay: 12.45, tier: 3.12, row: 2.5 };
+// Camera poses: position p, look-at t. `side` frames the lettered side like scene 1's last frame.
 const POSES = {
-  outside: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
+  side: { p: [LI / 2 + 3.6, 6.1, 13.2], t: [LI / 2, 1.3, 0] },
+  front: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
   doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
   inside: { p: [LI - 2.4, 1.45, 0.25], t: [0, 1.15, -0.35] },
 };
@@ -62,6 +72,8 @@ export async function createContainerWorld() {
   door2.scale.z = -1;
   set.add(door2);
   set.add(lettering());
+  for (const name of ['Quay', 'Shore']) set.getObjectByName(name).visible = false;
+  const shell = set.getObjectByName('Shell');
   set.traverse((o) => {
     if (!o.isMesh) return;
     if (['Wall', 'Frame'].includes(o.material.name)) o.material.side = THREE.DoubleSide; // seen from outside too
@@ -71,7 +83,7 @@ export async function createContainerWorld() {
     if (o.material.name === 'Floor') plywood(o.material);
     if (o.material.name === 'Shore') haze(o.material, sky.envTexture, 0.0003);
   });
-  scene.add(set);
+  scene.add(set, stack(shell, door, door2), deck());
 
   // A ship crossing the harbour mouth, seen through the doors now and then.
   const ship = shipGltf.scene;
@@ -125,15 +137,16 @@ export async function createContainerWorld() {
     // Outside with the doors shut (arriving from scene 1), or inside at once (any other way in).
     place(outside) {
       tl?.kill();
-      Object.assign(state, { door: outside ? 0 : 1, cam: pose(outside ? 'outside' : 'inside') });
+      Object.assign(state, { door: outside ? 0 : 1, cam: pose(outside ? 'side' : 'inside') });
     },
-    // From outside: the doors swing open, the camera passes the doorway and settles inside.
+    // From outside: round to the doors, they swing open, the camera passes the doorway and settles inside.
     goInside() {
       tl?.kill();
-      tl = gsap.timeline({ delay: 0.2 })
-        .to(state, { door: 1, duration: 1.6, ease: 'power2.inOut' })
-        .to(state.cam, { ...pose('doorway'), duration: 1.6, ease: 'power2.inOut' }, 0.6)
-        .to(state.cam, { ...pose('inside'), duration: 1.8, ease: 'power2.out' });
+      tl = gsap.timeline()
+        .to(state.cam, { ...pose('front'), duration: 1.8, ease: 'power2.inOut' })
+        .to(state, { door: 1, duration: 1.5, ease: 'power2.inOut' }, 1.0)
+        .to(state.cam, { ...pose('doorway'), duration: 1.3, ease: 'power1.inOut' }, 2.1)
+        .to(state.cam, { ...pose('inside'), duration: 1.7, ease: 'power2.out' });
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
@@ -274,6 +287,39 @@ function lettering() {
   map.anisotropy = 8;
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 0.9), new THREE.MeshStandardMaterial({ map, transparent: true, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2 }));
   mesh.position.set(LI / 2 + 0.3, 1.55, WO_HALF + 0.03);
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+// Shut boxes around ours: copies of its shell and door leaves in other colours, no shadows (cheap).
+function stack(shell, door, door2) {
+  const group = new THREE.Group();
+  const paint = {};
+  const recolour = (o, colour) =>
+    o.traverse((m) => {
+      if (!m.isMesh) return;
+      const key = m.material.name + colour;
+      paint[key] ??= Object.assign(m.material.clone(), { side: THREE.FrontSide });
+      if (['Wall', 'Frame', 'Door'].includes(m.material.name)) paint[key].color.set(colour);
+      m.material = paint[key];
+      m.castShadow = m.receiveShadow = false;
+    });
+  for (const [bay, tier, row, colour] of STACK) {
+    const box = new THREE.Group();
+    box.add(shell.clone(), door.clone(), door2.clone());
+    box.children[1].rotation.y = box.children[2].rotation.y = 0; // shut
+    recolour(box, colour);
+    box.position.set(bay * PITCH.bay, tier * PITCH.tier, row * PITCH.row);
+    group.add(box);
+  }
+  return group;
+}
+
+// The hatch cover the lowest tier stands on, in the ship's deck red; it ends at the ship's side (+z).
+function deck() {
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 30), new THREE.MeshStandardMaterial({ color: '#6e2620', roughness: 0.85 }));
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(LI / 2 - 6, DECK_Y, 1.5 - 15);
   mesh.receiveShadow = true;
   return mesh;
 }

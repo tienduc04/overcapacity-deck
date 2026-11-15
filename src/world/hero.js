@@ -14,7 +14,7 @@ const SUN = { elevation: 2, offset: 14 }; // degrees above the horizon / right o
 const ENV_INTENSITY = 0.8; // HDRI image light on the ship
 
 // Fly-in to scene 2: end on an orange box on deck (rig space, m, placed by eye), seen from `dist` m.
-const FLY = { target: [142, 18.6, -16.3], from: [0.3, 0.4, -1], dist: 15 }; // the lettered box near the bow
+const FLY = { target: [142, 18.6, -16.3], from: [0.3, 0.4, -1], dist: 3 }; // the lettered box near the bow; ends close, inside the blur
 
 const TITLE_DEPTH = 900; // m from the camera: beyond the ship (about 300 m), in front of the sky
 const DRAUGHT = 14.5; // m below the waterline, typical for this size (the red antifouling stays under water)
