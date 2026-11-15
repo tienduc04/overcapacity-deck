@@ -1,0 +1,14 @@
+{
+  "id": "s98-bad",
+  "speakerKey": "test",
+  "steps": 3,
+  "headline": "This headline is clearly far too long because it has thirteen words here",
+  "keyNumbers": [
+    { "value": "1", "unit": "x", "label": "Sample number", "source": "", "url": "", "date": "", "status": "sample" },
+    { "value": "2", "unit": "x", "label": "No url", "source": "S", "url": "", "date": "2026", "status": "verified" },
+    { "value": "3", "unit": "x", "label": "Three", "source": "S", "url": "u", "date": "d", "status": "verified" },
+    { "value": "4", "unit": "x", "label": "Four", "source": "S", "url": "u", "date": "d", "status": "verified" }
+  ],
+  "chart": { "type": "bar", "title": "Unverified chart", "status": "unverified" },
+  "pending": true
+}

@@ -21,9 +21,10 @@ export function placeholderPlate(n, title, w = 1920, h = 1080) {
   g.textAlign = 'right';
   g.textBaseline = 'alphabetic';
   g.fillText(pad(n), w - 60, h - 80);
-  g.fillStyle = 'rgba(232, 238, 244, 0.35)';
-  g.font = '800 44px Montserrat, sans-serif';
-  g.fillText(`PLACEHOLDER PLATE · ${title.toUpperCase()}`, w - 60, 110);
+  g.fillStyle = 'rgba(232, 238, 244, 0.3)';
+  g.font = '800 26px Montserrat, sans-serif';
+  g.textAlign = 'center'; // top centre: clear of the HUD top bar, headline and badge
+  g.fillText(`PLACEHOLDER PLATE · ${title.toUpperCase()}`, w / 2, 60);
   return c;
 }
 

@@ -1,0 +1,17 @@
+{
+  "id": "s99-ok",
+  "owner": "Test Owner",
+  "speakerKey": "test",
+  "budgetSec": 60,
+  "steps": 3,
+  "headline": "Twelve words is the maximum length for one headline on screen",
+  "keyNumbers": [
+    { "value": "14+", "unit": "M TEU", "label": "Orderbook", "source": "Fixture source", "url": "https://example.org/a", "date": "2026-09", "status": "verified" }
+  ],
+  "chart": { "type": "bar", "title": "Fixture chart", "source": "Fixture source", "url": "https://example.org/b", "date": "2026-09", "status": "verified" },
+  "bullets": ["One"],
+  "theory": "",
+  "case": "",
+  "speakerNotes": "",
+  "pending": false
+}

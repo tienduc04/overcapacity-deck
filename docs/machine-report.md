@@ -50,4 +50,14 @@ an install outside this folder, so they wait for your approval. Options:
 unpacked into `tools/` inside this project (no system change).
 
 ## Phase 1 measurements
-_Filled in after the Phase 1 build (see below)._
+2026-11-15, `npm run e2e` (production build, Chrome 157 headless, 1920×1080, Intel UHD):
+
+| Tier | FPS (crossfade skeleton, placeholder plates) |
+|---|---|
+| low | 144 |
+| med | 144 |
+| high | 144 |
+
+All tiers hit the 144 Hz display cap: a full-screen plate quad plus a crossfade is cheap. The tiers
+only start to differ once the Phase 3 shaders, Ken Burns and parallax exist; re-measure then.
+The `med` recommendation stands until those numbers are in.
