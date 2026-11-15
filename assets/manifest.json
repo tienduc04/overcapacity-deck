@@ -173,9 +173,9 @@
       "notes": "Most realistic (algae at the waterline), but only 1424x800 and the bow fills the left third where the headline sits."
     },
     {
-      "file": "public/plates/s01.jpg",
+      "file": "(replaced by v4)",
       "original": "assets-src/s01-v3-z_image-e93b923b.png",
-      "status": "placeholder",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "e93b923b-44f3-4fea-ba5a-75335c54dfbe",
@@ -304,6 +304,28 @@
       "date": "2026-11-15",
       "sources": "AI generated; no stock or third-party images",
       "notes": "Realistic, calm left third. Pseudo-letters on the hull."
+    },
+    {
+      "file": "public/plates/s01.jpg",
+      "original": "assets-src/s01-v4-hl-ideogram-f9fa1938.png",
+      "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "ideogram_4_5",
+      "job_id": "f9fa1938-acc0-49be-8c8d-0e5e1f579f2b",
+      "prompt": "Keep the photo exactly the same. Paint the company name HAPAG-LLOYD in large white capital letters along the side of the navy hull, as on a real container ship.",
+      "parameters": {
+        "edit_of": "e93b923b-44f3-4fea-ba5a-75335c54dfbe (s01 v3)",
+        "quality": "very_low",
+        "resolution": "2k",
+        "magic_prompt": "off",
+        "aspect_ratio": "16:9",
+        "original_size": "2560x1440"
+      },
+      "processing": "ffmpeg 9.0.2: scale 1920x1080 lanczos, JPEG q3, metadata stripped",
+      "credits": 0.25,
+      "date": "2026-11-15",
+      "sources": "AI edit of an AI-generated image; Hapag-Lloyd name added with owner approval (class taught by Hapag-Lloyd)",
+      "notes": "Name spelled correctly; rest of the photo preserved."
     }
   ]
 }

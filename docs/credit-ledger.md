@@ -20,6 +20,7 @@ working setting, state the quoted cost and wait for an explicit "yes". Never gue
 | 2026-11-15 | s01 v2 realistic (compare) | kling_omni_image, 1k, 16:9 | 0.5 | 0 (refused: "Requires basic plan or higher") | 8.80 | owner, "Thử cả ba, so sánh" |
 | 2026-11-15 | s01 v2 realistic (compare) | seedream_5_0_flash, 1k, 16:9 (job 1e6ab903; first try 429 rate limit, not charged) | 0.5 | 0.5 | 8.30 (checked) | owner, "Thử cả ba, so sánh" |
 | 2026-11-15 | s01-s07 v3 realistic, light wear | z_image, 16:9, 7 images one at a time (batch of 7: 6 refused with 429, not charged) | 1.05 | 1.05 | 7.25 (checked) | owner, "sửa các plate ... trông thật hơn ... ưu tiên tối ưu điểm credit" |
+| 2026-11-15 | s01 v4, HAPAG-LLOYD on hull (edit of v3) | ideogram_4_5, very_low, 2k, magic_prompt off (job f9fa1938) | 0.25 | 0.25 | 7.00 (checked) | owner, "Thử s01 trước" |
 
 Free plan runs one Higgsfield job at a time; submit sequentially.
 
