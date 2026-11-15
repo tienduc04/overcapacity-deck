@@ -69,7 +69,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     if (content.keyNumbers?.length) {
       const row = el('div', 'numbers');
       for (const k of content.keyNumbers) {
-        const card = el('div', `number-card glass number-card--${k.status}`);
+        const card = el('div', `number-card number-card--${k.status}`);
         const value = el('div', 'number-value metric', String(k.value));
         value.append(el('span', 'number-unit', k.unit));
         card.append(value, el('div', 'number-label', k.label));
@@ -80,7 +80,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     }
     const side = [];
     if (content.chart) {
-      const chart = el('div', 'chart glass');
+      const chart = el('div', 'chart');
       chart.append(el('div', 'chart-title', content.chart.title ?? 'Chart'), el('div', 'chart-body', `${content.chart.type ?? 'chart'} · ${content.chart.status}`));
       side.push(chart);
     }
@@ -98,7 +98,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     if (extra.length) {
       const row = el('div', 'extra');
       for (const [label, text] of extra) {
-        const card = el('div', 'extra-card glass');
+        const card = el('div', 'extra-card');
         card.append(el('div', 'extra-label', label), el('p', 'body-text', text));
         row.append(card);
       }

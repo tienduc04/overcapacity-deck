@@ -11,6 +11,7 @@
   --head: 'Montserrat', system-ui, sans-serif;
   --mono: 'Fira Code', ui-monospace, Consolas, monospace;
   --margin: 36px;
+  --edge: 96px; /* text inset from the stage edge (the nav keeps --margin) */
 }
 
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--midnight); color: var(--text); font-family: var(--head); font-weight: 500; }
@@ -29,8 +30,6 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
   transform: translate(-50%, -50%) scale(var(--scale, 1)); transform-origin: center;
 }
 
-.glass { background: rgba(0, 44, 95, 0.55); border: 1px solid rgba(0, 240, 255, 0.22); border-radius: 18px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 44, 95, 0.85); }
 .metric { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .body-text { font-size: 28px; line-height: 1.35; margin: 0; }
 
@@ -39,33 +38,35 @@ body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-f
 .slide [data-step] { transition: opacity 0.45s ease, transform 0.45s ease; }
 .slide .is-hidden { opacity: 0; transform: translateY(16px); }
 
-.slide-top { display: flex; gap: 28px; align-items: baseline; font-size: 22px; text-transform: uppercase; letter-spacing: 0.1em; }
-.slide-brand { font-weight: 800; padding-right: 28px; border-right: 2px solid rgba(232, 238, 244, 0.3); } /* text only: HANDOFF forbids the logo */
+.slide-top { position: absolute; left: var(--edge); top: 56px; display: flex; gap: 24px; align-items: baseline; font-size: 18px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.32em; color: rgba(232, 238, 244, 0.8); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5); }
+.slide-brand { padding-right: 24px; border-right: 1px solid rgba(232, 238, 244, 0.3); } /* text only: HANDOFF forbids the logo */
 .slide-no { color: var(--supply); }
-.slide-title { font-weight: 800; }
 .slide-speaker { color: var(--muted); }
 
-.headline { position: absolute; left: var(--margin); top: 110px; width: 1120px; margin: 0; font-size: 60px; font-weight: 800; line-height: 1.05; text-transform: uppercase; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6); }
+/* Generic layout in the hero's language: no panels, hairline rules, tracked caps for labels. */
+.headline { position: absolute; left: var(--edge); top: 112px; width: 900px; margin: 0; font-size: 60px; font-weight: 800; line-height: 1.05; letter-spacing: -0.005em; text-transform: uppercase; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5); }
 
-.numbers { position: absolute; left: var(--margin); top: 420px; display: flex; gap: 28px; }
-.number-card { min-width: 300px; padding: 22px 28px; position: relative; }
-.number-value { font-size: 72px; font-weight: 500; color: var(--supply); line-height: 1; }
-.number-unit { font-size: 32px; color: var(--muted); margin-left: 10px; }
-.number-label { font-size: 28px; margin-top: 10px; }
-.number-status { position: absolute; top: 10px; right: 14px; font: 500 18px var(--mono); color: var(--risk); letter-spacing: 0.08em; }
+.numbers { position: absolute; left: var(--edge); top: 330px; display: flex; flex-direction: column; gap: 40px; }
+.number-card { position: relative; padding-top: 18px; border-top: 2px solid var(--supply); width: 520px; }
+.number-value { font: 800 128px/0.95 var(--head); letter-spacing: -0.02em; color: var(--text); }
+.number-unit { font: 500 26px var(--head); letter-spacing: 0.2em; color: var(--supply); margin-left: 16px; }
+.number-label { font: 400 26px/1.35 'Inter', var(--head); color: rgba(232, 238, 244, 0.85); margin-top: 8px; }
+.number-status { position: absolute; top: 22px; right: 0; font: 500 18px var(--head); color: var(--risk); letter-spacing: 0.24em; }
 
-.side { position: absolute; right: var(--margin); top: 110px; width: 640px; display: flex; flex-direction: column; gap: 24px; }
-.chart { height: 300px; display: flex; flex-direction: column; justify-content: space-between; padding: 22px 28px; box-sizing: border-box; }
-.chart-title { font-size: 28px; font-weight: 800; text-transform: uppercase; }
-.chart-body { font: 500 22px var(--mono); color: var(--muted); }
-.bullets { padding-left: 1.1em; }
+.side { position: absolute; right: var(--edge); top: 112px; width: 560px; display: flex; flex-direction: column; gap: 32px; }
+.chart { height: 280px; display: flex; flex-direction: column; justify-content: space-between; padding: 18px 0; box-sizing: border-box; border-top: 1px solid rgba(232, 238, 244, 0.35); border-bottom: 1px solid rgba(232, 238, 244, 0.35); }
+.chart-title { font: 500 18px var(--head); letter-spacing: 0.32em; text-transform: uppercase; }
+.chart-body { font: 400 20px var(--head); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.bullets { padding-left: 1.1em; font-family: 'Inter', var(--head); }
 .bullets li + li { margin-top: 10px; }
+.bullets li::marker { color: var(--supply); }
 
-.extra { position: absolute; left: var(--margin); right: var(--margin); bottom: 150px; display: flex; gap: 28px; }
-.extra-card { flex: 1; padding: 18px 26px; }
-.extra-label { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--demand); margin-bottom: 6px; }
+.extra { position: absolute; left: var(--edge); right: var(--edge); bottom: 150px; display: flex; gap: 64px; }
+.extra-card { flex: 1; padding-top: 16px; border-top: 1px solid rgba(232, 238, 244, 0.35); }
+.extra-card .body-text { font-family: 'Inter', var(--head); font-size: 26px; }
+.extra-label { font: 500 18px var(--head); letter-spacing: 0.32em; text-transform: uppercase; color: var(--demand); margin-bottom: 8px; }
 
-.sources { position: absolute; left: var(--margin); bottom: var(--margin); max-width: 1300px; font: 400 18px var(--mono); color: var(--muted); }
+.sources { position: absolute; left: var(--edge); bottom: var(--margin); max-width: 1300px; font: 400 18px var(--mono); color: var(--muted); }
 
 .watermark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font-size: 190px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255, 51, 51, 0.13); pointer-events: none; white-space: nowrap; }
 .badge-pending { position: absolute; top: var(--margin); right: var(--margin); padding: 10px 20px; border-radius: 10px; background: var(--risk); color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; }
@@ -78,7 +79,6 @@ body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-f
 
 /* Hero (scene 1): masthead in the sky behind the ship, no panels; text sits on the picture. */
 .slide--hero .slide-top { display: none; }
-.slide--hero .sources { left: 96px; }
 .hero-course, .hero-kicker, .hero-crew, .hero-hint { font: 500 20px var(--head); letter-spacing: 0.32em; text-transform: uppercase; }
 .hero-course, .hero-crew, .hero-hint { text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5); }
 .hero-course { position: absolute; left: 96px; top: 56px; color: rgba(255, 240, 228, 0.8); }
