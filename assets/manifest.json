@@ -3,8 +3,27 @@
   "assets": [
     {
       "file": "public/plates/s01.jpg",
-      "original": "assets-src/s01-z_image-aeef037e.png",
+      "original": "assets-src/s01-v2-z_image-3fd9f54a.png",
       "status": "placeholder",
+      "tool": "Higgsfield MCP",
+      "model": "z_image",
+      "job_id": "3fd9f54a-7d46-40a6-8bb9-1cd7f2864d3a",
+      "prompt": "Documentary photograph, 16:9, shot from a helicopter with a full-frame camera and telephoto lens, natural colour grading, real-world detail, subtle film grain. A huge working container ship at dusk on a dark sea, three-quarter aerial view. Weathered steel hull: rust streaks running down from the anchor pocket and scuppers, faded and chipped navy paint, salt stains, a band of green marine growth and algae at the waterline, dented and dirty containers in faded blue, grey, rust red and a few orange. White bow wave and long foamy wake, warm orange sunset glow on the horizon, low sea haze. The left third of the frame is open, darker sea. No text, no letters, no numbers, no logos, no hull markings, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "count": 1,
+        "original_size": "2048x1152"
+      },
+      "processing": "Resized to 1920x1080, JPEG q85, no metadata (PowerShell System.Drawing)",
+      "credits": 0.15,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Realistic v2: rust, chipped paint, no visible text. Chosen over the Seedream version (higher resolution, ship sits right of the headline)."
+    },
+    {
+      "file": "(replaced by v2)",
+      "original": "assets-src/s01-z_image-aeef037e.png",
+      "status": "superseded",
       "tool": "Higgsfield MCP",
       "model": "z_image",
       "job_id": "aeef037e-bc87-4ac3-a062-c87301129c42",
@@ -133,6 +152,25 @@
       "date": "2026-11-15",
       "sources": "AI generated; no stock or third-party images",
       "notes": "Good. Left third is a dark out-of-focus pillar (works as UI area)."
+    },
+    {
+      "file": "(not used)",
+      "original": "assets-src/s01-v2-seedream_5_0_flash-1e6ab903.png",
+      "status": "alternative",
+      "tool": "Higgsfield MCP",
+      "model": "seedream_5_0_flash",
+      "job_id": "1e6ab903-75bf-4365-8416-ab6d406a33cf",
+      "prompt": "Documentary photograph, 16:9, shot from a helicopter with a full-frame camera and telephoto lens, natural colour grading, real-world detail, subtle film grain. A huge working container ship at dusk on a dark sea, three-quarter aerial view. Weathered steel hull: rust streaks running down from the anchor pocket and scuppers, faded and chipped navy paint, salt stains, a band of green marine growth and algae at the waterline, dented and dirty containers in faded blue, grey, rust red and a few orange. White bow wave and long foamy wake, warm orange sunset glow on the horizon, low sea haze. The left third of the frame is open, darker sea. No text, no letters, no numbers, no logos, no hull markings, no people.",
+      "parameters": {
+        "aspect_ratio": "16:9",
+        "resolution": "1k",
+        "count": 1,
+        "original_size": "1424x800"
+      },
+      "credits": 0.5,
+      "date": "2026-11-15",
+      "sources": "AI generated; no stock or third-party images",
+      "notes": "Most realistic (algae at the waterline), but only 1424x800 and the bow fills the left third where the headline sits."
     }
   ]
 }

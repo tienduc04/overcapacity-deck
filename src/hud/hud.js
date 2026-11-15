@@ -42,7 +42,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     slide.hidden = true;
 
     const top = el('header', 'slide-top');
-    top.append(el('span', 'slide-no metric', `${pad(index + 1)} / ${pad(total)}`), el('span', 'slide-title', scene.title), el('span', 'slide-speaker', scene.speaker));
+    top.append(el('span', 'slide-brand', 'Hapag-Lloyd'), el('span', 'slide-no metric', `${pad(index + 1)} / ${pad(total)}`), el('span', 'slide-title', scene.title), el('span', 'slide-speaker', scene.speaker));
     slide.append(top);
     if (content.pending) slide.append(el('div', 'badge-pending', 'CONTENT PENDING'));
     if (isSample(content)) slide.append(el('div', 'watermark', 'SAMPLE DATA'));

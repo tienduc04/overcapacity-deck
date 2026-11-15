@@ -27,11 +27,15 @@ body[data-tier='low'] .glass, body[data-renderer='fallback'] .glass { backdrop-f
 .metric { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .body-text { font-size: 28px; line-height: 1.35; margin: 0; }
 
-.slide { position: absolute; inset: 0; padding: var(--margin); box-sizing: border-box; }
+.slide { position: absolute; inset: 0; padding: var(--margin); box-sizing: border-box;
+  /* scrim: keeps HUD text readable on bright plates (sky, haze) */
+  background: linear-gradient(180deg, rgba(10, 17, 24, 0.6) 0%, rgba(10, 17, 24, 0) 40%),
+    linear-gradient(90deg, rgba(10, 17, 24, 0.45) 0%, rgba(10, 17, 24, 0) 55%); }
 .slide [data-step] { transition: opacity 0.45s ease, transform 0.45s ease; }
 .slide .is-hidden { opacity: 0; transform: translateY(16px); }
 
 .slide-top { display: flex; gap: 28px; align-items: baseline; font-size: 22px; text-transform: uppercase; letter-spacing: 0.1em; }
+.slide-brand { font-weight: 800; padding-right: 28px; border-right: 2px solid rgba(232, 238, 244, 0.3); } /* text only: HANDOFF forbids the logo */
 .slide-no { color: var(--supply); }
 .slide-title { font-weight: 800; }
 .slide-speaker { color: var(--muted); }
