@@ -42,5 +42,6 @@
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
   "budgetSec": 80,
-  "headline": "A record orderbook is heading for the water"
+  "headline": "A record orderbook is heading for the water",
+  "layout": "zoom"
 }

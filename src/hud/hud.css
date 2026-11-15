@@ -68,6 +68,23 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 
 .sources { position: absolute; left: var(--edge); bottom: var(--margin); max-width: 1300px; font: 400 18px var(--mono); color: var(--muted); }
 
+/* Scene 2 (zoom): reticle locked on the box and a prompt (steps 0-1), figures in a readout sliding in. */
+.lock { position: absolute; left: 50%; top: 50%; width: 560px; height: 320px; transform: translate(-50%, -50%); pointer-events: none; transition: opacity 0.5s; animation: lock-on 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s both; }
+.lock i { position: absolute; width: 48px; height: 48px; border: 0 solid var(--demand); filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.7)); }
+.lock i:nth-child(1) { left: 0; top: 0; border-width: 3px 0 0 3px; }
+.lock i:nth-child(2) { right: 0; top: 0; border-width: 3px 3px 0 0; }
+.lock i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 3px 3px; }
+.lock i:nth-child(4) { right: 0; bottom: 0; border-width: 0 3px 3px 0; }
+.lock-label { position: absolute; left: 0; top: -40px; text-transform: uppercase; font: 500 18px var(--head); letter-spacing: 0.32em; color: var(--demand); text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); white-space: nowrap; }
+@keyframes lock-on { from { opacity: 0; transform: translate(-50%, -50%) scale(1.6); } 60% { opacity: 1; } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+.tap { position: absolute; left: 50%; top: calc(50% + 200px); transform: translateX(-50%); padding: 14px 28px; border: 1px solid rgba(0, 240, 255, 0.6); background: rgba(10, 17, 24, 0.5); font: 500 20px var(--head); letter-spacing: 0.32em; text-transform: uppercase; white-space: nowrap; cursor: pointer; transition: opacity 0.4s; animation: pulse 2.4s ease-in-out 1.4s infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+.slide--zoom:not([data-at='0']) .tap, .slide--zoom[data-at='2'] .lock { animation: none; opacity: 0; } /* animations would override the opacity */
+.slide--zoom .numbers { top: 300px; padding: 28px 36px; gap: 28px; background: rgba(10, 17, 24, 0.6); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.slide--zoom .numbers.is-hidden { transform: translateX(-80px); }
+.slide--zoom .number-card { width: 440px; padding-top: 0; border-top: 0; }
+.slide--zoom .number-value { font-size: 104px; color: var(--supply); }
+
 .watermark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font-size: 190px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255, 51, 51, 0.13); pointer-events: none; white-space: nowrap; }
 .badge-pending { position: absolute; top: var(--margin); right: var(--margin); padding: 10px 20px; border-radius: 10px; background: var(--risk); color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; }
 

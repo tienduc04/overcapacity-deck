@@ -32,10 +32,10 @@ QUAY_EDGE = LI + 22.0
 DOOR_OPEN = 64  # degrees the right-hand door stands open (outwards)
 
 M = {
-    "wall": material("Wall", "#1f4796", 0.55, 0.3),
-    "frame": material("Frame", "#1a2f5c", 0.5, 0.4),
+    "wall": material("Wall", "#d2601f", 0.55, 0.3),  # Hapag orange
+    "frame": material("Frame", "#a84a18", 0.5, 0.4),
     "floor": material("Floor", "#ffffff", 0.75, vcol=True),
-    "door": material("Door", "#55657a", 0.5, 0.4),
+    "door": material("Door", "#d2601f", 0.5, 0.4),
     "steel": material("Fittings", "#3a3f46", 0.4, 0.8),
     "quay": material("Quay", "#8d8b86", 0.9),
     "paint": material("Kerb", "#ffffff", 0.7, vcol=True),

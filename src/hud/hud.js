@@ -48,11 +48,11 @@ export function createHud(stage, { total, onPrev, onNext }) {
     if (isSample(content)) slide.append(el('div', 'watermark', 'SAMPLE DATA'));
 
     const groups = [];
+    if (content.layout) slide.classList.add(`slide--${content.layout}`); // per-scene layout in hud.css
     const headline = el('h1', 'headline', content.headline);
     if (content.layout === 'hero') {
       // Scene 1: masthead centred in the sky (the live world letters it behind the ship and this copy
       // goes transparent), question bottom left with its second line in orange.
-      slide.classList.add('slide--hero');
       const lead = el('div', 'hero-lead');
       lead.append(el('div', 'hero-kicker', content.kicker), headline);
       groups.push(lead);

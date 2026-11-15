@@ -1,15 +1,18 @@
 import * as THREE from 'three';
+import gsap from 'gsap';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { createOcean, createSky, loadHdr, sunDirection } from './sea.js';
 import { dressAll, loadSurfaces } from './materials.js';
 
-// Scene 2 as a live 3D world: standing inside an open 40 ft container (scripts/blender/build_container.py),
-// low sun raking in through the doors, dust glinting in the beam, the harbour and a passing ship outside.
+// Scene 2 as a live 3D world: an orange 40 ft container on the quay (scripts/blender/build_container.py).
+// Step 0: the camera has just zoomed in from scene 1 and locks on to the box. Step 1: closer, the figures
+// slide in. Step 2: the doors swing open and the camera glides inside, low sun raking in behind it.
 // Three.js axes: x along the container towards the doors, y up, z to the right looking out.
 
 const LI = 12.03; // inside length: the door opening is at x = LI
 const DOOR = { w: 2.34, h: 2.58 };
+const WO_HALF = 1.22; // half the outside width (corrugation peaks)
 const WATER_Y = -2.6;
 const SUN = { elevation: 7, offset: -20 }; // degrees: low, from the front left, so the beam lands on the right
 const ENV_INTENSITY = 0.7; // HDRI image light outside
@@ -23,6 +26,14 @@ const LOOK = {
   Door: { surface: 'rust', detail: 0.5, normal: 0.4 },
 };
 const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings'];
+// Camera poses: position p, look-at t. The look-at point is the view centre, where the HUD reticle sits.
+const POSES = {
+  lock: { p: [LI + 7.5, 3.4, 8.5], t: [LI - 4.5, 1.2, 0] },
+  read: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
+  doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
+  inside: { p: [LI - 2.4, 1.45, 0.25], t: [0, 1.15, -0.35] },
+};
+const STEP_POSE = ['lock', 'read', 'inside'];
 
 export async function createContainerWorld() {
   RectAreaLightUniformsLib.init();
@@ -46,9 +57,16 @@ export async function createContainerWorld() {
   const set = gltf.scene;
   dressAll(set, surfaces, LOOK);
   const door = set.getObjectByName('Door');
-  const doorAngle = door.rotation.y;
+  const doorAngle = door.rotation.y; // open, as built
+  // Blender builds one leaf (hinged at +z); the other is its mirror image.
+  const door2 = door.clone();
+  door2.position.z = -door.position.z;
+  door2.scale.z = -1;
+  set.add(door2);
+  set.add(lettering());
   set.traverse((o) => {
     if (!o.isMesh) return;
+    if (['Wall', 'Frame'].includes(o.material.name)) o.material.side = THREE.DoubleSide; // seen from outside too
     o.castShadow = o.material.name !== 'Shore';
     // the sun grazes the quay at 7 degrees: shadows there would only add acne stripes
     o.receiveShadow = !['Shore', 'Quay', 'Kerb'].includes(o.material.name);
@@ -81,6 +99,11 @@ export async function createContainerWorld() {
   const dust = dustMotes(sun, 600);
   scene.add(dust);
 
+  // Animated state: door 0 = shut, 1 = open as built; cam = pose being shown.
+  const state = { door: 0, cam: pose('lock') };
+  let tl = null;
+  let at = 'lock';
+
   let ready = false;
   return {
     scene,
@@ -102,19 +125,37 @@ export async function createContainerWorld() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     },
+    // Move to the pose for a reveal step: animated, or at once (entering the scene from elsewhere).
+    // Going in or out passes the doorway, with the doors open.
+    go(step, instant = false) {
+      const to = STEP_POSE[Math.min(step, STEP_POSE.length - 1)];
+      tl?.kill();
+      if (instant) {
+        Object.assign(state, { door: to === 'inside' ? 1 : 0, cam: pose(to) });
+      } else if (to === 'inside') {
+        tl = gsap.timeline()
+          .to(state, { door: 1, duration: 1.4, ease: 'power2.inOut' })
+          .to(state.cam, { ...pose('doorway'), duration: 1.5, ease: 'power2.inOut' }, 0.5)
+          .to(state.cam, { ...pose('inside'), duration: 1.8, ease: 'power2.out' });
+      } else {
+        tl = gsap.timeline();
+        if (at === 'inside') tl.to(state.cam, { ...pose('doorway'), duration: 1.4, ease: 'power2.in' });
+        tl.to(state.cam, { ...pose(to), duration: 1.6, ease: 'power2.inOut' }).to(state, { door: 0, duration: 1.2, ease: 'power2.inOut' }, '<0.4');
+      }
+      at = to;
+    },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
       ocean.material.uniforms.uTime.value = t;
       dust.material.uniforms.uTime.value = t;
-      door.rotation.y = doorAngle + Math.sin(t * 0.4) * 0.025 + Math.sin(t * 1.3) * 0.006; // creaking in the breeze
+      const creak = state.door * (Math.sin(t * 0.4) * 0.025 + Math.sin(t * 1.3) * 0.006); // in the breeze, when open
+      door.rotation.y = doorAngle * state.door + creak;
+      door2.rotation.y = -door.rotation.y;
       ship.position.z = LANE.range - ((t * LANE.speed) % (2 * LANE.range));
-      // Slow walk towards the doors and back, hand-held.
-      camera.position.set(
-        3.0 + 0.9 * Math.sin(t * 0.04),
-        1.45 + 0.03 * Math.sin(t * 0.9) + lean.y * 0.12,
-        0.12 * Math.sin(t * 0.027) + lean.x * 0.2
-      );
-      camera.lookAt(LI + 1, 1.3 + 0.02 * Math.sin(t * 0.6), lean.x * 0.4);
+      // Hand-held: a little drift and breathing on top of the pose.
+      const c = state.cam;
+      camera.position.set(c.px + 0.06 * Math.sin(t * 0.31) + lean.x * 0.15, c.py + 0.03 * Math.sin(t * 0.9) + lean.y * 0.1, c.pz + 0.06 * Math.sin(t * 0.23));
+      camera.lookAt(c.tx, c.ty + 0.02 * Math.sin(t * 0.6), c.tz + lean.x * 0.2);
     },
   };
 }
@@ -218,4 +259,30 @@ function dustMotes(sun, count) {
   );
   points.frustumCulled = false; // positions drift in the shader
   return points;
+}
+
+// A pose as a flat object gsap can tween.
+function pose(name) {
+  const { p, t } = POSES[name];
+  return { px: p[0], py: p[1], pz: p[2], tx: t[0], ty: t[1], tz: t[2] };
+}
+
+// HAPAG-LLOYD in white on the side facing the camera (+z), just proud of the corrugation.
+function lettering() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 2048;
+  canvas.height = 256;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#f4f1ec';
+  g.font = '800 200px Montserrat';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('HAPAG-LLOYD', 1024, 136);
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.anisotropy = 8;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 0.9), new THREE.MeshStandardMaterial({ map, transparent: true, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2 }));
+  mesh.position.set(LI / 2 + 0.3, 1.55, WO_HALF + 0.03);
+  mesh.receiveShadow = true;
+  return mesh;
 }
