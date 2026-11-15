@@ -16,10 +16,10 @@ const crossfade = /* glsl */ `
 const zoomBlur = /* glsl */ `
   vec4 transition(vec2 uv, float p) {
     vec2 c = vec2(0.5);
-    float n = mix(6.0, 16.0, uDetail);
+    float n = mix(5.0, 12.0, uDetail); // 12 taps per plate: a live HDR world costs more per tap
     float s = sin(p * PI); // blur and bloom peak mid-way
     vec4 a = vec4(0.0), b = vec4(0.0);
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 12; i++) {
       if (float(i) >= n) break;
       float r = 1.0 - s * 0.35 * float(i) / n;
       a += fromColor(c + (uv - c) * (1.0 - 0.6 * p) * r); // from: zooms in
@@ -178,6 +178,7 @@ const fragmentShader = (body) => /* glsl */ `
   uniform vec2 uFromSize, uToSize, uScreen;
   uniform vec3 uFromXf, uToXf; // Ken Burns per plate: (scale, offset x, offset y)
   uniform float uProgress, uTime, uDetail, uGrain;
+  uniform float uFromLive, uToLive; // 1 = a live 3D world in HDR: tone-map it to match the plates
   varying vec2 vUv;
   #define PI 3.14159265
   float aspect() { return uScreen.x / uScreen.y; }
@@ -194,8 +195,10 @@ const fragmentShader = (body) => /* glsl */ `
     vec2 k = s > i ? vec2(1.0, i / s) : vec2(s / i, 1.0);
     return (uv - 0.5) * k / xf.x + xf.yz + 0.5;
   }
-  vec4 fromColor(vec2 uv) { return texture2D(uFrom, cover(uv, uFromSize, uFromXf)); }
-  vec4 toColor(vec2 uv) { return texture2D(uTo, cover(uv, uToSize, uToXf)); }
+  vec3 aces(vec3 x) { return clamp(x * (2.51 * x + 0.03) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+  vec4 grade(vec4 c, float live) { return live > 0.5 ? vec4(pow(aces(c.rgb * 0.6), vec3(1.0 / 2.2)), 1.0) : c; }
+  vec4 fromColor(vec2 uv) { return grade(texture2D(uFrom, cover(uv, uFromSize, uFromXf)), uFromLive); }
+  vec4 toColor(vec2 uv) { return grade(texture2D(uTo, cover(uv, uToSize, uToXf)), uToLive); }
   ${body}
   // Finish: cool shadows / warm highlights, vignette, animated film grain.
   vec3 finish(vec3 c, vec2 uv) {
@@ -231,7 +234,8 @@ let clipPlayer = null;
 export const setClipPlayer = (fn) => (clipPlayer = fn);
 
 // still[i] = true keeps plate i fixed (no Ken Burns), e.g. the s04 map that highlights align to.
-export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
+// live[i] = a 3D world ({ scene, camera, init, resize, update }) drawn instead of plate i.
+export function createRenderer(canvas, plates, tier, { still = [], live = [] } = {}) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' }); // r187 throws without WebGL2
@@ -251,6 +255,17 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
     return t;
   });
 
+  // Live worlds render into HDR targets on every frame they are on screen, then go through the
+  // same transition and finish shaders as a plate.
+  const targets = plates.map((_, i) => {
+    if (!live[i]) return null;
+    const rt = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType });
+    rt.texture.userData.size = new THREE.Vector2(1920, 1080);
+    textures[i] = rt.texture;
+    live[i].init(renderer);
+    return rt;
+  });
+
   const uniforms = {
     uFrom: { value: textures[0] },
     uTo: { value: textures[0] },
@@ -263,6 +278,8 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
     uGrain: { value: tier.motion ? 1 : 0 },
     uFromXf: { value: new THREE.Vector3(1, 0, 0) },
     uToXf: { value: new THREE.Vector3(1, 0, 0) },
+    uFromLive: { value: 0 },
+    uToLive: { value: 0 },
   };
   let motion = tier.motion;
   const started = plates.map(() => 0); // when each plate last came on screen (s)
@@ -272,7 +289,7 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
   // sampled window stays inside the plate (same bound as Ken Burns). Decorative only.
   const lean = { x: 0, y: 0, tx: 0, ty: 0 };
   const xf = (v, i, t) => {
-    if (!motion || still[i]) return v.set(1, 0, 0);
+    if (!motion || still[i] || live[i]) return v.set(1, 0, 0); // a live world moves its own camera
     const [s, x, y] = kenBurns(i, t - started[i]);
     const s2 = s * (1 + TILT);
     const m = 0.5 * (1 / s - 1 / s2);
@@ -292,6 +309,8 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
     uniforms.uFromSize.value = textures[from].userData.size;
     uniforms.uTo.value = textures[to];
     uniforms.uToSize.value = textures[to].userData.size;
+    uniforms.uFromLive.value = live[from] ? 1 : 0;
+    uniforms.uToLive.value = live[to] ? 1 : 0;
   };
 
   const settle = (i) => {
@@ -304,6 +323,9 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
     settle(i);
   }
 
+  // During a transition a live world is drawn on the first frame and then held: the transition
+  // shader plus a moving 3D world is too much fill rate for an iGPU, and the hold is not visible.
+  let liveHold = null; // null | 'first' | 'held'
   let level = 0;
   let size = [1920, 1080];
   let last = 0;
@@ -334,7 +356,9 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
     started[to] = now();
     setPair(from, to);
     uniforms.uProgress.value = 0;
+    liveHold = 'first';
     const end = () => {
+      liveHold = null;
       settle(to); // keeps the Ken Burns clock running from the transition start
       onDone?.();
     };
@@ -358,6 +382,13 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
       size = [w, h];
       renderer.setSize(w, h, false);
       uniforms.uScreen.value.set(w, h);
+      const pr = renderer.getPixelRatio() * (tier.liveScale || 1); // fill rate is the limit on iGPUs
+      targets.forEach((rt, i) => {
+        if (!rt) return;
+        rt.setSize(Math.round(w * pr), Math.round(h * pr));
+        rt.texture.userData.size.set(w, h);
+        live[i].resize(w, h);
+      });
     },
     tilt(x, y) {
       lean.tx = Math.max(-1, Math.min(1, x));
@@ -371,6 +402,14 @@ export function createRenderer(canvas, plates, tier, { still = [] } = {}) {
       uniforms.uTime.value = time;
       xf(uniforms.uFromXf.value, pair.from, time);
       xf(uniforms.uToXf.value, pair.to, time);
+      for (const i of liveHold === 'held' ? [] : new Set([pair.from, pair.to])) {
+        if (!targets[i]) continue;
+        live[i].update(time, lean);
+        renderer.setRenderTarget(targets[i]);
+        renderer.render(live[i].scene, live[i].camera);
+      }
+      if (liveHold === 'first') liveHold = 'held';
+      renderer.setRenderTarget(null);
       renderer.render(scene, camera);
     },
   };

@@ -184,6 +184,8 @@ test('FPS per tier, at rest and during each transition (logged for docs/machine-
     await page.goto(`/?q=${q}`);
     await at(page, 0, 0);
     await page.mouse.move(1400, 400);
+    await page.waitForTimeout(800);
+    const live = await countFps(page, 2000); // scene 1: the live 3D world
     const during = {};
     for (const n of [2, 3, 4, 5, 6, 7]) {
       await fromScene1(page);
@@ -192,10 +194,29 @@ test('FPS per tier, at rest and during each transition (logged for docs/machine-
       await idle(page);
     }
     await page.waitForTimeout(500);
-    result[q] = { rest: await countFps(page, 2000), during, minDuring: Math.min(...Object.values(during)) };
+    result[q] = { live, rest: await countFps(page, 2000), during, minDuring: Math.min(...Object.values(during)) };
   }
   const gpu = await page.evaluate(() => document.body.dataset.gpu);
   console.log(`[fps] ${JSON.stringify(result)} on ${gpu}`);
   expect(result.med.rest).toBeGreaterThanOrEqual(55);
+  expect(result.med.live).toBeGreaterThanOrEqual(55); // scene 1 as a live 3D world
   expect(result.med.minDuring).toBeGreaterThanOrEqual(55); // recommended tier keeps 60 FPS headroom
+});
+
+test('scene 1 is a live 3D world: frames change, no WebGL errors', async ({ page }) => {
+  const errors = [];
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/?q=med');
+  await at(page, 0, 0);
+  await page.waitForTimeout(1500);
+  const a = await page.screenshot({ path: join(SHOTS, 'live-s01-a.png') });
+  await page.waitForTimeout(2000);
+  const b = await page.screenshot({ path: join(SHOTS, 'live-s01-b.png') });
+  expect(a.equals(b)).toBe(false); // waves, ship and camera move on their own
+  await page.keyboard.press('2'); // the transition out of a live world works like a plate
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: join(SHOTS, 'live-s01-to-s02.png') });
+  await idle(page);
+  expect(errors).toEqual([]);
 });

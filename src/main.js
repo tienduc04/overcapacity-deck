@@ -24,7 +24,9 @@ const tier = TIERS[tierName];
 await document.fonts.load('800 44px Montserrat'); // placeholder plates draw text with it
 const plates = await Promise.all(scenes.map((s, i) => loadPlate(i + 1, s.title)));
 const canvas = document.getElementById('gl');
-let view = gpu ? createRenderer(canvas, plates, tier, { still: scenes.map((s) => s.still) }) : null;
+// Live 3D worlds need WebGL and motion; the low tier and the fallback keep the still plates.
+const live = gpu && tier.liveScale ? await Promise.all(scenes.map((s) => s.world?.() ?? null)) : [];
+let view = gpu ? createRenderer(canvas, plates, tier, { still: scenes.map((s) => s.still), live }) : null;
 if (!view) {
   canvas.remove();
   view = createFallback(document.getElementById('plates'), plates);

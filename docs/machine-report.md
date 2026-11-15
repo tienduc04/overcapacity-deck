@@ -41,11 +41,10 @@ unknown projector laptop.
 | Higgsfield MCP | **Connected** (`claude.ai Higgsfield2`, https://mcp.higgsfield.ai/mcp) |
 | Figma MCP | **Not connected** (not in `claude mcp list`) |
 | Playwright MCP | Connected (not needed: the project uses `@playwright/test` with installed Chrome) |
-| Blender | **Not found**: not on PATH, not in `C:\Program Files\Blender Foundation`, `%LOCALAPPDATA%\Programs`, Steam or WinGet |
+| Blender | **Installed 2026-11-15** (owner approved): 5.3.0 portable zip from download.blender.org, SHA-256 checked, in `%LOCALAPPDATA%\Programs\Blender\blender-5.3.0-windows-x64\` (winget only offers a machine-wide MSI). `npm run build:ship` rebuilds the ship |
 | ffmpeg / ffprobe | **Installed 2026-11-15**: ffmpeg 9.0.2 full build, `winget install Gyan.FFmpeg --scope user` (owner approved). Exe in `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0.2-full_build\bin\`; on PATH in new terminals |
 
-Blender is only needed for Phase 6 (optional), so it is not installed yet (about 400 MB). When
-Phase 6 starts: `winget install BlenderFoundation.Blender --scope user`.
+Blender builds the 3D objects for the live scenes (direction change of 2026-11-15, see HANDOFF).
 
 ## Phase 1 measurements
 2026-11-15, `npm run e2e` (production build, Chrome 157 headless, 1920×1080, Intel UHD):
@@ -77,3 +76,23 @@ scene 1 into scene n):
 - Headless Chrome reports devicePixelRatio 1, so `high` renders the same pixel count as `med`
   here; on a HiDPI screen `high` draws 4× the pixels. The `med` recommendation stands.
 - The e2e test fails if `med` drops below 55 FPS at rest or during any transition.
+
+## Live 3D scene 1 (prototype)
+2026-11-15, same setup. Scene 1 is a live world (`src/world/hero.js`: baked sunset sky, Gerstner
+ocean, Blender ship from `scripts/blender/build_ship.py`) rendered into an HDR target.
+
+| Tier | Scene 1 live | Lowest during a transition | Live world resolution |
+|---|---|---|---|
+| low | 144 (still plate, no 3D) | 69 | none |
+| med | 72 | 58 (zoomBlur, out of the live world) | 75 % of the screen |
+| high | 53 | 62 | 100 % × pixel ratio |
+
+What got it there (first build ran at 35 FPS on med):
+- Sky baked once into a cube map and drawn as the background; prefiltered once (PMREM).
+- Containers export only faces that can be seen (14k faces instead of 22k, much less overdraw).
+- The live world renders at 75 % resolution on med (the iGPU is fill-rate bound: 720p ran at 141).
+- During a transition the live world is drawn once and held; zoomBlur uses 12 taps.
+
+`high` is below 60 here because it renders the world at full resolution on the Intel UHD; on a
+discrete GPU it has headroom. Keep `med` on this laptop. The e2e test fails if `med` drops
+below 55 FPS in scene 1.

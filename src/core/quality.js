@@ -1,11 +1,12 @@
 // Render-quality tiers. Auto-picked from the GPU name; override with ?q=low|med|high.
 // See docs/machine-report.md for the measurements behind the defaults.
 export const TIERS = {
-  low: { pixelRatio: 1, motion: false, detail: 0.5 }, // unknown projector laptop, software WebGL
-  med: { pixelRatio: 1, motion: true, detail: 1 }, // Intel UHD / Iris Xe at 1080p
-  high: { pixelRatio: 2, motion: true, detail: 1 }, // discrete GPU, HiDPI
+  low: { pixelRatio: 1, motion: false, detail: 0.5, liveScale: 0 }, // unknown projector laptop, software WebGL
+  med: { pixelRatio: 1, motion: true, detail: 1, liveScale: 0.75 }, // Intel UHD / Iris Xe at 1080p
+  high: { pixelRatio: 2, motion: true, detail: 1, liveScale: 1 }, // discrete GPU, HiDPI
 };
 // motion = Ken Burns + mouse parallax (Phase 3). detail = shader sample count multiplier.
+// liveScale = resolution of the live 3D worlds relative to the screen (0 = still plates instead).
 
 export function gpuName(gl) {
   const ext = gl.getExtension('WEBGL_debug_renderer_info');

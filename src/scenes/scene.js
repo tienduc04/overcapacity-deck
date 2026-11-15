@@ -2,13 +2,15 @@
 // { id, title, speaker, init(ctx), enter(timeline), exit(timeline), update(dt), dispose() }
 // plus reveal(step) for the JSON reveal steps. Each sNN-*.js file passes its own metadata;
 // later phases override enter/exit/update per scene with real visuals.
-export function createScene({ title, speaker, transition, content, still = false }) {
+// world: optional async factory for a live 3D world that replaces the plate (WebGL path only).
+export function createScene({ title, speaker, transition, content, still = false, world = null }) {
   let slide;
   let hud;
   return {
     id: content.id,
     title,
     speaker,
+    world,
     still, // true: plate stays fixed (no Ken Burns), so overlays can align to it
     transition, // shader type used when entering this scene going forward
     content,

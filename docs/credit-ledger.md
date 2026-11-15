@@ -23,6 +23,12 @@ working setting, state the quoted cost and wait for an explicit "yes". Never gue
 | 2026-11-15 | s01 v4, HAPAG-LLOYD on hull (edit of v3) | ideogram_4_5, very_low, 2k, magic_prompt off (job f9fa1938) | 0.25 | 0.25 | 7.00 (checked) | owner, "Thử s01 trước" |
 | 2026-11-15 | s03 v4, HAPAG-LLOYD on hull (edit of v3) | ideogram_4_5, very_low, 2k, magic_prompt off (job 9606dca6) | 0.25 | 0.25 | 6.75 | owner, "Yes, làm s03 và s07" |
 | 2026-11-15 | s07 v4, HAPAG-LLOYD on hull (edit of v3) | ideogram_4_5, very_low, 2k, magic_prompt off (job f6606ac0) | 0.25 | 0.25 | 6.50 (checked) | owner, "Yes, làm s03 và s07" |
+| 2026-11-15 | Ship 3D model (test) from s01 v4 | sam_3_3d, textured GLB (job b3d06edb); 6k triangles, blurry texture, garbled hull text | 1 | 1 | 5.50 (checked) | owner, "Yes, SAM 3 3D" |
+
+3D quotes, 2026-11-15 (image = s01 v4): sam_3_3d 1; tripo_h3_1 6 (no texture) / 9;
+hunyuan3d_v3 LowPoly 14; meshy image_to_3d 20 (no texture) / 30; meshy_v6 text preview 25;
+tripo_p2 34; meshy_v7 38. Decision after the test: objects and scenes come from Blender
+(free); Higgsfield is kept for transition clips only.
 
 Free plan runs one Higgsfield job at a time; submit sequentially.
 
