@@ -1,0 +1,53 @@
+{
+  "steps": 3,
+  "keyNumbers": [
+    {
+      "value": "00.0",
+      "unit": "%",
+      "label": "Overcapacity 2030, optimistic (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    },
+    {
+      "value": "00.0",
+      "unit": "%",
+      "label": "Overcapacity 2030, base (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    },
+    {
+      "value": "00.0",
+      "unit": "%",
+      "label": "Overcapacity 2030, downside (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    }
+  ],
+  "chart": {
+    "type": "fan",
+    "title": "Scenario fan chart (sample)",
+    "source": "SAMPLE placeholder",
+    "url": "",
+    "date": "",
+    "status": "sample"
+  },
+  "bullets": [
+    "Optimistic = carriers’ view: tight market",
+    "Sample: what carriers should do"
+  ],
+  "theory": "Sample: scenario planning.",
+  "case": "Sample: signposts to watch.",
+  "speakerNotes": "Every number here is [MODEL] until the model runs.",
+  "pending": true,
+  "id": "s06-scenarios",
+  "owner": "Tien Duc",
+  "speakerKey": "tien-duc",
+  "budgetSec": 180,
+  "headline": "Three futures for 2030: optimistic, base, downside"
+}

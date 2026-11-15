@@ -1,0 +1,18 @@
+{
+  "steps": 2,
+  "keyNumbers": [],
+  "chart": null,
+  "bullets": [
+    "Sample: agenda point one",
+    "Sample: agenda point two"
+  ],
+  "theory": "",
+  "case": "",
+  "speakerNotes": "Sample: open with the question, introduce the five speakers.",
+  "pending": false,
+  "id": "s01-hero",
+  "owner": "Tien Duc",
+  "speakerKey": "tien-duc",
+  "budgetSec": 40,
+  "headline": "Too many ships, too little cargo? Overcapacity 2026–2030"
+}

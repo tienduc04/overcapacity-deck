@@ -1,0 +1,44 @@
+{
+  "steps": 3,
+  "keyNumbers": [
+    {
+      "value": "00.0",
+      "unit": "M TEU",
+      "label": "Capacity absorbed by detours (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    },
+    {
+      "value": "00.0",
+      "unit": "days",
+      "label": "Extra sailing days (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    }
+  ],
+  "chart": {
+    "type": "map",
+    "title": "Cape routing vs Suez (sample)",
+    "source": "SAMPLE placeholder",
+    "url": "",
+    "date": "",
+    "status": "sample"
+  },
+  "bullets": [
+    "Sample: Red Sea diversions",
+    "Sample: what happens when lanes normalise"
+  ],
+  "theory": "Sample: effective vs nominal capacity.",
+  "case": "Sample: Red Sea since 2023.",
+  "speakerNotes": "Sample notes for Speakers B and C.",
+  "pending": true,
+  "id": "s04-chokepoints",
+  "owner": "Speakers B and C",
+  "speakerKey": "speakers-b-c",
+  "budgetSec": 420,
+  "headline": "Detours absorb ships until the chokepoints reopen"
+}

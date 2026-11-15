@@ -1,0 +1,44 @@
+{
+  "steps": 3,
+  "keyNumbers": [
+    {
+      "value": "00.0",
+      "unit": "%",
+      "label": "Demand growth (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    },
+    {
+      "value": "00.0",
+      "unit": "M TEU",
+      "label": "Trade volume (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    }
+  ],
+  "chart": {
+    "type": "line",
+    "title": "Demand vs supply growth (sample)",
+    "source": "SAMPLE placeholder",
+    "url": "",
+    "date": "",
+    "status": "sample"
+  },
+  "bullets": [
+    "Sample: demand driver one",
+    "Sample: demand driver two"
+  ],
+  "theory": "Sample: derived demand.",
+  "case": "Sample: a trade lane example.",
+  "speakerNotes": "Sample notes for Speaker A.",
+  "pending": true,
+  "id": "s03-demand",
+  "owner": "Speaker A",
+  "speakerKey": "speaker-a",
+  "budgetSec": 210,
+  "headline": "Demand grows, but slower than the fleet"
+}

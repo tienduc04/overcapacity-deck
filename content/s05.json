@@ -1,0 +1,45 @@
+{
+  "steps": 3,
+  "keyNumbers": [
+    {
+      "value": "00.0",
+      "unit": "M TEU",
+      "label": "Scrapping per year (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    },
+    {
+      "value": "00.0",
+      "unit": "%",
+      "label": "Idle fleet (sample)",
+      "source": "SAMPLE placeholder",
+      "url": "",
+      "date": "",
+      "status": "sample"
+    }
+  ],
+  "chart": {
+    "type": "bubbles",
+    "title": "Carrier response levers (sample)",
+    "source": "SAMPLE placeholder",
+    "url": "",
+    "date": "",
+    "status": "sample"
+  },
+  "bullets": [
+    "Sample: fleet management",
+    "Sample: network design",
+    "Sample: consolidation"
+  ],
+  "theory": "Sample: supply-side adjustment.",
+  "case": "Sample: one carrier’s response.",
+  "speakerNotes": "Sample notes for Speaker D.",
+  "pending": true,
+  "id": "s05-carriers",
+  "owner": "Speaker D",
+  "speakerKey": "speaker-d",
+  "budgetSec": 210,
+  "headline": "Carriers respond: slow steaming, scrapping, blank sailings"
+}

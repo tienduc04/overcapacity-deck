@@ -1,0 +1,46 @@
+{
+  "steps": 3,
+  "keyNumbers": [
+    {
+      "value": "14+",
+      "unit": "M TEU",
+      "label": "Container ship orderbook",
+      "source": "BIMCO, via Maritime Executive",
+      "url": "",
+      "date": "2026-09",
+      "status": "verified",
+      "todo": "Owner adds the article URL"
+    },
+    {
+      "value": "~42",
+      "unit": "%",
+      "label": "Of the existing fleet",
+      "source": "BIMCO, via Maritime Executive",
+      "url": "",
+      "date": "2026-09",
+      "status": "verified",
+      "todo": "Owner adds the article URL"
+    }
+  ],
+  "chart": {
+    "type": "bar",
+    "title": "Deliveries per year (sample)",
+    "source": "SAMPLE placeholder",
+    "url": "",
+    "date": "",
+    "status": "sample"
+  },
+  "bullets": [
+    "Sample: what drives the ordering wave",
+    "Sample: when the ships arrive"
+  ],
+  "theory": "Sample: shipbuilding cycle and time lag between order and delivery.",
+  "case": "Sample: one carrier’s newbuilding programme.",
+  "speakerNotes": "Sample notes. Only the two BIMCO figures are verified.",
+  "pending": false,
+  "id": "s02-orderbook",
+  "owner": "Tien Duc",
+  "speakerKey": "tien-duc",
+  "budgetSec": 80,
+  "headline": "A record orderbook is heading for the water"
+}
