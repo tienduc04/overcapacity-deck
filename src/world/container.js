@@ -305,7 +305,7 @@ function stack(shell, door, door2) {
     o.traverse((m) => {
       if (!m.isMesh) return;
       const key = m.material.name + colour;
-      paint[key] ??= Object.assign(m.material.clone(), { side: THREE.FrontSide });
+      paint[key] ??= m.material.clone(); // keeps DoubleSide: the shell faces inwards
       if (['Wall', 'Frame', 'Door'].includes(m.material.name)) paint[key].color.set(colour);
       m.material = paint[key];
       m.castShadow = m.receiveShadow = false;
