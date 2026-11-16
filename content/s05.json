@@ -1,38 +1,36 @@
 {
-  "steps": 3,
+  "steps": 5,
   "keyNumbers": [
     {
-      "value": "00.0",
-      "unit": "M TEU",
-      "label": "Scrapping per year (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "0-25%",
+      "unit": "of a year's deliveries",
+      "label": "May slip into the next year (our ESTIMATE: no clean source for this cycle)",
+      "note": "Alphaliner: longest lead times since the 2005-07 boom.",
+      "source": "Own ESTIMATE; Alphaliner (lead times)",
       "url": "",
-      "date": "",
+      "date": "2026",
       "status": "sample"
     },
     {
-      "value": "00.0",
-      "unit": "%",
-      "label": "Idle fleet (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "0.008",
+      "unit": "M TEU",
+      "label": "Scrapped in 2025, the lowest in 20 years, against a record 0.655 in 2016",
+      "note": "2026 forecasts: ~0.14 (BIMCO) to over 0.4 (Drewry), revised down. Ships over 25 years: ~1.6 M TEU (BIMCO).",
+      "source": "Alphaliner via Global Maritime Hub; BIMCO; Drewry via Seatrade",
       "url": "",
-      "date": "",
+      "date": "Jan to Sep 2026",
       "status": "sample"
     }
   ],
   "chart": {
-    "type": "bubbles",
-    "title": "Carrier response levers (sample)",
-    "source": "SAMPLE placeholder",
+    "type": "propeller",
+    "title": "Five carrier responses",
+    "source": "Schematic illustration (3D)",
     "url": "",
     "date": "",
-    "status": "sample"
+    "status": "verified"
   },
-  "bullets": [
-    "Sample: fleet management",
-    "Sample: network design",
-    "Sample: consolidation"
-  ],
+  "bullets": [],
   "theory": "Sample: supply-side adjustment.",
   "case": "Sample: one carrier’s response.",
   "speakerNotes": "Sample notes for Speaker D.",
@@ -41,5 +39,34 @@
   "owner": "Speaker D",
   "speakerKey": "speaker-d",
   "budgetSec": 210,
-  "headline": "Carriers respond: slow steaming, scrapping, blank sailings"
+  "headline": "Five levers against overcapacity",
+  "layout": "carriers",
+  "noFigure": "No sourced figure yet: Req 5 owner to add",
+  "responses": [
+    {
+      "title": "Fleet management",
+      "line": "Defer or cancel newbuild slots, push deliveries back, lay up or hand back chartered ships.",
+      "number": 0
+    },
+    {
+      "title": "Network design",
+      "line": "Blank sailings, merged or shorter loops, fewer port calls: capacity leaves the lane without a ship being scrapped.",
+      "number": null
+    },
+    {
+      "title": "Slow steaming",
+      "line": "Sail slower: each round trip takes more days, so the same fleet moves less cargo.",
+      "number": null
+    },
+    {
+      "title": "Scrapping",
+      "line": "Recycle the oldest ships to shrink the fleet, but yard capacity, freight rates and rules limit the pace.",
+      "number": 1
+    },
+    {
+      "title": "Consolidation",
+      "line": "Mergers, alliances and vessel-sharing agreements: fewer players deciding capacity together.",
+      "number": null
+    }
+  ]
 }

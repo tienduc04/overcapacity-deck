@@ -101,6 +101,23 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--map:not([data-at='2']) .m-reopen { opacity: 0; pointer-events: none; }
 @keyframes m-pulse { 50% { box-shadow: 0 0 46px rgba(0, 240, 255, 0.85); } }
 
+/* Scene 5 (carriers): the five responses as a stepper, one detail card for the active one. */
+.slide--carriers .numbers, .slide--carriers .side, .slide--carriers .extra { display: none; }
+.c-col { position: absolute; left: var(--edge); top: 300px; width: 640px; display: flex; flex-direction: column; gap: 22px; }
+.c-steps { display: flex; flex-direction: column; gap: 6px; }
+.c-step { display: flex; align-items: center; gap: 18px; padding: 8px 18px; border-left: 3px solid rgba(232, 238, 244, 0.25); font: 800 30px var(--head); letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.38; transition: opacity 0.4s, border-color 0.4s, background 0.4s; }
+.c-step b { width: 34px; font: 500 20px var(--head); letter-spacing: 0.2em; color: var(--supply); }
+.c-step.past { opacity: 0.6; }
+.c-step.on { opacity: 1; border-left-color: var(--supply); background: rgba(10, 17, 24, 0.55); }
+.c-card { padding: 22px 30px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.c-card .line { font: 400 26px/1.4 'Inter', var(--head); }
+.c-card .fig { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(232, 238, 244, 0.2); }
+.c-card .v { font: 800 84px/1 var(--head); }
+.c-card .u { margin-left: 12px; font: 500 20px var(--head); letter-spacing: 0.16em; text-transform: uppercase; color: var(--supply); }
+.c-card .l { margin-top: 8px; font: 400 22px/1.35 'Inter', var(--head); }
+.c-card .n { margin-top: 8px; font: 400 18px/1.4 'Inter', var(--head); color: var(--muted); }
+.c-card .tbd { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(232, 238, 244, 0.2); font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+
 .watermark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font-size: 190px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255, 51, 51, 0.13); pointer-events: none; white-space: nowrap; }
 .badge-pending { position: absolute; top: var(--margin); right: var(--margin); padding: 10px 20px; border-radius: 10px; background: var(--risk); color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; }
 
