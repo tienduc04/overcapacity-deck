@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
 // Scene 6 as a live 3D world: a ship's bridge at night, three curved screens over the console and the dark
 // sea behind the windows. The screens draw the model's output (public/data/scenarios.json, from the Req 6
@@ -27,6 +30,7 @@ const MODE = ['dim', 'fan', 'paths', 'util']; // what the screens draw per step
 const ease = (x) => x * x * (3 - 2 * x);
 
 export async function createBridgeWorld(data) {
+  RectAreaLightUniformsLib.init();
   await document.fonts.load('800 60px Montserrat');
   await document.fonts.load('400 30px Inter');
   const scene = new THREE.Scene();
@@ -35,46 +39,18 @@ export async function createBridgeWorld(data) {
   const seaMesh = createSea();
   scene.add(sky(), seaMesh);
 
-  // Room: dark shell, window frame, console.
-  const dark = new THREE.MeshStandardMaterial({ color: 0x131c28, roughness: 0.55, metalness: 0.4 });
-  const trim = new THREE.MeshStandardMaterial({ color: 0x2c3948, roughness: 0.45, metalness: 0.6 });
-  const room = new THREE.Group();
-  const add = (geo, mat, x, y, z) => {
-    const m = new THREE.Mesh(geo, mat);
-    m.position.set(x, y, z);
-    room.add(m);
-    return m;
-  };
-  add(new THREE.BoxGeometry(40, 0.4, 30), dark, 0, -0.2, 2); // floor
-  add(new THREE.BoxGeometry(40, 0.4, 30), dark, 0, 6.6, 2); // ceiling
-  add(new THREE.BoxGeometry(0.4, 7, 30), dark, -14, 3, 2);
-  add(new THREE.BoxGeometry(0.4, 7, 30), dark, 14, 3, 2);
-  // window wall behind the screens: posts and a header, the middle open to the night
-  add(new THREE.BoxGeometry(40, 1.3, 0.6), dark, 0, 5.95, -7.4);
-  add(new THREE.BoxGeometry(40, 1.2, 0.6), dark, 0, 0.6, -7.4);
-  for (const x of [-12, -6, 0, 6, 12]) add(new THREE.BoxGeometry(0.5, 5.2, 0.5), trim, x, 3.0, -7.4);
-  // console under the screens: a sloped desk with rows of lit buttons
-  const desk = add(new THREE.BoxGeometry(15, 1.0, 3.2), trim, 0, 0.5, 1.4);
-  desk.rotation.x = -0.12;
-  const btnGeo = new THREE.BoxGeometry(0.22, 0.08, 0.16);
-  const btnMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const buttons = new THREE.InstancedMesh(btnGeo, btnMat, 160);
-  const m4 = new THREE.Matrix4();
-  const c = new THREE.Color();
-  let seed = 3;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  for (let i = 0; i < 160; i++) {
-    const row = i % 4;
-    const x = -6.6 + (Math.floor(i / 4) / 39) * 13.2;
-    m4.makeTranslation(x, 1.02 - row * 0.03, 0.55 + row * 0.42);
-    buttons.setMatrixAt(i, m4);
-    c.set([0x22d6e6, 0xf0a030, 0x2eea8a, 0xff6a4a][Math.floor(rnd() * 4)]).multiplyScalar(0.5 + rnd() * 2.4);
-    buttons.setColorAt(i, c);
+  // Room, console, chairs and screen bezels: one Blender mesh (scripts/blender/build_bridge.py, same ARC numbers).
+  const gltf = await new GLTFLoader().loadAsync('models/bridge.glb');
+  scene.add(gltf.scene);
+  // Ceiling strips (x = -9, -3, 3, 9 in the model) light the room from above.
+  for (const x of [-9, -3, 3, 9]) {
+    const strip = new THREE.RectAreaLight(0xffe2b8, 2.2, 0.5, 22);
+    strip.position.set(x, 6.2, 5);
+    strip.rotation.x = -Math.PI / 2;
+    scene.add(strip);
   }
-  room.add(buttons);
-  scene.add(room);
 
-  // The three curved screens, concave towards the viewer: segments of one cylinder, with a dark bezel behind.
+  // The three curved screens, concave towards the viewer: segments of one cylinder inside the model's bezels.
   const screens = ORDER.map((name, i) => {
     const canvas = document.createElement('canvas');
     canvas.width = SCREEN_PX.w;
@@ -91,18 +67,15 @@ export async function createBridgeWorld(data) {
       new THREE.CylinderGeometry(ARC.r, ARC.r, ARC.h, 40, 1, true, a0 + Math.PI, len),
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, color: new THREE.Color(BRIGHT, BRIGHT, BRIGHT), toneMapped: false })
     );
-    const bezel = new THREE.Mesh(new THREE.CylinderGeometry(ARC.r + 0.08, ARC.r + 0.08, ARC.h + 0.32, 40, 1, true, a0 + Math.PI - 0.025, len + 0.05), new THREE.MeshStandardMaterial({ color: 0x10161e, roughness: 0.4, metalness: 0.8, side: THREE.BackSide }));
-    for (const m of [face, bezel]) {
-      m.position.set(0, ARC.y, ARC.axisZ);
-      scene.add(m);
-    }
+    face.position.set(0, ARC.y, ARC.axisZ);
+    scene.add(face);
     const lamp = new THREE.PointLight(COLOURS[name], 130, 22, 2);
     const mid = a0 + len / 2 + Math.PI;
     lamp.position.set(Math.sin(mid) * (ARC.r - 1.6), ARC.y - 0.5, ARC.axisZ + Math.cos(mid) * (ARC.r - 1.6));
     scene.add(lamp);
     return { name, canvas, ctx: canvas.getContext('2d'), tex };
   });
-  scene.add(new THREE.HemisphereLight(0x3a5272, 0x0a1018, 1.1));
+  scene.add(new THREE.HemisphereLight(0x3a5272, 0x0a1018, 0.6));
 
   const draw = (mode) => {
     for (const s of screens) {
@@ -119,7 +92,11 @@ export async function createBridgeWorld(data) {
     scene,
     camera,
     post: { bloom: { strength: 0.4, radius: 0.5, threshold: 1.2 } }, // the screens, the buttons and the moon glitter
-    init() {
+    init(renderer) {
+      // dim studio reflections so the steel and the console read as metal
+      const pm = new THREE.PMREMGenerator(renderer);
+      scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environmentIntensity = 0.12;
       ready = true;
     },
     resize(w, h) {
