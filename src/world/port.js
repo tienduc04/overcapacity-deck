@@ -1,34 +1,39 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createOcean, createSky, loadHdr, sunDirection } from './sea.js';
 import { dressAll, loadSurfaces } from './materials.js';
 
-// Scene 3 as a live 3D world: a container terminal at blue hour. A ship-to-shore crane scans the
-// apron with a cyan laser; on the apron the boxes stack into a bar chart, one box per percentage
-// point: orange = net fleet growth, cyan = port throughput growth, one pair of stacks per year.
+// Scene 3 as a live 3D world: a container terminal at blue hour, wet apron, a ship at berth and a
+// ship-to-shore crane. The crane travels along the quay and stacks boxes into a bar chart, one box per
+// percentage point: orange = net fleet growth, cyan = port throughput growth, one pair of stacks per year.
 // Axes: x along the quay, y up, the sea at z < 0, the apron and the camera at z > 0. Units: metres.
 
 const BOX = { w: 2.44, h: 2.59, l: 12.19 }; // 40 ft high cube; long side across the quay (z)
 const TIER = 2.62; // stacking pitch
 const CHART = { z: 46, spacing: 13, pair: 1.45 }; // apron row of the stacks; x between years; half gap in a pair
 const COLOURS = { fleet: '#d2601f', demand: '#1f9fb3' };
-const CRANE = { x: 0, legs: [6, 34], gauge: 30, boomY: 44, boomZ: [-52, 58] }; // landside backreach over the chart
+const CRANE = { legs: [6, 34], gauge: 30, girderX: 8, boomY: 43, boomZ: [-52, 58], apex: 70 };
 const WATER_Y = -3.5;
 const SUN = { elevation: -3, offset: 25 }; // just below the horizon: blue hour
 const ENV_INTENSITY = 0.12;
-const DROP = 26; // m a box falls into place from
+const PER_BOX = 0.14; // s of reveal per box
+const FOG = 0x1a2c47;
 
 const SURFACES = { side: { file: 'container_side', repeat: 1 / 2.4 } };
 const LOOK = { Box: { surface: 'side', detail: 0.6, normal: 0.6 } };
 
 // Camera poses per reveal step: position p, look-at t.
-const ARRIVE = { p: [-8, 9, 92], t: [0, 12, CHART.z] }; // close under the crane, where scene 2's scan lands
+const ARRIVE = { p: [-8, 9, 92], t: [0, 12, CHART.z] }; // close under the crane, where scene 2's transition lands
 const POSES = [
-  { p: [-70, 16, 160], t: [8, 22, 0] }, // wide: crane, ship, the empty apron
+  { p: [-70, 16, 160], t: [8, 24, 0] }, // wide: crane, ship, the empty apron
   { p: [-16, 20, 128], t: [-16, 10, CHART.z] }, // the chart, right of the HUD figures
   { p: [0, 95, 160], t: [0, 0, CHART.z - 4] }, // high, small in the middle between the HUD columns
 ];
+
+const ease = (x) => x * x * (3 - 2 * x);
 
 // series: { years, fleet, demand } in % per year (null = no figure: no stack).
 export async function createPortWorld(series) {
@@ -38,21 +43,39 @@ export async function createPortWorld(series) {
   const camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.5, 12000);
   const sun = sunDirection(new THREE.Vector3(0, 0, -1), SUN.elevation, SUN.offset);
   const sky = createSky(scene, sun);
-  scene.fog = new THREE.FogExp2(0x14253d, 0.003);
+  const skyMesh = scene.children.find((o) => o.isSky);
+  scene.fog = new THREE.FogExp2(FOG, 0.0022);
 
-  const ocean = createOcean({ envTexture: sky.envTexture, sun, sunColor: new THREE.Color(0.4, 0.5, 0.7), wave: 0.15, ripple: 0.25, haze: 0.002 });
+  const dome = createDome(sun);
+  scene.add(dome);
+
+  const ocean = createOcean({ envTexture: sky.envTexture, sun, sunColor: new THREE.Color(0.5, 0.4, 0.35), wave: 0.15, ripple: 0.25, haze: 0.0015 });
   ocean.position.y = WATER_Y;
   scene.add(ocean);
-  const quay = new THREE.Mesh(new THREE.BoxGeometry(600, 4, 260), new THREE.MeshStandardMaterial({ color: 0x3b3f45, roughness: 0.92 }));
-  quay.position.set(0, -2, 130); // top at y = 0, edge at z = 0
-  quay.receiveShadow = true;
+
+  // The quay: concrete body, and a wet asphalt top that mirrors the lights, the crane and the stacks.
+  const quay = new THREE.Mesh(new THREE.BoxGeometry(600, 4, 260), new THREE.MeshStandardMaterial({ color: 0x2a2d33, roughness: 0.95 }));
+  quay.position.set(0, -2.02, 130); // top just under y = 0
   scene.add(quay);
+  const floor = new Reflector(new THREE.PlaneGeometry(600, 260), { shader: WetShader, textureWidth: 1024, textureHeight: 576, clipBias: 0.003, multisample: 0, color: 0x888888 });
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, 0, 130);
+  scene.add(floor);
+  const rails = [CRANE.legs[0], CRANE.legs[1]].map((z) => {
+    const r = new THREE.Mesh(new THREE.BoxGeometry(600, 0.25, 0.5), new THREE.MeshStandardMaterial({ color: 0x555a61, roughness: 0.4, metalness: 0.8 }));
+    r.position.set(0, 0.12, z);
+    return r;
+  });
+  scene.add(...rails);
 
   // The ship at berth, under the crane's boom.
   const ship = shipGltf.scene;
   const sb = new THREE.Box3().setFromObject(ship);
   ship.position.set(-(sb.min.x + sb.max.x) / 2 - 40, WATER_Y, -(sb.max.z - sb.min.z) / 2 - 4);
   scene.add(ship);
+
+  const shore = farShore();
+  scene.add(shore.group);
 
   const crane = createCrane();
   scene.add(crane.group);
@@ -63,35 +86,60 @@ export async function createPortWorld(series) {
   const holder = new THREE.Group();
   const chart = chartStacks(series, boxGeo, boxMat);
   const yard = yardStacks(boxGeo, boxMat);
-  holder.add(chart.mesh, yard);
+  holder.add(chart.mesh, yard.mesh);
   dressAll(holder, surfaces, LOOK);
-  scene.add(holder, ...chart.labels);
+  scene.add(holder, yard.contact, chart.contact, ...chart.labels);
 
   const laser = createLaser();
   scene.add(laser.group);
 
-  // Light: cool sky fill, a dim moon, warm floodlights from the crane and two masts.
-  const moon = new THREE.DirectionalLight(0x9fb4e0, 1.2);
+  // Light: cool sky fill, a dim moon, warm floodlights (the first rides on the crane) with light cones.
+  const moon = new THREE.DirectionalLight(0x8fa8d8, 1.0);
   moon.position.set(-200, 300, 250);
-  scene.add(moon, new THREE.HemisphereLight(0x4a6a9c, 0x15181c, 1.6));
-  for (const [x, y, z, tz] of [[0, CRANE.boomY - 2, CHART.z + 4, CHART.z], [-60, 32, 70, CHART.z], [60, 32, 70, CHART.z]]) {
-    const s = new THREE.SpotLight(0xffc98a, 16000, 160, 0.6, 0.6, 2);
-    s.position.set(x, y, z);
-    s.target.position.set(x * 0.5, 0, tz);
-    scene.add(s, s.target);
-  }
+  scene.add(moon, new THREE.HemisphereLight(0x4a6a9c, 0x15181c, 1.2));
+  const cones = [];
+  const floods = [
+    { at: [0, CRANE.boomY + 2, CHART.z + 14], aim: [0, 0, CHART.z], onCrane: true },
+    { at: [-70, 34, 72], aim: [-30, 0, CHART.z - 4] },
+    { at: [70, 34, 72], aim: [30, 0, CHART.z - 4] },
+  ];
+  floods.forEach((f, i) => {
+    const s = new THREE.SpotLight(0xffc98a, 22000, 190, 0.55, 0.65, 2);
+    s.position.set(...f.at);
+    s.target.position.set(...f.aim);
+    if (i === 0) {
+      s.castShadow = true;
+      s.shadow.mapSize.set(2048, 2048);
+      s.shadow.bias = -0.0004;
+      s.shadow.normalBias = 0.05;
+    }
+    const cone = lightCone(new THREE.Vector3(...f.at), new THREE.Vector3(...f.aim), 0.3, new THREE.Color(1.0, 0.72, 0.42));
+    if (f.onCrane) crane.group.add(s, s.target, cone);
+    else scene.add(s, s.target, cone);
+    cones.push(cone);
+  });
+  const dust = dustMotes();
+  scene.add(dust);
 
-  // Animated state: cam = pose shown, built = boxes dropped so far (chart.count when complete).
-  const state = { cam: pose(0), built: 0, scanX: 0, scan: 1 };
+  // Animated state: cam = pose shown, built = boxes placed so far (chart.count when complete).
+  const state = { cam: pose(0), built: 0, scan: 1 };
   let tl = null;
   let ready = false;
+  let craneX = 0;
+  let lastT = 0;
+  const tmp = new THREE.Vector3();
+  const spreaderAt = new THREE.Vector3();
   return {
     scene,
     camera,
-    post: { bloom: { strength: 0.22, radius: 0.3, threshold: 2.5 } }, // only the lamps and the laser core; more hazes this dark scene
+    post: { bloom: { strength: 0.3, radius: 0.35, threshold: 2.2 } }, // the lamps and the laser core
     init(renderer) {
-      sky.bake(renderer, { hide: [ocean, quay, ship, crane.group, holder, laser.group, ...chart.labels], hdr, envIntensity: ENV_INTENSITY });
-      scene.background = new THREE.Color(0x14253d); // the baked dusk sky is too bright for the night look
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      // Bake the environment from the dusk dome, so the sea and the metal reflect its glow.
+      skyMesh.visible = false;
+      sky.bake(renderer, { hide: [ocean, quay, floor, ...rails, ship, shore.group, crane.group, holder, yard.contact, chart.contact, laser.group, dust, ...cones, ...chart.labels], hdr, envIntensity: ENV_INTENSITY });
+      scene.background = new THREE.Color(0x050a14);
       ready = true;
     },
     resize(w, h) {
@@ -110,19 +158,30 @@ export async function createPortWorld(series) {
       }
       tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0);
       if (built > state.built) {
-        // The laser follows the stacks as they go up, year by year, then goes back to sweeping.
-        tl.to(state, { scan: 0, duration: 0.4 }, 0.6).to(state, { built, duration: chart.count * 0.11, ease: 'none' }, 0.8).to(state, { scan: 1, duration: 0.8 });
+        // The crane stacks the boxes one by one, the laser follows, then goes back to sweeping.
+        tl.to(state, { scan: 0, duration: 0.4 }, 0.6).to(state, { built, duration: chart.count * PER_BOX, ease: 'none' }, 0.8).to(state, { scan: 1, duration: 0.8 });
       } else if (built < state.built) tl.to(state, { built, duration: 0.6, ease: 'power1.in' }, 0);
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
+      const dt = Math.min(0.1, Math.max(0, t - lastT));
+      lastT = t;
       ocean.material.uniforms.uTime.value = t;
+      dust.material.uniforms.uTime.value = t;
+      shore.twinkle(t);
       chart.place(state.built);
-      // Laser: sweeps the apron, or tracks the stack being built.
+      // The crane follows the box being placed along the quay; the trolley runs out along the boom.
+      const carried = chart.carried;
+      const targetX = carried ? carried.x : 0;
+      craneX += (targetX - craneX) * (1 - Math.exp(-dt * 7));
+      crane.group.position.x = craneX;
+      if (carried) spreaderAt.set(carried.x, carried.y + BOX.h / 2 + 0.5, carried.z);
+      else spreaderAt.set(craneX, CRANE.boomY - 14 + Math.sin(t * 0.8) * 0.3, CHART.z); // hanging idle over the apron
+      crane.reach(spreaderAt, t);
+      // Laser: sweeps the apron, or marks the stack being built.
       const sweep = 30 * Math.sin(t * 0.45); // over the chart only, clear of the HUD figures
-      const x = THREE.MathUtils.lerp(chart.xAt(state.built), sweep, state.scan);
-      crane.trolley.position.x = x * 0.15; // the crane cannot move that fast; the beam swivels
-      laser.aim(crane.trolley.position, x, t);
+      const lx = carried ? THREE.MathUtils.lerp(sweep, carried.x, 1 - state.scan) : sweep;
+      laser.aim(crane.trolleyWorld(tmp), lx, t);
       const c = state.cam;
       camera.position.set(c.px + 0.8 * Math.sin(t * 0.13) + lean.x * 2, c.py + 0.4 * Math.sin(t * 0.21) + lean.y * 1.2, c.pz);
       camera.lookAt(c.tx, c.ty, c.tz);
@@ -130,56 +189,177 @@ export async function createPortWorld(series) {
   };
 }
 
+// --- sky -------------------------------------------------------------------------------------------
+
+// Dusk dome: deep blue overhead, teal band, an orange glow where the sun has just gone (towards the sea).
+function createDome(sun) {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uSun: { value: sun.clone().setY(0).normalize() } },
+    vertexShader: 'varying vec3 vDir; void main() { vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: /* glsl */ `
+      uniform vec3 uSun;
+      varying vec3 vDir;
+      float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+      void main() {
+        vec3 d = normalize(vDir);
+        float h = max(d.y, 0.0);
+        vec3 col = mix(vec3(0.075, 0.14, 0.25), vec3(0.008, 0.02, 0.06), smoothstep(0.0, 0.55, h));
+        float toSun = max(dot(vec3(d.x, 0.0, d.z) / max(length(d.xz), 1e-3), uSun), 0.0);
+        float band = exp(-h * 9.0);
+        col += vec3(1.0, 0.42, 0.14) * pow(toSun, 5.0) * band * 1.6;
+        col += vec3(0.9, 0.5, 0.35) * pow(toSun, 40.0) * exp(-h * 22.0) * 2.4;
+        col += vec3(0.10, 0.22, 0.38) * exp(-h * 16.0) * 0.6;
+        // faint stars high up
+        float star = step(0.9985, hash(floor(d * 380.0))) * smoothstep(0.25, 0.6, h);
+        col += vec3(star) * 0.8;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+    side: THREE.BackSide,
+    depthWrite: false,
+    depthTest: false,
+    fog: false,
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(6000, 32, 16), mat);
+  dome.renderOrder = -10;
+  dome.frustumCulled = false;
+  return dome;
+}
+
+// The far shore: dark stacks and cranes on the horizon with their lights, for depth.
+function farShore() {
+  const group = new THREE.Group();
+  const dark = new THREE.MeshStandardMaterial({ color: 0x0a0f1a, roughness: 1 });
+  let seed = 11;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const n = 140;
+  const boxes = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), dark, n);
+  const m = new THREE.Matrix4();
+  const lights = [];
+  for (let i = 0; i < n; i++) {
+    const w = 14 + rnd() * 40;
+    const h = 6 + rnd() * 26;
+    const x = -1100 + rnd() * 2200;
+    const z = -800 - rnd() * 260;
+    m.makeScale(w, h, 30 + rnd() * 60).setPosition(x, h / 2 - 3, z);
+    boxes.setMatrixAt(i, m);
+    for (let k = 0; k < 3; k++) lights.push(x + (rnd() - 0.5) * w, rnd() * h, z + 20);
+  }
+  group.add(boxes);
+  const pg = new THREE.BufferGeometry();
+  pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lights), 3));
+  const pm = new THREE.PointsMaterial({ color: new THREE.Color(3.0, 2.0, 1.1), size: 2.2, sizeAttenuation: false, fog: false });
+  const points = new THREE.Points(pg, pm);
+  group.add(points);
+  const farCranes = createCrane({ lite: true });
+  for (const x of [-520, -150, 330]) {
+    const c = farCranes.group.clone();
+    c.position.set(x, -3, -780);
+    c.scale.setScalar(1.1);
+    c.rotation.y = Math.PI;
+    group.add(c);
+  }
+  return { group, twinkle: (t) => (pm.size = 2.2 + 0.3 * Math.sin(t * 2.0)) };
+}
+
+// --- wet ground ------------------------------------------------------------------------------------
+
+// Reflector shader: dark asphalt with grain, puddles that mirror the scene, a yellow edge line.
+const WetShader = {
+  name: 'WetShader',
+  uniforms: { color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null } },
+  vertexShader: /* glsl */ `
+    uniform mat4 textureMatrix;
+    varying vec4 vUv;
+    varying vec3 vWorld;
+    void main() {
+      vUv = textureMatrix * vec4(position, 1.0);
+      vWorld = (modelMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    varying vec4 vUv;
+    varying vec3 vWorld;
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float vnoise(vec2 p) {
+      vec2 i = floor(p), f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + 1.0), f.x), f.y);
+    }
+    void main() {
+      vec2 w = vWorld.xz;
+      float n = vnoise(w * 0.06) * 0.6 + vnoise(w * 0.27) * 0.4;
+      float puddle = smoothstep(0.45, 0.68, n);
+      float grain = vnoise(w * 4.0) * 0.6 + vnoise(w * 17.0) * 0.4;
+      vec3 asphalt = vec3(0.028, 0.032, 0.04) * (0.6 + 0.9 * grain);
+      // painted lines: quay edge (yellow) and lane lines every 13 m along x
+      float edge = 1.0 - smoothstep(0.25, 0.45, abs(w.y - 4.0));
+      float lane = (1.0 - smoothstep(0.08, 0.2, abs(fract(w.x / 13.0 + 0.5) - 0.5) * 13.0)) * step(10.0, w.y) * step(w.y, 100.0);
+      asphalt = mix(asphalt, vec3(0.55, 0.42, 0.06), edge * 0.9);
+      asphalt = mix(asphalt, vec3(0.3), lane * 0.55);
+      vec3 view = normalize(cameraPosition - vWorld);
+      float fres = pow(1.0 - clamp(view.y, 0.0, 1.0), 3.0);
+      vec2 ripple = vec2(vnoise(w * 1.3), vnoise(w * 1.3 + 7.0)) - 0.5;
+      vec3 refl = texture2DProj(tDiffuse, vUv + vec4(ripple * 0.004 * vUv.w, 0.0, 0.0)).rgb;
+      float r = clamp(mix(0.10, 0.85, puddle) * (0.45 + 0.9 * fres), 0.0, 0.95) * (1.0 - edge * 0.6);
+      gl_FragColor = vec4(mix(asphalt, refl, r), 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`,
+};
+
 // --- chart -----------------------------------------------------------------------------------------
 
 // Stacks for each year: fleet (orange, left) and demand (cyan, right), one box per percentage point
-// (rounded), dropped in order: year by year, both stacks of a year together. Labels on the apron.
+// (rounded), placed one at a time by the crane: year by year, bottom to top. Labels on the apron.
 function chartStacks({ years, fleet, demand }, geo, mat) {
   const slots = []; // { x, y, colour, order }
-  let order = 0;
   const x0 = -((years.length - 1) * CHART.spacing) / 2;
   const xs = years.map((_, i) => x0 + i * CHART.spacing);
-  const startOf = [];
   years.forEach((_, i) => {
-    startOf.push(order);
     const tiers = [fleet[i], demand[i]].map((v) => (v == null ? 0 : Math.round(v)));
     for (let k = 0; k < Math.max(...tiers); k++) {
       tiers.forEach((n, j) => {
-        if (k < n) slots.push({ x: xs[i] + (j ? CHART.pair : -CHART.pair), y: BOX.h / 2 + k * TIER, colour: j ? COLOURS.demand : COLOURS.fleet, order });
+        if (k < n) slots.push({ x: xs[i] + (j ? CHART.pair : -CHART.pair), y: BOX.h / 2 + k * TIER, colour: j ? COLOURS.demand : COLOURS.fleet, order: slots.length });
       });
-      order++;
     }
   });
-  startOf.push(order);
   const mesh = new THREE.InstancedMesh(geo, mat, slots.length);
   const colour = new THREE.Color();
-  slots.forEach((s, i) => mesh.setColorAt(i, colour.set(s.colour)));
+  slots.forEach((s, i) => mesh.setColorAt(i, colour.set(s.colour).multiplyScalar(0.9 + 0.2 * ((i * 37) % 10) / 10))); // slight batch-to-batch tone
   mesh.castShadow = mesh.receiveShadow = true;
-  mesh.frustumCulled = false; // boxes fall in from above the bounds
+  mesh.frustumCulled = false; // boxes travel in from outside the bounds
   const m = new THREE.Matrix4();
+  const bottoms = slots.filter((s) => s.y === BOX.h / 2);
+  const contact = contactShadows(bottoms.length);
+  const out = { mesh, contact, count: slots.length, carried: null, labels: years.map((y, i) => yearLabel(y, fleet[i], demand[i], xs[i])) };
   let shown = -1;
-  return {
-    mesh,
-    count: order,
-    labels: years.map((y, i) => yearLabel(y, fleet[i], demand[i], xs[i])),
-    // x of the stack pair being built when `built` boxes are down (fractional).
-    xAt(built) {
-      const i = startOf.findIndex((s, k) => built < startOf[k + 1]);
-      return xs[i < 0 ? xs.length - 1 : i];
-    },
-    // Boxes with order < built are down; the next one falls; the rest are hidden.
-    place(built) {
-      if (built === shown) return;
-      shown = built;
-      slots.forEach((s, i) => {
-        const k = THREE.MathUtils.clamp(built - s.order, 0, 1);
-        const fall = 1 - k * k; // accelerating, like a drop
-        m.makeScale(k > 0 ? 1 : 0, k > 0 ? 1 : 0, k > 0 ? 1 : 0).setPosition(s.x, s.y + fall * DROP, CHART.z);
-        mesh.setMatrixAt(i, m);
-      });
-      mesh.instanceMatrix.needsUpdate = true;
-    },
+  // Boxes with order < built are down; the next one is carried in by the crane (in along the boom,
+  // then lowered); the rest are not there yet.
+  out.place = (built) => {
+    if (built === shown) return;
+    shown = built;
+    out.carried = null;
+    slots.forEach((s, i) => {
+      const p = THREE.MathUtils.clamp(built - s.order, 0, 1);
+      let y = s.y;
+      let z = CHART.z;
+      if (p > 0 && p < 1) {
+        z = CHART.z - 16 * (1 - ease(Math.min(1, p / 0.45)));
+        y = s.y + 13 * (1 - ease(Math.max(0, (p - 0.35) / 0.65)));
+        out.carried = { x: s.x, y, z };
+      }
+      m.makeScale(p > 0 ? 1 : 0, p > 0 ? 1 : 0, p > 0 ? 1 : 0).setPosition(s.x, y, z);
+      mesh.setMatrixAt(i, m);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    bottoms.forEach((s, i) => {
+      const on = built - s.order >= 0.9 ? 1 : 0;
+      contact.setMatrixAt(i, m.makeScale(on, on, on).setPosition(s.x, 0.06, CHART.z));
+    });
+    contact.instanceMatrix.needsUpdate = true;
   };
+  return out;
 }
 
 // Painted on the apron in front of the stacks: the year, and the two figures in their colours.
@@ -203,13 +383,13 @@ function yearLabel(year, fleet, demand, x) {
   map.anisotropy = 8;
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(11, 5.5), new THREE.MeshBasicMaterial({ map, transparent: true, color: new THREE.Color(1.6, 1.6, 1.6), depthWrite: false }));
   mesh.rotation.x = -Math.PI / 2;
-  mesh.position.set(x, 0.03, CHART.z + BOX.l / 2 + 4.5);
+  mesh.position.set(x, 0.05, CHART.z + BOX.l / 2 + 4.5);
   return mesh;
 }
 
-// The terminal yard around the chart: blocks of stacks 1-4 high in muted colours (fixed seed).
+// The terminal yard around the chart: blocks of stacks 1-4 high in muted, weathered colours (fixed seed).
 function yardStacks(geo, mat) {
-  const colours = ['#1d2a52', '#7d8798', '#4a1c22', '#2f4a3a', '#8a8f96', '#c9561c'];
+  const colours = ['#1d2a52', '#7d8798', '#4a1c22', '#2f4a3a', '#8a8f96', '#c9561c', '#6b2a1a', '#2a4a6a'];
   let seed = 7;
   const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   const items = [];
@@ -217,18 +397,43 @@ function yardStacks(geo, mat) {
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const h = 1 + Math.floor(rnd() * 4);
-        for (let k = 0; k < h; k++) items.push([bx + r * (BOX.w + 0.4), BOX.h / 2 + k * TIER, bz + c * (BOX.l + 1.5), colours[Math.floor(rnd() * colours.length)]]);
+        for (let k = 0; k < h; k++) items.push([bx + r * (BOX.w + 0.4), BOX.h / 2 + k * TIER, bz + c * (BOX.l + 1.5), colours[Math.floor(rnd() * colours.length)], 0.55 + rnd() * 0.5]);
       }
     }
   }
   const mesh = new THREE.InstancedMesh(geo, mat, items.length);
   const m = new THREE.Matrix4();
   const colour = new THREE.Color();
-  items.forEach(([x, y, z, c], i) => {
+  items.forEach(([x, y, z, c, tone], i) => {
     mesh.setMatrixAt(i, m.makeTranslation(x, y, z));
-    mesh.setColorAt(i, colour.set(c).multiplyScalar(0.8));
+    mesh.setColorAt(i, colour.set(c).multiplyScalar(tone));
   });
   mesh.receiveShadow = true;
+  mesh.castShadow = true;
+  const bottoms = items.filter((it) => it[1] === BOX.h / 2);
+  const contact = contactShadows(bottoms.length);
+  bottoms.forEach((it, i) => contact.setMatrixAt(i, m.makeTranslation(it[0], 0.06, it[2])));
+  return { mesh, contact };
+}
+
+// Soft dark pads under the bottom boxes: the mirror floor cannot take shadows, this grounds the stacks.
+function contactShadows(count) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(64, 64, 20, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(0,0,0,0.95)');
+  grad.addColorStop(0.55, 'rgba(0,0,0,0.6)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  const map = new THREE.CanvasTexture(c);
+  const plane = new THREE.PlaneGeometry(BOX.w + 3.2, BOX.l + 3.2);
+  plane.rotateX(-Math.PI / 2);
+  const mesh = new THREE.InstancedMesh(plane, new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, fog: false, color: 0x000000 }), count);
+  mesh.frustumCulled = false;
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < count; i++) mesh.setMatrixAt(i, m.makeScale(0, 0, 0));
   return mesh;
 }
 
@@ -245,45 +450,223 @@ function boxGeometry() {
 
 // --- crane and laser ---------------------------------------------------------------------------------
 
-// Ship-to-shore crane from steel boxes: two portal frames, the boom out over the ship and back over
-// the apron, the A-frame with its stays, and the trolley (moves along x a little, for the laser).
-function createCrane() {
+const UP = new THREE.Vector3(0, 1, 0);
+const _q = new THREE.Quaternion();
+const _m = new THREE.Matrix4();
+const ONE = new THREE.Vector3(1, 1, 1);
+
+// A square-section beam between two points, as a box geometry ready to merge.
+function beamGeo(a, b, t, t2 = t) {
+  const va = new THREE.Vector3(...a);
+  const vb = new THREE.Vector3(...b);
+  const g = new THREE.BoxGeometry(t, va.distanceTo(vb), t2);
+  _q.setFromUnitVectors(UP, vb.clone().sub(va).normalize());
+  g.applyMatrix4(_m.compose(va.clone().add(vb).multiplyScalar(0.5), _q, ONE));
+  return g;
+}
+
+// A lattice girder from a to b: four chords and zig-zag bracing on every face.
+function lattice(a, b, hw, hh, chord = 0.5, diag = 0.22) {
+  const va = new THREE.Vector3(...a);
+  const vb = new THREE.Vector3(...b);
+  const d = vb.clone().sub(va);
+  const len = d.length();
+  d.normalize();
+  const side = new THREE.Vector3().crossVectors(d, Math.abs(d.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : UP).normalize();
+  const up = new THREE.Vector3().crossVectors(side, d).normalize();
+  const corner = (sx, sy) => side.clone().multiplyScalar(sx * hw).add(up.clone().multiplyScalar(sy * hh));
+  const cs = [corner(-1, -1), corner(1, -1), corner(1, 1), corner(-1, 1)];
+  const out = [];
+  cs.forEach((c) => out.push(beamGeo(va.clone().add(c).toArray(), vb.clone().add(c).toArray(), chord)));
+  const n = Math.max(2, Math.round(len / (Math.max(hw, hh) * 2.2)));
+  for (let f = 0; f < 4; f++) {
+    const c0 = cs[f];
+    const c1 = cs[(f + 1) % 4];
+    for (let j = 0; j < n; j++) {
+      const p0 = va.clone().addScaledVector(d, (len * j) / n).add(j % 2 ? c0 : c1);
+      const p1 = va.clone().addScaledVector(d, (len * (j + 1)) / n).add(j % 2 ? c1 : c0);
+      out.push(beamGeo(p0.toArray(), p1.toArray(), diag));
+    }
+  }
+  return out;
+}
+
+// Ship-to-shore crane: portal legs with bracing, lattice boom girders over the ship and back over the
+// apron, the A-frame with stays, machinery house, trolley with cabin, spreader and four hoist cables.
+// reach(spreaderWorld, t) hangs the spreader at a point; the trolley runs along the boom to it.
+function createCrane({ lite = false } = {}) {
   const group = new THREE.Group();
-  const steel = new THREE.MeshStandardMaterial({ color: 0xd9dde2, roughness: 0.6, metalness: 0.3 });
-  const red = new THREE.MeshStandardMaterial({ color: 0xa8231c, roughness: 0.6, metalness: 0.3 });
-  const beam = (a, b, size, mat = steel) => {
-    const va = new THREE.Vector3(...a);
-    const vb = new THREE.Vector3(...b);
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(size, size, va.distanceTo(vb)), mat);
-    mesh.position.copy(va).add(vb).multiplyScalar(0.5);
-    mesh.lookAt(vb);
+  const steel = [];
+  const red = [];
+  const dark = [];
+  const { legs, gauge, girderX, boomY, boomZ, apex } = CRANE;
+  const top = boomY - 4;
+  for (const side of [-1, 1]) {
+    const sx = (side * gauge) / 2;
+    for (const z of legs) red.push(beamGeo([sx, 0, z], [sx, top, z], 1.8, 2.2));
+    red.push(beamGeo([sx, 0.8, legs[0] - 3], [sx, 0.8, legs[1] + 3], 2.0, 2.0)); // sill beam
+    for (const [y0, y1] of [[1, 14], [14, 27], [27, top - 1]]) {
+      steel.push(beamGeo([sx, y0, legs[0]], [sx, y1, legs[1]], 0.5)); // X bracing between the legs
+      steel.push(beamGeo([sx, y0, legs[1]], [sx, y1, legs[0]], 0.5));
+    }
+    steel.push(beamGeo([sx, 14, legs[0]], [sx, 14, legs[1]], 0.9), beamGeo([sx, 27, legs[0]], [sx, 27, legs[1]], 0.9));
+    steel.push(beamGeo([sx, top, legs[0]], [sx, top, legs[1]], 1.4));
+    for (const z of legs) for (const w of [-2.2, 2.2]) dark.push(beamGeo([sx, 0.1, z + w], [sx, 1.4, z + w], 1.1)); // wheel bogies
+    // A-frame
+    steel.push(...lattice([sx, top, legs[1]], [sx * 0.55, apex, legs[1] - 6], 0.7, 0.7, 0.55, 0.2));
+    steel.push(...lattice([sx, top, legs[0]], [sx * 0.55, apex, legs[1] - 6], 0.6, 0.6, 0.5, 0.2));
+    // stays to the boom tip and the backreach end
+    steel.push(beamGeo([sx * 0.55, apex, legs[1] - 6], [side * girderX, boomY + 2, boomZ[0] + 4], 0.35));
+    steel.push(beamGeo([sx * 0.55, apex, legs[1] - 6], [side * girderX, boomY + 2, boomZ[1]], 0.35));
+  }
+  for (const z of legs) steel.push(beamGeo([-gauge / 2, top, z], [gauge / 2, top, z], 1.5)); // portal cross beams
+  steel.push(beamGeo([-gauge / 2 * 0.55, apex, legs[1] - 6], [gauge / 2 * 0.55, apex, legs[1] - 6], 0.9));
+  // boom girders
+  for (const side of [-1, 1]) {
+    steel.push(...lattice([side * girderX, boomY, boomZ[0]], [side * girderX, boomY, boomZ[1]], 1.0, 2.2, 0.65, 0.25));
+    dark.push(beamGeo([side * girderX, boomY + 2.4, boomZ[0]], [side * girderX, boomY + 2.4, boomZ[1]], 0.5, 0.7)); // trolley rail
+  }
+  for (let z = boomZ[0] + 6; z <= boomZ[1]; z += 14) steel.push(beamGeo([-girderX, boomY, z], [girderX, boomY, z], 0.7)); // boom cross ties
+  // machinery house on the backreach
+  const house = new THREE.BoxGeometry(15, 6, 13);
+  house.translate(0, boomY + 5, legs[1] + 8);
+  steel.push(house);
+  const merged = (list, material) => {
+    const mesh = new THREE.Mesh(mergeGeometries(list), material);
     mesh.castShadow = true;
     group.add(mesh);
   };
-  const { x, legs, gauge, boomY, boomZ } = CRANE;
-  const top = boomY - 3;
-  for (const side of [-1, 1]) {
-    const sx = x + (side * gauge) / 2;
-    for (const z of legs) beam([sx, 0, z], [sx, top, z], 1.8, red);
-    beam([sx, 12, legs[0]], [sx, 12, legs[1]], 1.4);
-    beam([sx, top, legs[0]], [sx, top, legs[1]], 1.6);
-    beam([sx, 0.8, legs[0] - 3], [sx, 0.8, legs[1] + 3], 2.2); // sill beam over the wheels
-    beam([sx, boomY, boomZ[0]], [sx, boomY, boomZ[1]], 1.6); // boom girder
-    beam([sx, boomY + 26, legs[1] - 6], [sx, top, legs[1]], 1.2); // A-frame
-    beam([sx, boomY + 26, legs[1] - 6], [sx, top, legs[0]], 1.2);
-    beam([sx, boomY + 26, legs[1] - 6], [sx, boomY, boomZ[0] + 8], 0.5); // forestay
-    beam([sx, boomY + 26, legs[1] - 6], [sx, boomY, boomZ[1]], 0.5); // backstay
-  }
-  for (const z of [...legs, boomZ[0], boomZ[1]]) beam([x - gauge / 2, z === legs[0] || z === legs[1] ? top : boomY, z], [x + gauge / 2, z === legs[0] || z === legs[1] ? top : boomY, z], 1.4);
-  beam([x - gauge / 2, boomY + 26, legs[1] - 6], [x + gauge / 2, boomY + 26, legs[1] - 6], 1.2);
-  const trolley = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 8), new THREE.MeshStandardMaterial({ color: 0x2b2f35, roughness: 0.5, emissive: 0x00f0ff, emissiveIntensity: 0.15 }));
-  trolley.position.set(x, boomY - 2.5, CHART.z);
+  merged(steel, new THREE.MeshStandardMaterial({ color: 0xc4cad1, roughness: 0.55, metalness: 0.4 }));
+  merged(red, new THREE.MeshStandardMaterial({ color: 0x9c2a1f, roughness: 0.6, metalness: 0.3 }));
+  merged(dark, new THREE.MeshStandardMaterial({ color: 0x1c2026, roughness: 0.5, metalness: 0.6 }));
+  // lamps along the boom and the frame: bright points for the bloom
+  const lampMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(7, 6, 4.5), fog: false });
+  const lampSpots = [];
+  for (let z = boomZ[0] + 2; z <= boomZ[1]; z += 12) lampSpots.push([-girderX, boomY - 2.4, z], [girderX, boomY - 2.4, z]);
+  for (const side of [-1, 1]) for (const z of legs) lampSpots.push([side * gauge / 2 + side * 1.2, top - 2, z], [side * gauge / 2 + side * 1.2, 16, z]);
+  const lamps = new THREE.InstancedMesh(new THREE.SphereGeometry(0.22, 8, 6), lampMat, lampSpots.length + 1);
+  lampSpots.forEach((p, i) => lamps.setMatrixAt(i, _m.makeTranslation(...p)));
+  group.add(lamps);
+  const warn = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 0.5, 0.3), fog: false }));
+  warn.position.set(0, apex + 1, legs[1] - 6);
+  group.add(warn);
+  if (lite) return { group };
+
+  // trolley with the operator cabin, the spreader and the hoist cables
+  const trolley = new THREE.Group();
+  const trolleyBody = new THREE.Mesh(new THREE.BoxGeometry(girderX * 2 + 2.4, 2.4, 6), new THREE.MeshStandardMaterial({ color: 0x23272d, roughness: 0.5, metalness: 0.5 }));
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3, 4), new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.5, emissive: 0xffb760, emissiveIntensity: 1.4 }));
+  cabin.position.set(0, -2.7, 0);
+  trolley.add(trolleyBody, cabin);
+  trolley.position.set(0, boomY + 5.0, CHART.z);
+  trolley.castShadow = true;
   group.add(trolley);
-  // Aircraft warning lights on the A-frame.
-  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(8, 0.6, 0.4) }));
-  lamp.position.set(x, boomY + 26.8, legs[1] - 6);
-  group.add(lamp);
-  return { group, trolley };
+  const spreader = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, BOX.l * 0.98), new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.5, metalness: 0.6 }));
+  spreader.castShadow = true;
+  group.add(spreader);
+  const cableMat = new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.6, metalness: 0.7 });
+  const cables = Array.from({ length: 4 }, () => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1, 6), cableMat);
+    group.add(c);
+    return c;
+  });
+  const va = new THREE.Vector3();
+  const vb = new THREE.Vector3();
+  const dir = new THREE.Vector3();
+  return {
+    group,
+    trolleyWorld: (v) => trolley.getWorldPosition(v),
+    // Hang the spreader at `world` (a point in the scene); the trolley follows along the boom.
+    reach(world) {
+      const local = group.worldToLocal(va.copy(world));
+      trolley.position.z += (local.z - trolley.position.z) * 0.35;
+      spreader.position.copy(local);
+      const sz = BOX.l * 0.4;
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy], i) => {
+        const a = vb.set(sx * 1.0, boomY + 4, trolley.position.z + sy * 2.2).clone();
+        const b = new THREE.Vector3(local.x + sx * 1.1, local.y + 0.2, local.z + sy * sz);
+        dir.subVectors(b, a);
+        const c = cables[i];
+        c.position.copy(a).addScaledVector(dir, 0.5);
+        c.scale.set(1, dir.length(), 1);
+        c.quaternion.setFromUnitVectors(UP, dir.normalize());
+      });
+    },
+  };
+}
+
+// A floodlight's visible cone: additive, brightest near the lamp and at the cone's core.
+function lightCone(from, to, angle, colour) {
+  const dir = new THREE.Vector3().subVectors(to, from);
+  const len = dir.length();
+  const geo = new THREE.ConeGeometry(Math.tan(angle) * len, len, 40, 1, true);
+  geo.translate(0, -len / 2, 0); // apex at the origin, opening along -y
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: colour } },
+    vertexShader: `
+      varying vec3 vN; varying vec3 vV; varying float vH;
+      void main() {
+        vH = -position.y / ${len.toFixed(2)};
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vN = normalize(normalMatrix * normal);
+        vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor; varying vec3 vN; varying vec3 vV; varying float vH;
+      void main() {
+        float f = pow(abs(dot(normalize(vN), normalize(vV))), 1.6);
+        float a = f * (1.0 - vH) * smoothstep(0.0, 0.06, vH) * 0.15;
+        gl_FragColor = vec4(uColor * a, 1.0);
+      }`,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    fog: false,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(from);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir.normalize());
+  mesh.frustumCulled = false;
+  return mesh;
+}
+
+// Dust and spray drifting in the lamplight over the apron.
+function dustMotes() {
+  const count = 500;
+  const pos = new Float32Array(count * 3);
+  const seed = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos.set([(Math.random() - 0.5) * 160, 0.5 + Math.random() * 38, 20 + Math.random() * 70], i * 3);
+    seed[i] = Math.random() * 100;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('seed', new THREE.BufferAttribute(seed, 1));
+  const points = new THREE.Points(
+    g,
+    new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 } },
+      vertexShader: `
+        uniform float uTime; attribute float seed; varying float vA;
+        void main() {
+          vec3 p = position + vec3(sin(uTime * 0.2 + seed) * 2.0, sin(uTime * 0.13 + seed * 2.3) * 1.2, cos(uTime * 0.17 + seed * 1.7) * 2.0);
+          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          vA = 0.35 + 0.35 * sin(uTime * 1.1 + seed * 5.0);
+          gl_PointSize = clamp(60.0 / -mv.z * (1.0 + fract(seed)), 1.0, 4.0);
+          gl_Position = projectionMatrix * mv;
+        }`,
+      fragmentShader: `
+        varying float vA;
+        void main() { float r = length(gl_PointCoord - 0.5); gl_FragColor = vec4(vec3(1.0, 0.78, 0.5) * vA * smoothstep(0.5, 0.0, r), 1.0); }`,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+  );
+  points.frustumCulled = false;
+  return points;
 }
 
 // Cyan scan beam: a thin fan from the trolley down to a line across the apron, and the glowing line.
@@ -292,7 +675,7 @@ function createLaser() {
   const glow = (alpha) => new THREE.MeshBasicMaterial({ color: new THREE.Color(0, 4, 5), transparent: true, opacity: alpha, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false });
   const fanGeo = new THREE.BufferGeometry();
   fanGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(9), 3));
-  const fan = new THREE.Mesh(fanGeo, glow(0.05));
+  const fan = new THREE.Mesh(fanGeo, glow(0.03));
   fan.frustumCulled = false;
   const line = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, BOX.l + 6), glow(0.9));
   group.add(fan, line);
@@ -302,10 +685,10 @@ function createLaser() {
       const p = fanGeo.attributes.position;
       const half = (BOX.l + 6) / 2;
       p.setXYZ(0, from.x, from.y - 1.5, from.z);
-      p.setXYZ(1, x, 0.05, CHART.z - half);
-      p.setXYZ(2, x, 0.05, CHART.z + half);
+      p.setXYZ(1, x, 0.08, CHART.z - half);
+      p.setXYZ(2, x, 0.08, CHART.z + half);
       p.needsUpdate = true;
-      line.position.set(x, 0.06, CHART.z);
+      line.position.set(x, 0.09, CHART.z);
       line.material.opacity = 0.75 + 0.25 * Math.sin(t * 9);
     },
   };
