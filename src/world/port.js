@@ -23,6 +23,7 @@ const SURFACES = { side: { file: 'container_side', repeat: 1 / 2.4 } };
 const LOOK = { Box: { surface: 'side', detail: 0.6, normal: 0.6 } };
 
 // Camera poses per reveal step: position p, look-at t.
+const ARRIVE = { p: [-8, 9, 92], t: [0, 12, CHART.z] }; // close under the crane, where scene 2's scan lands
 const POSES = [
   { p: [-70, 16, 160], t: [8, 22, 0] }, // wide: crane, ship, the empty apron
   { p: [-16, 20, 128], t: [-16, 10, CHART.z] }, // the chart, right of the HUD figures
@@ -102,6 +103,8 @@ export async function createPortWorld(series) {
       const built = step >= 1 ? chart.count : 0;
       if (instant) {
         Object.assign(state, { cam: pose(step), built, scan: 1 });
+        // Arriving at step 0: start close and pull back to the wide shot, under the transition.
+        if (step === 0) tl = gsap.timeline({ delay: 1 }).fromTo(state.cam, flat(ARRIVE), { ...pose(0), duration: 4.5, ease: 'sine.inOut', immediateRender: true }); // delay: scene 2's lead-out
         return;
       }
       tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0);
@@ -308,6 +311,9 @@ function createLaser() {
 }
 
 function pose(step) {
-  const { p, t } = POSES[Math.min(step, POSES.length - 1)];
+  return flat(POSES[Math.min(step, POSES.length - 1)]);
+}
+
+function flat({ p, t }) {
   return { px: p[0], py: p[1], pz: p[2], tx: t[0], ty: t[1], tz: t[2] };
 }

@@ -84,7 +84,6 @@ function apply(ev) {
   const start = () =>
     (r.visual = view.transition(ev.from, ev.to, {
       type,
-      liveFrom: lead > 0,
       onDone: () => {
         tl.progress(1);
         deck.done();

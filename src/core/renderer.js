@@ -326,10 +326,8 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     settle(i);
   }
 
-  // During a transition a live world is drawn on the first frame and then held: the transition
-  // shader plus a moving 3D world is too much fill rate for an iGPU, and the hold is not visible.
-  let liveHold = null; // null | 'first' | 'held'
-  let keepFrom = false;
+  // Live worlds keep moving under the transition shader, so camera moves carry across the cut.
+  // shortcut: costs fill rate on an iGPU (govern() steps effects down if frames drop); the deck runs on an RTX 3050.
   let level = 0;
   let size = [1920, 1080];
   let last = 0;
@@ -351,8 +349,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     console.info(`[renderer] slow frames, effects level → ${FX_LEVELS[level]}`);
   }
 
-  // liveFrom: keep the leaving world moving under the shader (its camera move carries on into the blur).
-  function transition(from, to, { type = 'crossfade', duration, liveFrom = false, onDone } = {}) {
+  function transition(from, to, { type = 'crossfade', duration, onDone } = {}) {
     const clip = clipPlayer?.(from, to, onDone);
     if (clip) return clip;
     const t = TRANSITIONS[type] ?? TRANSITIONS.crossfade;
@@ -361,10 +358,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     started[to] = now();
     setPair(from, to);
     uniforms.uProgress.value = 0;
-    liveHold = 'first';
-    keepFrom = liveFrom;
     const end = () => {
-      liveHold = null;
       settle(to); // keeps the Ken Burns clock running from the transition start
       onDone?.();
     };
@@ -408,13 +402,12 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
       uniforms.uTime.value = time;
       xf(uniforms.uFromXf.value, pair.from, time);
       xf(uniforms.uToXf.value, pair.to, time);
-      for (const i of liveHold === 'held' ? (keepFrom ? [pair.from] : []) : new Set([pair.from, pair.to])) {
+      for (const i of new Set([pair.from, pair.to])) {
         if (!targets[i]) continue;
         live[i].update(time, lean);
         renderer.setRenderTarget(targets[i]);
         renderer.render(live[i].scene, live[i].camera);
       }
-      if (liveHold === 'first') liveHold = 'held';
       renderer.setRenderTarget(null);
       renderer.render(scene, camera);
     },

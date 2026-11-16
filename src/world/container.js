@@ -41,6 +41,7 @@ const POSES = {
   front: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
   doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
   inside: { p: [LI - 2.4, 1.45, 0.25], t: [0, 1.15, -0.35] },
+  out: { p: [LI + 9, 2.4, 0.4], t: [0, 1.2, 0] }, // backed out through the doors, still facing in
 };
 
 export async function createContainerWorld() {
@@ -147,6 +148,11 @@ export async function createContainerWorld() {
         .to(state, { door: 1, duration: 1.5, ease: 'power2.inOut' }, 1.0)
         .to(state.cam, { ...pose('doorway'), duration: 1.3, ease: 'power1.inOut' }, 2.1)
         .to(state.cam, { ...pose('inside'), duration: 1.7, ease: 'power2.out' });
+    },
+    // Leaving for scene 3: back out through the doors (a timeline, so the deck can skip it).
+    goOut() {
+      tl?.kill();
+      return (tl = gsap.timeline().to(state.cam, { ...pose('out'), duration: 2.8, ease: 'power1.inOut' }));
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;

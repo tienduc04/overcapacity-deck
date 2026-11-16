@@ -27,4 +27,11 @@ scene.exit = (tl) => {
 // After the zoom blur: open the doors and go in.
 scene.arrive = (direction) => direction > 0 && box?.goInside();
 
+// Next to scene 3: the camera backs out of the box while the laser scan takes over.
+scene.leadOut = (tl, ev) => {
+  if (!box || ev.to !== 2) return 0;
+  tl.add(box.goOut(), 0);
+  return 0.9;
+};
+
 export default scene;
