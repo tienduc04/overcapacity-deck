@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { Pass } from 'three/addons/postprocessing/Pass.js';
+import { TexturePass } from 'three/addons/postprocessing/TexturePass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { MAX_TRANSITION } from './fallback.js';
 
 // Full-screen Three.js canvas that shows one plate (cover-fit) and blends between two plates.
@@ -158,6 +163,52 @@ const dockFade = /* glsl */ `
   }
 `;
 
+// Scene pass with MSAA: draws into its own multisampled target, which a TexturePass then copies into the
+// composer. (MSAA on the composer's own targets doubled the cost of every later pass.)
+class MsaaScenePass extends Pass {
+  constructor(scene, camera, samples) {
+    super();
+    this.scene = scene;
+    this.camera = camera;
+    this.needsSwap = false;
+    this.target = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, stencilBuffer: true, samples }); // stencil: hero title
+  }
+  setSize(w, h) {
+    this.target.setSize(w, h);
+  }
+  render(renderer) {
+    renderer.setRenderTarget(this.target);
+    renderer.render(this.scene, this.camera);
+  }
+}
+
+// Screen-space god rays: bright sky around the sun is smeared towards the sun, dark things (the ship)
+// in between leave shafts. Runs on the HDR frame, before tone mapping.
+const GodRays = {
+  uniforms: { tDiffuse: { value: null }, uSun: { value: new THREE.Vector2(0.5, 0.5) }, uIntensity: { value: 0.5 }, uThreshold: { value: 1.2 }, uTint: { value: new THREE.Color(1.0, 0.72, 0.45) } },
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    uniform vec2 uSun;
+    uniform float uIntensity, uThreshold;
+    uniform vec3 uTint;
+    varying vec2 vUv;
+    void main() {
+      vec4 base = texture2D(tDiffuse, vUv);
+      vec2 step = (uSun - vUv) * (0.9 / 24.0);
+      vec2 p = vUv;
+      float w = 1.0, sum = 0.0;
+      for (int i = 0; i < 24; i++) {
+        p += step;
+        vec3 s = texture2D(tDiffuse, p).rgb;
+        sum += clamp(dot(s, vec3(0.2126, 0.7152, 0.0722)) - uThreshold, 0.0, 6.0) * w;
+        w *= 0.92;
+      }
+      float falloff = 1.0 - smoothstep(0.0, 1.2, length(uSun - vUv));
+      gl_FragColor = vec4(base.rgb + uTint * sum * (1.0 / 24.0) * uIntensity * (0.4 + falloff), base.a);
+    }`,
+};
+
 export const TRANSITIONS = {
   none: { glsl: crossfade, duration: 0 },
   crossfade: { glsl: crossfade, duration: 1.2 },
@@ -257,14 +308,40 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
 
   // Live worlds render into HDR targets on every frame they are on screen, then go through the
   // same transition and finish shaders as a plate.
+  const composers = [];
   const targets = plates.map((_, i) => {
     if (!live[i]) return null;
-    const rt = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, stencilBuffer: true }); // stencil: hero title behind the ship
+    const rt = new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, stencilBuffer: true, samples: 0 }); // stencil: hero title behind the ship; MSAA: smooth edges on a discrete GPU
     rt.texture.userData.size = new THREE.Vector2(1920, 1080);
     textures[i] = rt.texture;
     live[i].init(renderer);
-    renderer.setRenderTarget(rt); // compile shaders and upload textures now, not on the first transition frame
-    renderer.render(live[i].scene, live[i].camera);
+    const post = live[i].post;
+    if (post) {
+      // Post chain on the world's own target: scene, bloom on the HDR highlights, god rays.
+      const c = new EffectComposer(renderer, rt);
+      const scenePass = new MsaaScenePass(live[i].scene, live[i].camera, 0);
+      c.addPass(scenePass);
+      c.addPass(new TexturePass(scenePass.target.texture));
+      c.bloom = new UnrealBloomPass(new THREE.Vector2(960, 540), post.bloom.strength, post.bloom.radius, post.bloom.threshold);
+      c.addPass(c.bloom);
+      if (post.rays) {
+        c.rays = new ShaderPass(GodRays);
+        c.rays.uniforms.uIntensity.value = post.rays.intensity;
+        c.rays.uniforms.uThreshold.value = post.rays.threshold ?? 1.2;
+        c.addPass(c.rays);
+      }
+      composers[i] = c;
+    }
+    // Compile shaders and upload textures now, not on the first transition frame (that was a 200-300 ms hitch).
+    live[i].update?.(0);
+    if (composers[i]) {
+      live[i].post.sun?.(composers[i].rays?.uniforms.uSun.value);
+      composers[i].render();
+      composers[i].render(); // twice: both ping-pong targets
+    } else {
+      renderer.setRenderTarget(rt);
+      renderer.render(live[i].scene, live[i].camera);
+    }
     renderer.setRenderTarget(null);
     return rt;
   });
@@ -342,6 +419,7 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
     level++;
     uniforms.uGrain.value = 0;
     if (level === 2) {
+      composers.forEach((c) => c?.passes.slice(1).forEach((p) => (p.enabled = false))); // back to the plain frame
       motion = false;
       renderer.setPixelRatio(1);
       renderer.setSize(...size, false);
@@ -385,7 +463,11 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
       const pr = renderer.getPixelRatio() * (tier.liveScale || 1); // fill rate is the limit on iGPUs
       targets.forEach((rt, i) => {
         if (!rt) return;
-        rt.setSize(Math.round(w * pr), Math.round(h * pr));
+        const c = composers[i];
+        if (c) {
+          c.setPixelRatio(pr);
+          c.setSize(w, h);
+        } else rt.setSize(Math.round(w * pr), Math.round(h * pr));
         rt.texture.userData.size.set(w, h);
         live[i].resize(w, h);
       });
@@ -405,9 +487,18 @@ export function createRenderer(canvas, plates, tier, { still = [], live = [] } =
       for (const i of new Set([pair.from, pair.to])) {
         if (!targets[i]) continue;
         live[i].update(time, lean);
-        renderer.setRenderTarget(targets[i]);
-        renderer.render(live[i].scene, live[i].camera);
+        const c = composers[i];
+        if (c) {
+          live[i].post.sun?.(c.rays?.uniforms.uSun.value); // sun position on screen, for the rays
+          c.render();
+        } else {
+          renderer.setRenderTarget(targets[i]);
+          renderer.render(live[i].scene, live[i].camera);
+        }
       }
+      // A composer ping-pongs its two targets: the finished frame is in readBuffer.
+      if (composers[pair.from]) uniforms.uFrom.value = composers[pair.from].readBuffer.texture;
+      if (composers[pair.to]) uniforms.uTo.value = composers[pair.to].readBuffer.texture;
       renderer.setRenderTarget(null);
       renderer.render(scene, camera);
     },

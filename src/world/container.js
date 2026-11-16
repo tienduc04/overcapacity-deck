@@ -118,6 +118,7 @@ export async function createContainerWorld() {
   return {
     scene,
     camera,
+    post: { bloom: { strength: 0.35, radius: 0.5, threshold: 1.6 } }, // the sunbeam, dust motes, the bright doorway
     init(renderer) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;

@@ -3,7 +3,7 @@
 export const TIERS = {
   low: { pixelRatio: 1, motion: false, detail: 0.5, liveScale: 0 }, // unknown projector laptop, software WebGL
   med: { pixelRatio: 1, motion: true, detail: 1, liveScale: 0.75 }, // Intel UHD / Iris Xe at 1080p
-  high: { pixelRatio: 2, motion: true, detail: 1, liveScale: 1 }, // discrete GPU, HiDPI
+  high: { pixelRatio: 2, motion: true, detail: 1, liveScale: 1.5 }, // discrete GPU, HiDPI
 };
 // motion = Ken Burns + mouse parallax (Phase 3). detail = shader sample count multiplier.
 // liveScale = resolution of the live 3D worlds relative to the screen (0 = still plates instead).

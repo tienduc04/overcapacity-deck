@@ -88,6 +88,7 @@ export async function createPortWorld(series) {
   return {
     scene,
     camera,
+    post: { bloom: { strength: 0.22, radius: 0.3, threshold: 2.5 } }, // only the lamps and the laser core; more hazes this dark scene
     init(renderer) {
       sky.bake(renderer, { hide: [ocean, quay, ship, crane.group, holder, laser.group, ...chart.labels], hdr, envIntensity: ENV_INTENSITY });
       scene.background = new THREE.Color(0x14253d); // the baked dusk sky is too bright for the night look

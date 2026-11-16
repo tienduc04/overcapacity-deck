@@ -62,6 +62,7 @@ export async function createHeroWorld(title) {
   scene.add(camera);
   const titleFx = { alpha: 1, rise: 0 }; // driven by the scene's entrance animation
   const fly = { p: 0 }; // 0 = drone shot, 1 = close on the orange box; driven by the scene's lead-out
+  const sunPoint = new THREE.Vector3();
   const flyTarget = new THREE.Vector3();
   const flyEnd = new THREE.Vector3(...FLY.from).normalize();
   const offset = new THREE.Vector3();
@@ -85,6 +86,16 @@ export async function createHeroWorld(title) {
     },
     titleFx,
     fly,
+    post: {
+      bloom: { strength: 0.14, radius: 0.35, threshold: 9.0 }, // HDR units: only the sun disc and its glitter
+      rays: { intensity: 0.2, threshold: 9.0 },
+      // sun position on screen (uv) for the god rays
+      sun(uv) {
+        if (!uv) return;
+        const v = sunPoint.copy(camera.position).addScaledVector(sun, 5000).project(camera);
+        uv.set(v.x * 0.5 + 0.5, v.y * 0.5 + 0.5);
+      },
+    },
     // t: seconds since page load. lean: smoothed pointer tilt (-1..1).
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
@@ -108,7 +119,7 @@ export async function createHeroWorld(title) {
         camera.position.addVectors(flyTarget, offset);
         look.lerp(flyTarget, Math.min(1, fly.p * 1.6));
       }
-      camera.view.offsetX = shift * (1 - fly.p); // the box ends in the centre, where the zoom blur aims
+      if (camera.view) camera.view.offsetX = shift * (1 - fly.p); // the box ends in the centre, where the zoom blur aims (no view before the first resize)
       camera.updateProjectionMatrix();
       camera.lookAt(look);
     },
