@@ -76,6 +76,31 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--zoom .number-card, .slide--port .number-card { width: 440px; padding-top: 0; border-top: 0; }
 .slide--zoom .number-value { font-size: 104px; color: var(--supply); }
 
+/* Scene 4 (map): custom readouts on the left, the lane legend top right, a big REOPEN SUEZ button. */
+.slide--map .numbers, .slide--map .side, .slide--map .extra { display: none; }
+.m-col { position: absolute; left: var(--edge); top: 335px; width: 640px; display: flex; flex-direction: column; gap: 22px; }
+.m-banner { padding: 14px 22px; border: 1px solid rgba(255, 90, 70, 0.75); background: rgba(40, 8, 6, 0.6); color: #ff7a62; font: 500 20px var(--head); letter-spacing: 0.26em; text-transform: uppercase; transition: color 0.6s, border-color 0.6s, background 0.6s; }
+.slide--map[data-open='1'] .m-banner { border-color: rgba(0, 240, 255, 0.7); background: rgba(4, 30, 36, 0.6); color: var(--demand); }
+.m-card { padding: 22px 30px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.slide--map[data-open='1'] .m-card { border-left-color: var(--demand); }
+.m-card .v { font: 800 92px/1 var(--head); }
+.m-card .u { margin-left: 12px; font: 500 22px var(--head); letter-spacing: 0.2em; text-transform: uppercase; color: var(--supply); }
+.slide--map[data-open='1'] .m-card .u { color: var(--demand); }
+.m-card .l { margin-top: 10px; font: 400 24px/1.35 'Inter', var(--head); }
+.m-card .n { margin-top: 10px; font: 400 19px/1.4 'Inter', var(--head); color: var(--muted); }
+.slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
+.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map[data-at='3'] .m-a, .slide--map:not([data-at='3']) .m-c { display: none; }
+.m-legend { position: absolute; right: var(--edge); top: 112px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); }
+.m-legend i { display: inline-block; width: 36px; height: 4px; margin-left: 14px; vertical-align: middle; }
+.m-legend .cape i { background: #f0a030; box-shadow: 0 0 10px #f0a030; }
+.m-legend .suez i { background: #ff5a40; box-shadow: 0 0 10px #ff5a40; }
+.slide--map[data-open='1'] .m-legend .suez i { background: var(--demand); box-shadow: 0 0 10px var(--demand); }
+.m-legend .note { font-size: 14px; letter-spacing: 0.1em; color: var(--muted); }
+.m-reopen { position: absolute; left: 1060px; top: 860px; width: 380px; height: 96px; border: 2px solid var(--demand); background: rgba(4, 30, 36, 0.78); color: #fff; font: 800 24px var(--head); letter-spacing: 0.24em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 28px rgba(0, 240, 255, 0.45); animation: m-pulse 2s ease-in-out infinite; transition: opacity 0.4s; }
+.m-reopen.done { animation: none; cursor: default; border-color: rgba(0, 240, 255, 0.4); color: var(--demand); box-shadow: none; }
+.slide--map:not([data-at='2']) .m-reopen { opacity: 0; pointer-events: none; }
+@keyframes m-pulse { 50% { box-shadow: 0 0 46px rgba(0, 240, 255, 0.85); } }
+
 .watermark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font-size: 190px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255, 51, 51, 0.13); pointer-events: none; white-space: nowrap; }
 .badge-pending { position: absolute; top: var(--margin); right: var(--margin); padding: 10px 20px; border-radius: 10px; background: var(--risk); color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; }
 

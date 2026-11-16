@@ -1,37 +1,57 @@
 {
-  "steps": 3,
+  "steps": 4,
   "keyNumbers": [
     {
-      "value": "00.0",
+      "value": "1.6",
       "unit": "M TEU",
-      "label": "Capacity absorbed by detours (sample)",
-      "source": "SAMPLE placeholder",
+      "label": "Effective capacity absorbed by Suez and Red Sea detours",
+      "labelOpen": "Effective capacity released back to the market if Suez routing returns",
+      "note": "",
+      "source": "Taylor 2026, as cited in the Req 1 data",
       "url": "",
-      "date": "",
+      "date": "2026",
       "status": "sample"
     },
     {
-      "value": "00.0",
-      "unit": "days",
-      "label": "Extra sailing days (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "~250",
+      "unit": "ships",
+      "label": "Still sailing round the Cape (about 3.5 M TEU of ship capacity: a different measure, down from ~380 at the peak)",
+      "note": "Also stuck: ~130 ships (~1.5% of fleet capacity) in the Gulf since the Strait of Hormuz closed (BIMCO, Mar 2026).",
+      "source": "Linerlytica via ShipUniverse; BIMCO",
       "url": "",
-      "date": "",
+      "date": "Sep 2026; Mar 2026",
+      "status": "sample"
+    },
+    {
+      "value": "-5",
+      "unit": "pp",
+      "label": "Ship-demand growth if Suez normalises gradually in 2027 (vs BIMCO's own forecast)",
+      "note": "",
+      "source": "BIMCO",
+      "url": "",
+      "date": "Sep 2026",
+      "status": "sample"
+    },
+    {
+      "value": "~-10",
+      "unit": "%",
+      "label": "Ship demand once Suez is fully back, vs continued Cape routing",
+      "note": "",
+      "source": "BIMCO via forwarder.lk (secondary source)",
+      "url": "",
+      "date": "Oct 2026",
       "status": "sample"
     }
   ],
   "chart": {
     "type": "map",
-    "title": "Cape routing vs Suez (sample)",
-    "source": "SAMPLE placeholder",
-    "url": "",
+    "title": "Suez vs Cape routing (schematic)",
+    "source": "Natural Earth 1:10m land (public domain); lanes drawn schematically",
+    "url": "https://www.naturalearthdata.com",
     "date": "",
-    "status": "sample"
+    "status": "verified"
   },
-  "bullets": [
-    "Sample: Red Sea diversions",
-    "Sample: what happens when lanes normalise"
-  ],
+  "bullets": [],
   "theory": "Sample: effective vs nominal capacity.",
   "case": "Sample: Red Sea since 2023.",
   "speakerNotes": "Sample notes for Speakers B and C.",
@@ -40,5 +60,20 @@
   "owner": "Speakers B and C",
   "speakerKey": "speakers-b-c",
   "budgetSec": 420,
-  "headline": "Detours absorb ships until the chokepoints reopen"
+  "headline": "Detours absorb ships until the chokepoints reopen",
+  "layout": "map",
+  "banner": {
+    "shut": "Capacity absorbed by routing",
+    "open": "Suez route open: capacity returning"
+  },
+  "button": {
+    "label": "Reopen Suez",
+    "done": "Suez reopened"
+  },
+  "legend": [
+    "Cape route: busy",
+    "Suez route: shut",
+    "Schematic routes, not navigation data"
+  ],
+  "legendOpen": "Suez route: open"
 }

@@ -27,3 +27,5 @@ Changed by `scripts/rebrand_rm02.py` (CC-BY allows changes; say so in the credit
 erased from the hull and container textures, yellow boxes repainted orange, HAPAG-LLOYD lettered on
 the hull and the orange boxes, textures reduced to 2K. Credit line: *"Container Ship" by RM02,
 CC BY 4.0, modified.* The Blender ship (`public/models/ship.glb`) is still used in scene 2.
+
+| Natural Earth 1:10m land | https://www.naturalearthdata.com | Natural Earth (public domain) | Scene 4 coastlines, clipped and simplified by `scripts/build-land.py` | `public/data/land.json` (source `assets-src/geo/ne_10m_land.geojson`, not committed) |
