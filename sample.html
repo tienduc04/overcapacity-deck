@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sample: photo plate with depth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import '/node_modules/@fontsource/montserrat/latin-500.css';
+  @import '/node_modules/@fontsource/montserrat/latin-800.css';
+  @import '/node_modules/@fontsource/inter/latin-400.css';
+  html, body { margin: 0; height: 100%; background: #0a1118; overflow: hidden; font-family: Montserrat, sans-serif; color: #fff; }
+  canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  .k { position: absolute; left: 0; right: 0; top: 16%; text-align: center; font: 500 clamp(11px, 1.15vw, 22px) Montserrat; letter-spacing: 0.5em; text-transform: uppercase; color: rgba(255, 244, 232, 0.9); text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5); }
+  .s { position: absolute; left: 5vw; bottom: 8vh; font: 400 clamp(16px, 1.7vw, 32px)/1.4 Inter, sans-serif; color: #e9e4dd; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6); }
+  .s em { font-style: normal; color: #f07a2a; }
+  .n { position: absolute; right: 5vw; bottom: 8vh; font: 500 clamp(10px, 0.9vw, 16px) Montserrat; letter-spacing: 0.3em; color: rgba(233, 228, 221, 0.7); text-transform: uppercase; }
+  .vig { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(10, 17, 24, 0.7) 0%, rgba(10, 17, 24, 0) 38%), linear-gradient(180deg, rgba(10, 17, 24, 0.35) 0%, rgba(10, 17, 24, 0) 25%); }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="vig"></div>
+<div id="hud">
+  <div class="k">Topic 02 · Container shipping</div>
+  <div class="s">Structural challenge or cyclical disruption?<br><em>A 2030 supply–demand outlook.</em></div>
+  <div class="n">Sample · AI plate + depth parallax</div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+
+// One photo plate, a depth map (sky far, sea nearer towards the viewer, ship in between) and a ship mask.
+// The camera pushes in: near things (ship, sea in front) move more than far things (sky), so the still
+// photo reads as 3D. The title is lettered into the sky BEHIND the ship using the mask.
+await Promise.all([document.fonts.load('800 200px Montserrat')]);
+const loader = new THREE.TextureLoader();
+const [plate, depth, mask] = await Promise.all(['plate.jpg', 'depth.png', 'mask.png'].map((f) => loader.loadAsync('/sample/' + f)));
+plate.colorSpace = THREE.SRGBColorSpace;
+
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+// Title on a canvas, same 16:9 frame as the plate.
+const tc = document.createElement('canvas');
+tc.width = 2000; tc.height = 1125;
+const g = tc.getContext('2d');
+g.textAlign = 'center';
+g.font = '800 270px Montserrat';
+g.letterSpacing = '-3px';
+const fade = g.createLinearGradient(0, 330, 0, 520);
+fade.addColorStop(0, 'rgba(14,18,26,0.92)');
+fade.addColorStop(1, 'rgba(40,30,30,0.0)');
+g.fillStyle = fade;
+g.fillText('OVERCAPACITY', 1000, 470);
+const title = new THREE.CanvasTexture(tc);
+title.colorSpace = THREE.SRGBColorSpace;
+
+const mat = new THREE.ShaderMaterial({
+  uniforms: { uPlate: { value: plate }, uDepth: { value: depth }, uMask: { value: mask }, uTitle: { value: title }, uP: { value: 0 }, uT: { value: 0 }, uAspect: { value: 16 / 9 } },
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+  fragmentShader: /* glsl */ `
+    uniform sampler2D uPlate, uDepth, uMask, uTitle;
+    uniform float uP, uT, uAspect;
+    varying vec2 vUv;
+    void main() {
+      // object-fit: cover for a 16:9 plate
+      vec2 uv = vUv;
+      float a = uAspect;
+      uv.x = (uv.x - 0.5) * min(1.0, 16.0 / 9.0 / a) + 0.5;
+      uv.y = (uv.y - 0.5) * min(1.0, a / (16.0 / 9.0)) + 0.5;
+      float d = texture2D(uDepth, uv).r;
+      // push-in: aim just right of centre on the bow; near things grow faster
+      vec2 c = vec2(0.58, 0.5);
+      float k = uP * (0.10 + 0.95 * d);
+      vec2 p = c + (uv - c) / (1.0 + k);
+      // slow drone drift: near moves, far stays
+      p += vec2(sin(uT * 0.22) * 0.010, cos(uT * 0.17) * 0.005) * (d - 0.35);
+      vec3 col = texture2D(uPlate, p).rgb;
+      // title behind the ship (far layer: it hardly moves), hidden where the ship is
+      vec2 tp = c + (uv - c) / (1.0 + uP * 0.05);
+      vec4 t = texture2D(uTitle, tp);
+      float shipHere = texture2D(uMask, p).r;
+      col = mix(col, t.rgb, t.a * (1.0 - shipHere) * (1.0 - smoothstep(0.55, 0.85, uP)));
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+});
+const scene = new THREE.Scene();
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const resize = () => { renderer.setSize(innerWidth, innerHeight, false); mat.uniforms.uAspect.value = innerWidth / innerHeight; };
+addEventListener('resize', resize); resize();
+
+const params = new URLSearchParams(location.search);
+const T = Number(params.get('dur') ?? 9); // seconds for the push-in
+const t0 = performance.now();
+const ease = (x) => x * x * (3 - 2 * x);
+function frame(now) {
+  const t = (now - t0) / 1000;
+  const fixed = params.get('t');
+  const tt = fixed !== null ? Number(fixed) : t;
+  mat.uniforms.uT.value = tt;
+  mat.uniforms.uP.value = ease(Math.min(1, tt / T));
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__ready = true;
+</script>
+</body>
+</html>
