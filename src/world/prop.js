@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Scene 5 as a live 3D world: under a ship's stern, a five-bladed bronze propeller turning in deep water.
 // Light shafts fall from the surface, bubbles stream off the blades, marine snow drifts. Per reveal step
@@ -16,7 +15,7 @@ const STEPS = [
   { rpm: 1.5, age: 0, fleet: 0, cam: { p: [3.5, 3.5, 15], t: [-5.5, 0.4, 0] } },
   { rpm: 1.3, age: 0, fleet: 0, cam: { p: [-14.5, 5.5, 14], t: [-5.5, 0.4, 0] } },
   { rpm: 0.35, age: 0, fleet: 0, cam: { p: [-5.0, 0.6, 14], t: [-5.5, 0, 0] } }, // head on, turning slowly
-  { rpm: 0.9, age: 1, fleet: 0, cam: { p: [4.5, -2.5, 10], t: [-5.5, 0, -1] } }, // low, old and worn
+  { rpm: 0.9, age: 1, fleet: 0, cam: { p: [6, -2, 15.5], t: [-5.5, 0, -1] } }, // low, old and worn
   { rpm: 1.3, age: 0, fleet: 1, cam: { p: [-5.5, 8, 27], t: [-5.5, 0.5, 0] } }, // pulled back: three fleets
 ];
 
@@ -26,9 +25,11 @@ export async function createPropWorld() {
   scene.fog = new THREE.FogExp2(FOG, 0.045);
   scene.add(createWater());
 
-  const bronze = new THREE.MeshStandardMaterial({ color: 0xc78a4a, metalness: 1, roughness: 0.27, envMapIntensity: 1.5 });
-  const aged = { color: new THREE.Color(0x4d5a45), rough: 0.72 };
-  const fresh = { color: new THREE.Color(0xc78a4a), rough: 0.27 };
+  const maps = surfaceMaps();
+  const bronze = new THREE.MeshPhysicalMaterial({ color: 0xd9964f, metalness: 1, roughness: 0.34, map: maps.color, roughnessMap: maps.rough, normalMap: maps.normal, normalScale: new THREE.Vector2(0.45, 0.45), clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 1.7 });
+  caustics(bronze, 1.5);
+  const aged = { color: new THREE.Color(0x58664d), rough: 0.9 };
+  const fresh = { color: new THREE.Color(0xd9964f), rough: 0.34 };
   const blade = bladeGeometry();
   const makeProp = () => {
     const g = new THREE.Group();
@@ -53,16 +54,22 @@ export async function createPropWorld() {
   scene.add(rig);
 
   // The stern above and behind the propeller: dark antifouling-red hull, shaft, skeg (no rudder: it would hide the blades).
-  const hullMat = new THREE.MeshStandardMaterial({ color: 0x2a0d0b, roughness: 0.9, metalness: 0.1 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0x232a30, roughness: 0.55, metalness: 0.6 });
+  const hullNormal = maps.normal.clone();
+  hullNormal.repeat.set(7, 3);
+  hullNormal.needsUpdate = true;
+  const hullMat = new THREE.MeshStandardMaterial({ color: 0x5a1a14, roughness: 0.85, metalness: 0.05, normalMap: hullNormal, normalScale: new THREE.Vector2(0.7, 0.7) });
+  caustics(hullMat, 0.9);
+  const steel = new THREE.MeshStandardMaterial({ color: 0x2c343b, roughness: 0.45, metalness: 0.7 });
+  caustics(steel, 0.8);
   const stern = new THREE.Group();
-  const hull = new THREE.Mesh(new THREE.BoxGeometry(22, 13, 10), hullMat);
-  hull.position.set(0, 4.4, -9.2);
+  const hull = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 40), hullMat);
+  hull.scale.set(15, 10, 11);
+  hull.position.set(0, 6.4, -10.5);
   const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 3.4, 20), steel);
   shaft.rotation.x = Math.PI / 2;
   shaft.position.set(0, 0, -2.9);
-  const skeg = new THREE.Mesh(new THREE.BoxGeometry(0.7, 6, 5), hullMat);
-  skeg.position.set(0, 1.0, -2.0);
+  const skeg = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.2, 3.2), hullMat);
+  skeg.position.set(0, 2.6, -4.2);
   stern.add(hull, shaft, skeg);
   stern.position.x = 0;
   scene.add(stern);
@@ -72,7 +79,11 @@ export async function createPropWorld() {
   sunlight.position.set(-6, 40, 14);
   const lamp = new THREE.PointLight(0xffc88a, 900, 60, 2);
   lamp.position.set(6, 3, 18);
-  scene.add(sunlight, lamp, new THREE.HemisphereLight(0x3fa8c0, 0x03121a, 0.8));
+  const rim = new THREE.DirectionalLight(0x5fe6ff, 2.6);
+  rim.position.set(2, 9, -30);
+  const rim2 = new THREE.DirectionalLight(0xffb070, 1.4);
+  rim2.position.set(14, -3, 12);
+  scene.add(sunlight, lamp, rim, rim2, new THREE.HemisphereLight(0x3fa8c0, 0x03121a, 0.9));
 
   const shafts = lightShafts();
   const snow = marineSnow();
@@ -89,8 +100,8 @@ export async function createPropWorld() {
     post: { bloom: { strength: 0.35, radius: 0.6, threshold: 1.1 } },
     init(renderer) {
       const pm = new THREE.PMREMGenerator(renderer);
-      scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-      scene.environmentIntensity = 0.55;
+      scene.environment = pm.fromScene(underwaterEnv(), 0.03).texture;
+      scene.environmentIntensity = 0.8;
       pm.dispose();
       ready = true;
     },
@@ -120,6 +131,7 @@ export async function createPropWorld() {
       bronze.roughness = fresh.rough + (aged.rough - fresh.rough) * state.age;
       bronze.metalness = 1 - 0.45 * state.age;
       shafts.material.uniforms.uTime.value = t;
+      CAUSTIC_TIME.value = t;
       snow.material.uniforms.uTime.value = t;
       bubbles.points.material.uniforms.uTime.value = t;
       bubbles.points.material.uniforms.uRate.value = 0.25 + state.rpm * 0.5;
@@ -133,21 +145,23 @@ export async function createPropWorld() {
 const ease = (x) => x * x * (3 - 2 * x);
 
 // One propeller blade as a closed thin solid: elliptical outline, pitch twist, rake and skew.
-function bladeGeometry({ r0 = 0.8, pitch = 3.9, wmax = 1.7, rake = 0.45, skew = 0.7, thick = 0.2, nu = 30, nv = 14 } = {}) {
+function bladeGeometry({ r0 = 0.8, pitch = 3.9, wmax = 1.95, rake = 0.5, skew = 0.9, thick = 0.19, nu = 36, nv = 16 } = {}) {
   const pos = [];
+  const uvs = [];
   const idx = [];
   const cols = nv + 1;
   for (let side = 0; side < 2; side++) {
     for (let i = 0; i <= nu; i++) {
       const u = i / nu;
       const r = r0 + (R - r0) * u;
-      const w = wmax * Math.sqrt(Math.max(0, 1 - ((u - 0.4) / 0.6) ** 2));
+      const w = wmax * Math.pow(Math.max(0, 1 - ((u - 0.44) / 0.56) ** 2), 0.5) * (1 - 0.08 * u);
       const phi = Math.atan(pitch / (2 * Math.PI * r));
       const sk = skew * u * u;
       for (let j = 0; j <= nv; j++) {
         const v = (j / nv) * 2 - 1;
         const s = v * w;
-        const th = (side ? -1 : 1) * thick * (1 - v * v) * (1 - 0.75 * u);
+        const th = (side ? -1 : 1) * thick * Math.pow(1 - v * v, 1.6) * (1 - 0.78 * u) * (v > 0 ? 1 : 0.8); // thin trailing and leading edges
+        uvs.push(u, (v + 1) / 2);
         // radial x, tangential y, axial z; blade normal n = (0, -sin phi, cos phi)
         pos.push(r, s * Math.cos(phi) + sk - th * Math.sin(phi), s * Math.sin(phi) + rake * u * u + th * Math.cos(phi));
       }
@@ -168,9 +182,145 @@ function bladeGeometry({ r0 = 0.8, pitch = 3.9, wmax = 1.7, rake = 0.45, skew = 
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   g.setIndex(idx);
   g.computeVertexNormals();
   return g;
+}
+
+// Procedural surfaces: a bronze colour map (pitting, scratches, green verdigris towards the root),
+// roughness and a normal map built from the same height field. 512 px, tiled.
+function surfaceMaps() {
+  const N = 512;
+  const h = new Float32Array(N * N);
+  const rnd = (() => {
+    let s = 91;
+    return () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  })();
+  const lattice = Array.from({ length: 4 }, () => Float32Array.from({ length: 65 * 65 }, rnd));
+  const noise = (x, y, o) => {
+    const f = 8 * 2 ** o;
+    const fx = (x / N) * f;
+    const fy = (y / N) * f;
+    const ix = Math.floor(fx) % 64;
+    const iy = Math.floor(fy) % 64;
+    const tx = fx - Math.floor(fx);
+    const ty = fy - Math.floor(fy);
+    const sx = tx * tx * (3 - 2 * tx);
+    const sy = ty * ty * (3 - 2 * ty);
+    const L = lattice[o];
+    const a = L[iy * 65 + ix];
+    const b = L[iy * 65 + ix + 1];
+    const c = L[(iy + 1) * 65 + ix];
+    const d = L[(iy + 1) * 65 + ix + 1];
+    return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+  };
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) h[y * N + x] = noise(x, y, 0) * 0.5 + noise(x, y, 1) * 0.3 + noise(x, y, 2) * 0.2;
+  // scratches along u (the blade's span): thin dark lines
+  for (let k = 0; k < 70; k++) {
+    const x0 = rnd() * N;
+    const y0 = rnd() * N;
+    const len = 20 + rnd() * 120;
+    const dy = (rnd() - 0.5) * 8;
+    for (let i = 0; i < len; i++) {
+      const xx = Math.floor(x0 + i) % N;
+      const yy = Math.floor(y0 + (dy * i) / len + N) % N;
+      h[yy * N + xx] -= 0.1 + rnd() * 0.06;
+    }
+  }
+  const mk = (data) => {
+    const t = new THREE.DataTexture(data, N, N, THREE.RGBAFormat);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.magFilter = THREE.LinearFilter;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.generateMipmaps = true;
+    t.anisotropy = 8;
+    t.needsUpdate = true;
+    return t;
+  };
+  const col = new Uint8Array(N * N * 4);
+  const rough = new Uint8Array(N * N * 4);
+  const nor = new Uint8Array(N * N * 4);
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const i = y * N + x;
+      const v = h[i];
+      const u = x / N; // 0 = blade root
+      const verd = (Math.max(0, 1 - u * 3.2) * (0.5 + 0.9 * noise(x, y, 1)) + Math.max(0, noise(x, y, 2) - 0.78) * 2.4) * 0.4;
+      const shade = 0.62 + 0.55 * v;
+      const g = Math.min(1, verd);
+      col[i * 4] = Math.min(255, 255 * shade * (1 - 0.4 * g));
+      col[i * 4 + 1] = Math.min(255, 255 * shade * (1 - 0.05 * g));
+      col[i * 4 + 2] = Math.min(255, 255 * shade * (1 - 0.1 * g) * (1 - 0.0));
+      col[i * 4 + 3] = 255;
+      const r = Math.min(1, 0.45 + 0.9 * (1 - v) * 0.8 + 0.4 * g);
+      rough[i * 4 + 1] = 255 * r; // G channel: roughness
+      rough[i * 4 + 3] = 255;
+      const dx = h[y * N + ((x + 1) % N)] - h[y * N + ((x - 1 + N) % N)];
+      const dy = h[((y + 1) % N) * N + x] - h[((y - 1 + N) % N) * N + x];
+      const nx = -dx * 5;
+      const ny = -dy * 5;
+      const l = Math.hypot(nx, ny, 1);
+      nor[i * 4] = 255 * (nx / l * 0.5 + 0.5);
+      nor[i * 4 + 1] = 255 * (ny / l * 0.5 + 0.5);
+      nor[i * 4 + 2] = 255 * (1 / l * 0.5 + 0.5);
+      nor[i * 4 + 3] = 255;
+    }
+  }
+  const color = mk(col);
+  color.colorSpace = THREE.SRGBColorSpace;
+  return { color, rough: mk(rough), normal: mk(nor) };
+}
+
+// Animated caustics: the bright net of light that a rippling surface throws on things below it. Added to
+// the material's emissive light, strongest on upward-facing surfaces near the top of the scene.
+const CAUSTIC_TIME = { value: 0 };
+function caustics(material, strength) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uCT = CAUSTIC_TIME;
+    shader.uniforms.uCS = { value: strength };
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vCW;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvCW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        varying vec3 vCW; uniform float uCT, uCS;
+        float caustic(vec2 p, float t) {
+          vec2 q = p;
+          float v = 0.0;
+          for (int i = 0; i < 3; i++) {
+            q += vec2(sin(q.y * 1.3 + t * 0.9), cos(q.x * 1.1 + t * 1.1)) * 0.55;
+            v += abs(sin(q.x * 1.7) + sin(q.y * 1.7));
+          }
+          return pow(clamp(1.0 - v / 3.2, 0.0, 1.0), 3.0);
+        }`
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        float cs = caustic(vCW.xz * 0.9 + vCW.y * 0.25, uCT) * 0.7 + caustic(vCW.xz * 1.7 - vCW.y * 0.4, uCT * 1.3) * 0.5;
+        totalEmissiveRadiance += vec3(0.35, 0.95, 1.0) * cs * uCS * smoothstep(-8.0, 10.0, vCW.y) * 0.55;`
+      );
+  };
+  material.needsUpdate = true;
+}
+
+// Image light for the metal: dark water with a few bright patches overhead (the surface) and a warm lamp.
+function underwaterEnv() {
+  const s = new THREE.Scene();
+  s.background = new THREE.Color(0x03141c);
+  const panel = (w, h, pos, rgb, k) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(...rgb).multiplyScalar(k), side: THREE.DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(0, 0, 0);
+    s.add(m);
+  };
+  panel(40, 14, [0, 22, 6], [0.6, 1.0, 1.0], 9);
+  panel(14, 30, [-24, 12, 2], [0.5, 0.9, 1.0], 5);
+  panel(10, 10, [18, 8, 16], [1.0, 0.7, 0.4], 7);
+  panel(30, 8, [0, 4, -22], [0.3, 0.9, 1.0], 4);
+  panel(40, 40, [0, -22, 0], [0.02, 0.1, 0.14], 1);
+  return s;
 }
 
 // Deep-water backdrop: bright teal near the surface above, black-blue below.
@@ -198,12 +348,12 @@ function createWater() {
 
 // God rays: tall soft planes falling from the surface, swaying slowly.
 function lightShafts() {
-  const n = 16;
+  const n = 26;
   const geos = [];
   let seed = 5;
   const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   for (let i = 0; i < n; i++) {
-    const g = new THREE.PlaneGeometry(2 + rnd() * 6, 90);
+    const g = new THREE.PlaneGeometry(1.4 + rnd() * 5, 90);
     g.rotateZ(0.22 + (rnd() - 0.5) * 0.1);
     g.rotateY((rnd() - 0.5) * 1.6);
     g.translate(-40 + rnd() * 80, 18, -30 + rnd() * 60);
@@ -239,7 +389,7 @@ function lightShafts() {
           float edge = 1.0 - abs(vUv.x - 0.5) * 2.0;
           float down = pow(vUv.y, 1.6);
           float flick = 0.6 + 0.4 * sin(uTime * 0.4 * vS + vS * 9.0);
-          float a = pow(edge, 1.6) * down * flick * 0.1;
+          float a = pow(edge, 1.8) * down * flick * 0.2;
           gl_FragColor = vec4(vec3(0.5, 1.0, 1.0) * a, 1.0);
         }`,
       transparent: true,
