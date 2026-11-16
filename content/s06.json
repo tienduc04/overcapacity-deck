@@ -1,53 +1,164 @@
 {
-  "steps": 3,
+  "steps": 4,
   "keyNumbers": [
     {
-      "value": "00.0",
-      "unit": "%",
-      "label": "Overcapacity 2030, optimistic (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "-0.1",
+      "unit": "pp",
+      "label": "Supply growth minus demand growth in 2030, optimistic",
+      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
       "url": "",
-      "date": "",
-      "status": "sample"
+      "date": "2026-11-06",
+      "status": "model"
     },
     {
-      "value": "00.0",
-      "unit": "%",
-      "label": "Overcapacity 2030, base (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "+1.4",
+      "unit": "pp",
+      "label": "Supply growth minus demand growth in 2030, base",
+      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
       "url": "",
-      "date": "",
-      "status": "sample"
+      "date": "2026-11-06",
+      "status": "model"
     },
     {
-      "value": "00.0",
-      "unit": "%",
-      "label": "Overcapacity 2030, downside (sample)",
-      "source": "SAMPLE placeholder",
+      "value": "+2.9",
+      "unit": "pp",
+      "label": "Supply growth minus demand growth in 2030, downside",
+      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
       "url": "",
-      "date": "",
-      "status": "sample"
+      "date": "2026-11-06",
+      "status": "model"
     }
   ],
   "chart": {
     "type": "fan",
-    "title": "Scenario fan chart (sample)",
-    "source": "SAMPLE placeholder",
+    "title": "Supply-demand gap 2027-2030, fan of 5,000 runs",
+    "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
     "url": "",
-    "date": "",
-    "status": "sample"
+    "date": "2026-11-06",
+    "status": "model"
   },
-  "bullets": [
-    "Optimistic = carriers’ view: tight market",
-    "Sample: what carriers should do"
-  ],
+  "bullets": [],
   "theory": "Sample: scenario planning.",
   "case": "Sample: signposts to watch.",
   "speakerNotes": "Every number here is [MODEL] until the model runs.",
-  "pending": true,
+  "pending": false,
   "id": "s06-scenarios",
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
   "budgetSec": 180,
-  "headline": "Three futures for 2030: optimistic, base, downside"
+  "headline": "Three futures for 2030: optimistic, base, downside",
+  "layout": "scenarios",
+  "definition": "Optimistic = the carriers' view: a tight market with little overcapacity",
+  "inputs": [
+    {
+      "k": "Fleet at start of 2027",
+      "v": "34.5 M TEU",
+      "tag": "SOURCE",
+      "by": "Taylor 2026"
+    },
+    {
+      "k": "Orderbook",
+      "v": "15.12 M TEU (range 14.0 to 16.2)",
+      "tag": "SOURCE",
+      "by": "Alphaliner; BIMCO, Linerlytica, Taylor"
+    },
+    {
+      "k": "Deliveries 2027 / 28 / 29",
+      "v": "3.43 / 5.98 / 4.35 M TEU",
+      "tag": "SOURCE",
+      "by": "Alphaliner schedule"
+    },
+    {
+      "k": "Deliveries 2030",
+      "v": "0.64 · 2.0 · 3.36 M TEU",
+      "tag": "DERIVED",
+      "by": "low · mid · high"
+    },
+    {
+      "k": "Demand growth 2027-30",
+      "v": "4.2 · 2.3 · 2.9 · 2.5 %, plus a shock of 1 pp",
+      "tag": "SOURCE + ESTIMATE",
+      "by": "Drewry Issue 2"
+    },
+    {
+      "k": "Scrapping per year",
+      "v": "0.14 to 0.30 · 0.30 to 0.60 · 0.70 M TEU",
+      "tag": "ESTIMATE",
+      "by": "low · base · high; record is 0.655 (Alphaliner)"
+    },
+    {
+      "k": "Suez return",
+      "v": "2027 30% · 2028 40% · 2029 20% · never 10%",
+      "tag": "ESTIMATE",
+      "by": "Drewry CF Issue 3; Linerlytica"
+    },
+    {
+      "k": "Delivery slippage",
+      "v": "0 to 25% of a year",
+      "tag": "ESTIMATE",
+      "by": "no clean source"
+    }
+  ],
+  "fan": {
+    "value": "+13.7",
+    "unit": "pp in 2028",
+    "label": "Median gap at the peak: 5.98 M TEU of deliveries land in 2028 (Alphaliner)",
+    "note": "Band = P10 to P90 of 5,000 runs. Gap above zero: supply grows faster than demand.",
+    "insight": "The utilisation index stays near 77 even when the gap closes: the overhang does not go away, it just stops growing."
+  },
+  "scenarios": [
+    {
+      "id": "optimistic",
+      "name": "Optimistic",
+      "sub": "tight market, carriers’ view",
+      "story": "Demand runs about 1.2 pp a year above Drewry’s path and a share of deliveries slips: the gap is back to about zero by 2030.",
+      "act": "Hold newbuild slots back, add no new orders, keep scrapping steady."
+    },
+    {
+      "id": "base",
+      "name": "Base",
+      "sub": "Drewry demand path",
+      "story": "Demand follows Drewry, about 12% of deliveries slip and 2.2 M TEU are scrapped over 2027 to 2030: the gap peaks near +14 in 2028 and is +1.4 in 2030.",
+      "act": "Blank sailings and slow steaming to protect rates, scrap the oldest ships."
+    },
+    {
+      "id": "downside",
+      "name": "Downside",
+      "sub": "weak demand",
+      "story": "Demand runs about 1.2 pp a year below Drewry and little scrapping happens: overcapacity is still +2.9 pp in 2030.",
+      "act": "Deeper blank sailings, scrap beyond the 0.655 M TEU record (needs yards) and consolidate."
+    }
+  ],
+  "assumptions": {
+    "optimistic": {
+      "Demand shock": "+1.1 pp a year",
+      "Scrapping 2027-30": "2.4 M TEU",
+      "Slippage": "14%",
+      "Deliveries 2030": "1.8 M TEU"
+    },
+    "base": {
+      "Demand shock": "0.0 pp a year",
+      "Scrapping 2027-30": "2.2 M TEU",
+      "Slippage": "12%",
+      "Deliveries 2030": "2.0 M TEU"
+    },
+    "downside": {
+      "Demand shock": "-1.1 pp a year",
+      "Scrapping 2027-30": "2.1 M TEU",
+      "Slippage": "10%",
+      "Deliveries 2030": "2.2 M TEU"
+    }
+  },
+  "spread": "The three paths differ mostly in demand (about 1.2 pp a year either way). The year Suez returns barely separates them.",
+  "signposts": [
+    "Demand against Drewry’s +4.2% for 2027: the biggest swing between our three paths.",
+    "Ships still on Cape routes (about 250 in Sep 2026, Linerlytica): a quick fall means Suez capacity returns early.",
+    "Scrapping against about 0.3 M TEU in 2027 (2025 actual: 0.008, record: 0.655).",
+    "Slippage and new orders after Oct 2026, ahead of the 5.98 M TEU due in 2028."
+  ],
+  "limits": [
+    "Not modelled: Hormuz closure, port congestion, slow steaming, consolidation.",
+    "Ranges are our own estimates: the fan is a simulation, not a forecast.",
+    "Scenarios are the median of the runs around P10, P50 and P90 of the 2030 utilisation index."
+  ]
 }

@@ -1,0 +1,142 @@
+{
+ "source": "container-scenarios simulate.py via model.run_model, 5,000 runs, seed 42 (state of 6 Nov 2026)",
+ "kind": "scenarios = median of the runs within +-4 percentile points of the 2030 utilisation index P90 / P50 / P10; fan = per-year percentiles",
+ "units": {
+  "gap_pp": "supply growth minus demand growth, percentage points per year (> 0 = overcapacity)",
+  "util_idx": "utilisation index, start of 2027 = 100 (relative, not absolute utilisation)"
+ },
+ "years": [
+  2027,
+  2028,
+  2029,
+  2030
+ ],
+ "runs": 5000,
+ "seed": 42,
+ "fan_gap_pp": {
+  "optimistic": [
+   2.17,
+   11.41,
+   5.65,
+   -0.64
+  ],
+  "base": [
+   4.44,
+   13.67,
+   7.52,
+   1.44
+  ],
+  "downside": [
+   7.7,
+   16.52,
+   10.23,
+   3.54
+  ]
+ },
+ "fan_util_idx": {
+  "optimistic": [
+   98.0,
+   87.5,
+   81.9,
+   81.7
+  ],
+  "base": [
+   95.9,
+   84.3,
+   78.4,
+   77.3
+  ],
+  "downside": [
+   93.1,
+   81.3,
+   75.1,
+   73.1
+  ]
+ },
+ "scenarios": {
+  "optimistic": {
+   "n": 400,
+   "gap_pp": [
+    2.84,
+    12.14,
+    6.3,
+    -0.11
+   ],
+   "util_idx": [
+    97.4,
+    86.7,
+    81.8,
+    81.7
+   ],
+   "drivers": {
+    "demand_shock_pp": 1.15,
+    "scrapping_total_mteu": 2.42,
+    "slippage": 0.144,
+    "suez_release_mteu": 1.61,
+    "deliveries_2030_mteu": 1.84,
+    "suez_year_share": {
+     "2027": 0.28,
+     "2028": 0.37,
+     "2029": 0.15,
+     "never": 0.19
+    }
+   }
+  },
+  "base": {
+   "n": 400,
+   "gap_pp": [
+    4.29,
+    13.75,
+    7.47,
+    1.41
+   ],
+   "util_idx": [
+    96.0,
+    84.0,
+    78.4,
+    77.3
+   ],
+   "drivers": {
+    "demand_shock_pp": -0.03,
+    "scrapping_total_mteu": 2.22,
+    "slippage": 0.122,
+    "suez_release_mteu": 1.67,
+    "deliveries_2030_mteu": 2.03,
+    "suez_year_share": {
+     "2027": 0.33,
+     "2028": 0.41,
+     "2029": 0.18,
+     "never": 0.09
+    }
+   }
+  },
+  "downside": {
+   "n": 399,
+   "gap_pp": [
+    5.58,
+    15.13,
+    9.04,
+    2.89
+   ],
+   "util_idx": [
+    94.8,
+    81.9,
+    75.2,
+    73.1
+   ],
+   "drivers": {
+    "demand_shock_pp": -1.15,
+    "scrapping_total_mteu": 2.06,
+    "slippage": 0.105,
+    "suez_release_mteu": 1.79,
+    "deliveries_2030_mteu": 2.2,
+    "suez_year_share": {
+     "2027": 0.3,
+     "2028": 0.39,
+     "2029": 0.28,
+     "never": 0.03
+    }
+   }
+  }
+ }
+}
