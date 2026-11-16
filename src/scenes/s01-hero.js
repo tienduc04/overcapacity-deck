@@ -40,8 +40,8 @@ scene.leadOut = (tl, ev) => {
   gsap.killTweensOf(hero.titleFx); // the entrance fade may still be running
   tl.to(hero.titleFx, { alpha: 0, duration: 0.6, ease: 'power1.in' }, 0);
   // Never slows down: the blur takes over while the camera is still rushing in (renderer keeps it live).
-  tl.fromTo(hero.fly, { p: 0 }, { p: 1, duration: 3.6, ease: 'none' }, 0);
-  return 2.0;
+  tl.fromTo(hero.fly, { p: 0 }, { p: 1, duration: 3.4, ease: 'none' }, 0);
+  return 1.8; // + 1.6 s blur: 3.4 s, inside the deck's 4 s per transition
 };
 
 export default scene;

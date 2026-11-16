@@ -21,11 +21,34 @@
     }
   ],
   "chart": {
-    "type": "line",
-    "title": "Demand vs supply growth (sample)",
-    "source": "SAMPLE placeholder",
+    "type": "3D stacks, 1 box = 1 pp",
+    "title": "Net fleet growth (orange) vs port throughput growth (cyan), % per year",
+    "series": {
+      "years": [
+        2026,
+        2027,
+        2028,
+        2029,
+        2030
+      ],
+      "fleet": [
+        4.2,
+        8.1,
+        11.2,
+        8.2,
+        3.2
+      ],
+      "demand": [
+        3.0,
+        4.2,
+        2.3,
+        2.9,
+        2.5
+      ]
+    },
+    "source": "Drewry Container Forecaster Issue 2 (29 Jun 2026), via a research summary, original not checked; placeholder until Req 2",
     "url": "",
-    "date": "",
+    "date": "2026-06-29",
     "status": "sample"
   },
   "bullets": [
@@ -40,5 +63,6 @@
   "owner": "Speaker A",
   "speakerKey": "speaker-a",
   "budgetSec": 210,
-  "headline": "Demand grows, but slower than the fleet"
+  "headline": "Demand grows, but slower than the fleet",
+  "layout": "port"
 }

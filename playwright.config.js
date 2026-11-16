@@ -7,6 +7,7 @@ export default defineConfig({
   outputDir: 'test-results',
   reporter: 'list',
   timeout: 60_000,
+  expect: { timeout: 12_000 }, // a cold start loads and pre-renders three 3D worlds: about 8 s on the RTX 3050
   workers: 1,
   use: {
     baseURL: 'http://localhost:4174',
