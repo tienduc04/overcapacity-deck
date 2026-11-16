@@ -175,3 +175,24 @@ function oceanGeometry(size, segments) {
   g.computeBoundingSphere();
   return g;
 }
+
+// Distance haze into the horizon colour of the baked sky, same as the sea's.
+export function haze(material, envTexture, density) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uHazeEnv = { value: envTexture };
+    shader.uniforms.uHaze = { value: density };
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vHazeWorld;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvHazeWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vHazeWorld;\nuniform samplerCube uHazeEnv;\nuniform float uHaze;')
+      .replace(
+        '#include <dithering_fragment>',
+        `vec3 hv = vHazeWorld - cameraPosition;
+        vec3 horizon = textureCube(uHazeEnv, normalize(vec3(hv.x, 0.03 * length(hv.xz), hv.z))).rgb;
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, horizon, 1.0 - exp(-length(hv) * uHaze));
+        #include <dithering_fragment>`
+      );
+  };
+  material.needsUpdate = true;
+}

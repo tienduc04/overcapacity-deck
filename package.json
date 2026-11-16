@@ -12,7 +12,8 @@
     "build:ship-rm02": "python scripts/rebrand_rm02.py assets-src/models/rm02/container_ship.glb public/models/ship-rm02.glb",
     "build:container": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_container.py -- public/models/container.glb",
     "build:propeller": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_propeller.py -- public/models/propeller.glb",
-    "build:bridge": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_bridge.py -- public/models/bridge.glb"
+    "build:bridge": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_bridge.py -- public/models/bridge.glb",
+    "build:harbour": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_harbour.py -- public/models/harbour.glb"
   },
   "type": "module",
   "private": true,
