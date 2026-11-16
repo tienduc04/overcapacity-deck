@@ -29,3 +29,5 @@ the hull and the orange boxes, textures reduced to 2K. Credit line: *"Container 
 CC BY 4.0, modified.* The Blender ship (`public/models/ship.glb`) is still used in scene 2.
 
 | Natural Earth 1:10m land | https://www.naturalearthdata.com | Natural Earth (public domain) | Scene 4 coastlines, clipped and simplified by `scripts/build-land.py` | `public/data/land.json` (source `assets-src/geo/ne_10m_land.geojson`, not committed) |
+
+| Propeller (own work) | - | this project | Scene 5 propeller, lofted airfoil blades built by `scripts/blender/build_propeller.py` (`npm run build:propeller`) | `public/models/propeller.glb` (no third-party asset) |

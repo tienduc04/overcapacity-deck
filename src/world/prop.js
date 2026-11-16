@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // Scene 5 as a live 3D world: under a ship's stern, a five-bladed bronze propeller turning in deep water.
 // Light shafts fall from the surface, bubbles stream off the blades, marine snow drifts. Per reveal step
@@ -7,8 +8,7 @@ import gsap from 'gsap';
 // (scrapping: an old ship) and two more props appear beside it (consolidation: more fleets together).
 // Axes: the shaft runs along z, the hull is at z < 0, the camera is behind the ship at z > 0. Units: metres.
 
-const R = 4.2; // propeller radius
-const BLADES = 5;
+const R = 4.2; // propeller radius (the Blender model's)
 const FOG = 0x04303c;
 // Reveal steps: fleet management, network design, slow steaming, scrapping, consolidation.
 const STEPS = [
@@ -30,17 +30,14 @@ export async function createPropWorld() {
   caustics(bronze, 1.5);
   const aged = { color: new THREE.Color(0x58664d), rough: 0.9 };
   const fresh = { color: new THREE.Color(0xd9964f), rough: 0.34 };
-  const blade = bladeGeometry();
+  // The propeller comes from Blender (scripts/blender/build_propeller.py): lofted airfoil blades, boss, nose cap.
+  // Blender's z (the shaft) is glTF y; turning it by 90 degrees about x puts the shaft on z, nose cap towards +z.
+  const gltf = await new GLTFLoader().loadAsync('models/propeller.glb');
+  const propGeo = gltf.scene.getObjectByProperty('isMesh', true).geometry.clone();
+  propGeo.rotateX(Math.PI / 2);
   const makeProp = () => {
     const g = new THREE.Group();
-    for (let k = 0; k < BLADES; k++) {
-      const m = new THREE.Mesh(blade, bronze);
-      m.rotation.z = (k * Math.PI * 2) / BLADES;
-      g.add(m);
-    }
-    const lathe = new THREE.LatheGeometry([[0.001, -1.2], [0.6, -1.05], [0.98, -0.4], [0.98, 0.9], [0.72, 1.5], [0.001, 1.85]].map(([r, z]) => new THREE.Vector2(r, z)), 40);
-    lathe.rotateX(Math.PI / 2);
-    g.add(new THREE.Mesh(lathe, bronze));
+    g.add(new THREE.Mesh(propGeo, bronze));
     return g;
   };
   const props = [makeProp(), makeProp(), makeProp()];
@@ -143,50 +140,6 @@ export async function createPropWorld() {
 }
 
 const ease = (x) => x * x * (3 - 2 * x);
-
-// One propeller blade as a closed thin solid: elliptical outline, pitch twist, rake and skew.
-function bladeGeometry({ r0 = 0.8, pitch = 3.9, wmax = 1.95, rake = 0.5, skew = 0.9, thick = 0.19, nu = 36, nv = 16 } = {}) {
-  const pos = [];
-  const uvs = [];
-  const idx = [];
-  const cols = nv + 1;
-  for (let side = 0; side < 2; side++) {
-    for (let i = 0; i <= nu; i++) {
-      const u = i / nu;
-      const r = r0 + (R - r0) * u;
-      const w = wmax * Math.pow(Math.max(0, 1 - ((u - 0.44) / 0.56) ** 2), 0.5) * (1 - 0.08 * u);
-      const phi = Math.atan(pitch / (2 * Math.PI * r));
-      const sk = skew * u * u;
-      for (let j = 0; j <= nv; j++) {
-        const v = (j / nv) * 2 - 1;
-        const s = v * w;
-        const th = (side ? -1 : 1) * thick * Math.pow(1 - v * v, 1.6) * (1 - 0.78 * u) * (v > 0 ? 1 : 0.8); // thin trailing and leading edges
-        uvs.push(u, (v + 1) / 2);
-        // radial x, tangential y, axial z; blade normal n = (0, -sin phi, cos phi)
-        pos.push(r, s * Math.cos(phi) + sk - th * Math.sin(phi), s * Math.sin(phi) + rake * u * u + th * Math.cos(phi));
-      }
-    }
-  }
-  const per = (nu + 1) * cols;
-  for (let side = 0; side < 2; side++) {
-    for (let i = 0; i < nu; i++) {
-      for (let j = 0; j < nv; j++) {
-        const a = side * per + i * cols + j;
-        const b = a + 1;
-        const c = a + cols;
-        const d = c + 1;
-        if (side) idx.push(a, b, c, b, d, c);
-        else idx.push(a, c, b, b, c, d);
-      }
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
-}
 
 // Procedural surfaces: a bronze colour map (pitting, scratches, green verdigris towards the root),
 // roughness and a normal map built from the same height field. 512 px, tiled.
