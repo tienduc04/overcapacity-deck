@@ -24,20 +24,33 @@
   ],
   "chart": {
     "type": "bar",
-    "title": "Deliveries per year (sample)",
-    "source": "SAMPLE placeholder",
+    "title": "Gross deliveries, M TEU per year",
+    "bars": {
+      "labels": [
+        "2027",
+        "2028",
+        "2029"
+      ],
+      "values": [
+        3.43,
+        5.98,
+        4.35
+      ]
+    },
+    "source": "Yang Chen 2026b (Alphaliner data)",
     "url": "",
-    "date": "",
-    "status": "sample"
+    "date": "2026",
+    "status": "unverified"
   },
   "bullets": [
-    "16.2M TEU on order, 46.5% of the fleet: a post-2009 peak (Taylor 2026)",
-    "Gross deliveries: 3.43M TEU (2027), 5.98M (2028), 4.35M (2029)",
-    "Orderbook covers 4–4.5 years of deliveries, against a 2–2.5 year norm"
+    "16.2M TEU on order, 46.5% of the fleet: a post-2009 peak (Taylor 2026); Linerlytica: 1,925 ships, 15.6M TEU",
+    "About 5.4M TEU ordered in 2025, another 4.4–4.9M TEU so far in 2026",
+    "The orderbook covers 4–4.5 years of deliveries, against a 2–2.5 year norm",
+    "Drewry net fleet growth: about 9% (2027), 12.1% (2028), 10% (2029)"
   ],
-  "theory": "Sample: shipbuilding cycle and time lag between order and delivery.",
-  "case": "MSC: 3.38M TEU on order, 45% of its fleet. Hapag-Lloyd: 0.49M TEU, 20% (Alphaliner).",
-  "speakerNotes": "Sample notes. Only the two BIMCO figures are verified.",
+  "theory": "Fallacy of composition: each order is rational for one carrier, but together they add far more ships than demand can fill.",
+  "case": "MSC: 3.38M TEU on order, 45% of its own fleet. Hapag-Lloyd: 0.49M TEU, 20% (Alphaliner).",
+  "speakerNotes": "Req 1, orderbook tab of the team doc. Range: BIMCO >14M TEU (42%), Linerlytica 15.6M (45%), Taylor 16.2M (46.5%). 2028-29 deliveries (~10.3M TEU) are close to 30% of today's fleet. Drivers section to be rewritten.",
   "pending": false,
   "id": "s02-orderbook",
   "owner": "Tien Duc",

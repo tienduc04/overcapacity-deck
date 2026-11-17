@@ -160,7 +160,6 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--scenarios:not([data-at='3']) .v-sign { display: none; }
 .slide--scenarios[data-show='drivers'] .v-story, .slide--scenarios:not([data-show='drivers']) .v-drivers { display: none; }
 
-.watermark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font-size: 190px; font-weight: 800; letter-spacing: 0.08em; color: rgba(255, 51, 51, 0.13); pointer-events: none; white-space: nowrap; }
 .badge-pending { position: absolute; top: var(--margin); right: var(--margin); padding: 10px 20px; border-radius: 10px; background: var(--risk); color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; }
 
 .nav { position: absolute; right: var(--margin); bottom: var(--margin); display: flex; align-items: center; gap: 18px; }
@@ -207,3 +206,12 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .c-card .pts li::marker { color: var(--supply); }
 .slide--carriers .headline { width: 1400px; }
 .slide--carriers .c-col { top: 265px; width: 820px; }
+
+/* Bar chart drawn in HTML (chart.bars): value on top, year below. */
+.chart-bars { flex: 1; display: flex; gap: 28px; align-items: flex-end; padding-top: 14px; }
+.bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; }
+.bar-fill { background: linear-gradient(var(--supply), rgba(243, 112, 33, 0.35)); min-height: 4px; }
+.bar-value { font: 800 30px var(--head); text-align: center; margin-bottom: 6px; }
+.bar-label { font: 500 18px var(--mono); letter-spacing: 0.12em; text-align: center; color: var(--muted); margin-top: 8px; }
+.slide--zoom .chart { background: rgba(10, 17, 24, 0.6); padding: 18px 24px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.slide--zoom .bullets { padding: 18px 24px 18px 44px; margin: 0; background: rgba(10, 17, 24, 0.6); font-size: 23px; line-height: 1.38; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }

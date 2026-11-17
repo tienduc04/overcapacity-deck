@@ -9,7 +9,6 @@ const el = (tag, cls, text) => {
 };
 const pad = (n) => String(n).padStart(2, '0');
 const mmss = (s) => `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`;
-export const isSample = (c) => [...(c.keyNumbers ?? []), ...(c.chart ? [c.chart] : [])].some((x) => x.status === 'sample');
 
 export function createHud(stage, { total, onPrev, onNext }) {
   const slides = el('div', 'slides');
@@ -45,7 +44,6 @@ export function createHud(stage, { total, onPrev, onNext }) {
     top.append(el('span', 'slide-brand', 'Hapag-Lloyd'), el('span', 'slide-no metric', `${pad(index + 1)} / ${pad(total)}`), el('span', 'slide-title', scene.title), el('span', 'slide-speaker', scene.speaker));
     slide.append(top);
     if (content.pending) slide.append(el('div', 'badge-pending', 'CONTENT PENDING'));
-    if (isSample(content)) slide.append(el('div', 'watermark', 'SAMPLE DATA'));
 
     const groups = [];
     if (content.layout) slide.classList.add(`slide--${content.layout}`); // per-scene layout in hud.css
@@ -81,7 +79,20 @@ export function createHud(stage, { total, onPrev, onNext }) {
     const side = [];
     if (content.chart) {
       const chart = el('div', 'chart');
-      chart.append(el('div', 'chart-title', content.chart.title ?? 'Chart'), el('div', 'chart-body', `${content.chart.type ?? 'chart'} · ${content.chart.status}`));
+      chart.append(el('div', 'chart-title', content.chart.title ?? 'Chart'));
+      const bars = content.chart.bars;
+      if (bars) {
+        const body = el('div', 'chart-bars');
+        const max = Math.max(...bars.values);
+        bars.labels.forEach((label, i) => {
+          const col = el('div', 'bar');
+          const fill = el('div', 'bar-fill');
+          fill.style.height = `${(bars.values[i] / max) * 100}%`;
+          col.append(el('div', 'bar-value metric', String(bars.values[i])), fill, el('div', 'bar-label metric', label));
+          body.append(col);
+        });
+        chart.append(body);
+      } else chart.append(el('div', 'chart-body', `${content.chart.type ?? 'chart'} · ${content.chart.status}`));
       side.push(chart);
     }
     if (content.bullets?.length) {
