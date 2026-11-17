@@ -7,7 +7,7 @@ const world = () =>
     .then((m) => m.createMapWorld())
     .then((w) => (map = w));
 
-const scene = createScene({ title: 'Chokepoints', speaker: 'Speakers B and C', transition: 'radarWipe', content, world });
+const scene = createScene({ title: 'Chokepoints', speaker: 'Akshaya and Akib', transition: 'radarWipe', content, world });
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false; // on screen: steps animate; arriving from another scene jumps
 let opened = false; // the REOPEN SUEZ button was pressed on step 2

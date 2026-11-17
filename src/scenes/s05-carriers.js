@@ -7,7 +7,7 @@ const world = () =>
     .then((m) => m.createPropWorld())
     .then((w) => (prop = w));
 
-const scene = createScene({ title: 'Carriers', speaker: 'Speaker D', transition: 'bubbles', content, world });
+const scene = createScene({ title: 'Carriers', speaker: 'Sarkar Sanjoy', transition: 'bubbles', content, world });
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false; // on screen: steps animate; arriving from another scene jumps
 let steps = [];
