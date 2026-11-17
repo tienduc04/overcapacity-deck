@@ -31,11 +31,12 @@
     "status": "sample"
   },
   "bullets": [
-    "Sample: what drives the ordering wave",
-    "Sample: when the ships arrive"
+    "16.2M TEU on order, 46.5% of the fleet: a post-2009 peak (Taylor 2026)",
+    "Gross deliveries: 3.43M TEU (2027), 5.98M (2028), 4.35M (2029)",
+    "Orderbook covers 4–4.5 years of deliveries, against a 2–2.5 year norm"
   ],
   "theory": "Sample: shipbuilding cycle and time lag between order and delivery.",
-  "case": "Sample: one carrier’s newbuilding programme.",
+  "case": "MSC: 3.38M TEU on order, 45% of its fleet. Hapag-Lloyd: 0.49M TEU, 20% (Alphaliner).",
   "speakerNotes": "Sample notes. Only the two BIMCO figures are verified.",
   "pending": false,
   "id": "s02-orderbook",

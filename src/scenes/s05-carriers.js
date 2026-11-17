@@ -44,6 +44,7 @@ scene.reveal = (step) => {
   const n = r.number == null ? null : content.keyNumbers[r.number];
   card.innerHTML =
     `<div class="line">${r.line}</div>` +
+    (r.points ? `<ul class="pts">${r.points.map((t) => `<li>${t}</li>`).join('')}</ul>` : '') +
     (n
       ? `<div class="fig"><div><span class="v">${n.value}</span><span class="u">${n.unit}</span></div><div class="l">${n.label}</div><div class="n">${n.note}</div></div>`
       : `<div class="tbd">${content.noFigure}</div>`);

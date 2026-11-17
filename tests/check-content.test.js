@@ -24,6 +24,6 @@ describe('check-content', () => {
     const m = messages('content').join('\n');
     expect(m).not.toMatch(/s02\.json: keyNumbers/); // both BIMCO figures are verified with a URL
     expect(m).toMatch(/s02\.json: chart .* is sample/);
-    expect(m).toMatch(/s03\.json: pending is true/);
+    expect(m).toMatch(/s03\.json: keyNumbers\[0\] .* is unverified/); // Req 2 figures still need sources
   });
 });

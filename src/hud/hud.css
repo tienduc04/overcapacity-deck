@@ -89,7 +89,7 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .m-card .l { margin-top: 10px; font: 400 24px/1.35 'Inter', var(--head); }
 .m-card .n { margin-top: 10px; font: 400 19px/1.4 'Inter', var(--head); color: var(--muted); }
 .slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
-.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map[data-at='3'] .m-a, .slide--map:not([data-at='3']) .m-c { display: none; }
+.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map:not([data-at='0']):not([data-at='1']):not([data-at='2']) .m-a, .slide--map:not([data-at='4']) .m-c { display: none; }
 .m-legend { position: absolute; right: var(--edge); top: 112px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); }
 .m-legend i { display: inline-block; width: 36px; height: 4px; margin-left: 14px; vertical-align: middle; }
 .m-legend .cape i { background: #f0a030; box-shadow: 0 0 10px #f0a030; }
@@ -192,3 +192,18 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .overlay-debug { position: absolute; left: var(--margin); bottom: 90px; margin: 0; padding: 14px 18px; border-radius: 12px; background: rgba(10, 17, 24, 0.9); font: 400 18px/1.5 var(--mono); color: var(--demand); }
 .overlay-backup { position: absolute; inset: 120px 240px; padding: 60px; border-radius: 24px; background: rgba(10, 17, 24, 0.94); border: 2px solid var(--supply); }
 .overlay-backup h2 { margin: 0 0 24px; font-size: 48px; font-weight: 800; text-transform: uppercase; color: var(--supply); }
+
+/* Pages: the team's slide text, one panel per reveal step, right column. */
+.pages { position: absolute; right: var(--edge); top: 300px; width: 700px; }
+.page { position: absolute; inset: 0 0 auto 0; padding: 26px 34px; background: rgba(10, 17, 24, 0.7); border-left: 3px solid var(--demand); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: opacity 0.45s ease, transform 0.45s ease; }
+.page.is-hidden { pointer-events: none; }
+.page-title { margin: 0 0 14px; font: 800 32px/1.1 var(--head); text-transform: uppercase; }
+.page-points { margin: 0; padding-left: 1.1em; font: 400 23px/1.38 'Inter', var(--head); }
+.page-points li + li { margin-top: 9px; }
+.page-points li::marker { color: var(--demand); }
+.page-note { margin-top: 14px; font: 400 18px/1.4 'Inter', var(--head); color: var(--muted); }
+.c-card .pts { margin: 12px 0 0; padding-left: 1.1em; font: 400 21px/1.38 'Inter', var(--head); }
+.c-card .pts li + li { margin-top: 6px; }
+.c-card .pts li::marker { color: var(--supply); }
+.slide--carriers .headline { width: 1400px; }
+.slide--carriers .c-col { top: 265px; width: 820px; }

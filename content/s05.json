@@ -20,6 +20,16 @@
       "url": "",
       "date": "Jan to Sep 2026",
       "status": "sample"
+    },
+    {
+      "value": "42.2",
+      "unit": "% fuel per day",
+      "label": "From 16 to 12 knots under the simplified cube rule: about 58% less fuel per day (illustrative)",
+      "note": "Class example from Req 5. Per voyage the saving is smaller, since the trip takes longer.",
+      "source": "Req 5 class example (cube rule)",
+      "url": "",
+      "date": "",
+      "status": "unverified"
     }
   ],
   "chart": {
@@ -33,40 +43,64 @@
   "bullets": [],
   "theory": "Sample: supply-side adjustment.",
   "case": "Sample: one carrier’s response.",
-  "speakerNotes": "Sample notes for Speaker D.",
-  "pending": true,
+  "speakerNotes": "Req 5 slide text from the team doc: slide 1 lever wording, slide 2 table, slide 3 network design and consolidation.",
+  "pending": false,
   "id": "s05-carriers",
   "owner": "Speaker D",
   "speakerKey": "speaker-d",
   "budgetSec": 210,
-  "headline": "Five levers against overcapacity",
+  "headline": "How can carriers respond to overcapacity?",
   "layout": "carriers",
   "noFigure": "No sourced figure yet: Req 5 owner to add",
   "responses": [
     {
       "title": "Fleet management",
-      "line": "Defer or cancel newbuild slots, push deliveries back, lay up or hand back chartered ships.",
-      "number": 0
+      "line": "Adjust vessel deployment and charter commitments.",
+      "number": 0,
+      "points": [
+        "Fleet deployment: shift vessels towards stronger-demand routes, to improve utilisation",
+        "Charter adjustment: reduce chartered capacity when contracts permit, for flexibility",
+        "Lay-up: temporarily withdraw vessels, to reduce active capacity"
+      ]
     },
     {
       "title": "Network design",
-      "line": "Blank sailings, merged or shorter loops, fewer port calls: capacity leaves the lane without a ship being scrapped.",
-      "number": null
+      "line": "Optimise routes, port calls and vessel allocation.",
+      "number": null,
+      "points": [
+        "Optimise routes, service loops and port rotations",
+        "Match vessel size and frequency to cargo demand",
+        "Improve vessel utilisation and operational efficiency"
+      ]
     },
     {
       "title": "Slow steaming",
-      "line": "Sail slower: each round trip takes more days, so the same fleet moves less cargo.",
-      "number": null
+      "line": "Reduce speed to absorb effective capacity and save fuel.",
+      "number": 2,
+      "points": [
+        "Fuel use rises steeply with speed (simplified cube rule)",
+        "Trade-off: longer transit times, and more ships for the same weekly frequency"
+      ]
     },
     {
       "title": "Scrapping",
-      "line": "Recycle the oldest ships to shrink the fleet, but yards, rates and rules limit the pace.",
-      "number": 1
+      "line": "Permanently remove older vessels, to reduce fleet supply.",
+      "number": 1,
+      "points": [
+        "Lay-up is temporary; scrapping is permanent",
+        "Limits: owners keep ships that still pay, scrap prices matter, newbuilds offset the removals"
+      ]
     },
     {
       "title": "Consolidation",
-      "line": "Mergers, alliances and vessel-sharing agreements: fewer players deciding capacity together.",
-      "number": null
+      "line": "Combine overlapping services and coordinate capacity.",
+      "number": null,
+      "points": [
+        "Combine overlapping or underutilised services and reduce duplicated capacity",
+        "Coordinate vessel deployment between carriers, keep transit times and reliability",
+        "Example: Hapag-Lloyd and Maersk's Gemini Cooperation (2025)",
+        "Managing overcapacity is not simply about removing ships"
+      ]
     }
   ]
 }

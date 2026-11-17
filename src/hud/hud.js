@@ -94,7 +94,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
       wrap.append(...side);
       groups.push(wrap);
     }
-    const extra = [['Theory', content.theory], ['Case', content.case]].filter(([, t]) => t);
+    const extra = [[content.theoryLabel ?? 'Theory', content.theory], [content.caseLabel ?? 'Case', content.case]].filter(([, t]) => t);
     if (extra.length) {
       const row = el('div', 'extra');
       for (const [label, text] of extra) {
@@ -110,6 +110,22 @@ export function createHud(stage, { total, onPrev, onNext }) {
       slide.append(g);
     });
 
+    // Pages: the team's own slide text, one panel per reveal step (`at` lists the steps it shows on).
+    if (content.pages?.length) {
+      const wrap = el('div', 'pages');
+      for (const p of content.pages) {
+        const page = el('div', 'page is-hidden');
+        page.dataset.at = [].concat(p.at).join(' ');
+        page.append(el('h2', 'page-title', p.title));
+        const ul = el('ul', 'page-points');
+        for (const t of p.points ?? []) ul.append(el('li', '', t));
+        page.append(ul);
+        if (p.note) page.append(el('div', 'page-note', p.note));
+        wrap.append(page);
+      }
+      slide.append(wrap);
+    }
+
     const sources = [...(content.keyNumbers ?? []), ...(content.chart ? [content.chart] : [])]
       .filter((x) => x.source)
       .map((x) => `${x.source}${x.date ? `, ${x.date}` : ''}`);
@@ -123,6 +139,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     mount,
     showStep(slide, step) {
       for (const g of slide.querySelectorAll('[data-step]')) g.classList.toggle('is-hidden', Number(g.dataset.step) > step);
+      for (const p of slide.querySelectorAll('.page')) p.classList.toggle('is-hidden', !p.dataset.at.split(' ').includes(String(step)));
     },
     setPosition(index, step, steps) {
       counter.textContent = `${pad(index + 1)}/${pad(total)} · ${step + 1}/${steps}`;
