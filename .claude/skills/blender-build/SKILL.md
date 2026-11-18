@@ -19,6 +19,7 @@ Models are code: one headless Blender script per asset, so every GLB can be rebu
    ```
    "%LOCALAPPDATA%\Programs\Blender\blender-5.3.0-windows-x64\blender.exe" -b --factory-startup --python scripts/blender/preview_eevee.py -- public/models/<name>.glb <scratch dir> [px,py,pz:tx,ty,tz ...]
    ```
+   Short form: `npm run preview:glb -- public/models/<name>.glb <scratch dir> [cams]`.
    Pass the deck camera(s) in three.js coordinates (y up) so the preview matches the slide. Without cameras it renders
    front, three-quarter and high views. Read `<scratch dir>/sheet.png` and judge it against step 1 before going on.
    Takes ~7 s for a small model, ~30 s for the harbour on the RTX 3050.
