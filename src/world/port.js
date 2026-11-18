@@ -187,6 +187,7 @@ export async function createPortWorld(series) {
       dust.material.uniforms.uTime.value = t;
       shore.twinkle(t);
       chart.place(state.built);
+      for (const l of chart.labels) l.visible = state.built > 0; // painted labels only with the chart (beat 3)
       hero.update(state, t);
       // The crane follows the box being placed along the quay; the trolley runs out along the boom.
       const carried = chart.carried;
