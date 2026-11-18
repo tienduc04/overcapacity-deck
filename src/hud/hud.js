@@ -79,20 +79,7 @@ export function createHud(stage, { total, onPrev, onNext }) {
     const side = [];
     if (content.chart) {
       const chart = el('div', 'chart');
-      chart.append(el('div', 'chart-title', content.chart.title ?? 'Chart'));
-      const bars = content.chart.bars;
-      if (bars) {
-        const body = el('div', 'chart-bars');
-        const max = Math.max(...bars.values);
-        bars.labels.forEach((label, i) => {
-          const col = el('div', 'bar');
-          const fill = el('div', 'bar-fill');
-          fill.style.height = `${(bars.values[i] / max) * 100}%`;
-          col.append(el('div', 'bar-value metric', String(bars.values[i])), fill, el('div', 'bar-label metric', label));
-          body.append(col);
-        });
-        chart.append(body);
-      } else chart.append(el('div', 'chart-body', `${content.chart.type ?? 'chart'} · ${content.chart.status}`));
+      chart.append(el('div', 'chart-title', content.chart.title ?? 'Chart'), el('div', 'chart-body', `${content.chart.type ?? 'chart'} · ${content.chart.status}`));
       side.push(chart);
     }
     if (content.bullets?.length) {

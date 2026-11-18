@@ -2,29 +2,39 @@
   "steps": 3,
   "keyNumbers": [
     {
-      "value": "14+",
+      "value": "16.2",
       "unit": "M TEU",
-      "label": "Container ship orderbook",
-      "source": "BIMCO Container Market Overview & Outlook, Sep 2026, via Maritime Executive",
-      "url": "https://maritime-executive.com/article/overcapacity-looms-over-container-shipping-as-supply-pressure-mounts",
-      "date": "2026-09-23",
-      "status": "verified",
-      "note": "Same figures reposted 24 Sep 2026 (El Estrecho Digital, Hellenic Shipping News). Not the 3 Sep article, where 42% is fleet growth."
+      "label": "On order: 46.5% of the active fleet, the highest since 2009",
+      "note": "Range: BIMCO >14M (42%) · Linerlytica 15.6M (45%) · Taylor 16.2M (46.5%)",
+      "source": "Taylor 2026; BIMCO via Maritime Executive; Linerlytica via Yang Chen 2026a",
+      "url": "",
+      "date": "2026",
+      "status": "unverified"
     },
     {
-      "value": "~42",
-      "unit": "%",
-      "label": "Of the existing fleet",
-      "source": "BIMCO Container Market Overview & Outlook, Sep 2026, via Maritime Executive",
-      "url": "https://maritime-executive.com/article/overcapacity-looms-over-container-shipping-as-supply-pressure-mounts",
-      "date": "2026-09-23",
-      "status": "verified",
-      "note": "42% = orderbook / existing fleet, so BIMCO's fleet is at least 14 / 0.42 = 33.3M TEU (floor, since the orderbook is 'more than 14')."
+      "value": "4–4.5",
+      "unit": "years",
+      "label": "Of deliveries already in the orderbook, against a 2–2.5 year norm",
+      "note": "A ship ordered today arrives around 2030",
+      "source": "van Marle 2026",
+      "url": "",
+      "date": "2026",
+      "status": "unverified"
+    },
+    {
+      "value": "10.3",
+      "unit": "M TEU",
+      "label": "Delivered in 2028–29 alone: about 30% of today's fleet",
+      "note": "5.98 + 4.35M TEU gross, on a fleet of about 34.5M TEU",
+      "source": "Yang Chen 2026b",
+      "url": "",
+      "date": "2026",
+      "status": "unverified"
     }
   ],
   "chart": {
     "type": "bar",
-    "title": "Gross deliveries, M TEU per year",
+    "title": "Gross deliveries 2027–29, M TEU",
     "bars": {
       "labels": [
         "2027",
@@ -35,27 +45,90 @@
         3.43,
         5.98,
         4.35
-      ]
+      ],
+      "tags": [
+        "~9%",
+        "12.1%",
+        "~10%"
+      ],
+      "tagLabel": "Drewry net fleet growth"
     },
-    "source": "Yang Chen 2026b (Alphaliner data)",
+    "footnote": "Gross deliveries and Drewry's net growth use different fleet definitions: the gap is not a scrapping forecast.",
+    "source": "Yang Chen 2026b (Alphaliner data); Drewry via Portnews",
     "url": "",
     "date": "2026",
     "status": "unverified"
   },
-  "bullets": [
-    "16.2M TEU on order, 46.5% of the fleet: a post-2009 peak (Taylor 2026); Linerlytica: 1,925 ships, 15.6M TEU",
-    "About 5.4M TEU ordered in 2025, another 4.4–4.9M TEU so far in 2026",
-    "The orderbook covers 4–4.5 years of deliveries, against a 2–2.5 year norm",
-    "Drewry net fleet growth: about 9% (2027), 12.1% (2028), 10% (2029)"
-  ],
-  "theory": "Fallacy of composition: each order is rational for one carrier, but together they add far more ships than demand can fill.",
-  "case": "MSC: 3.38M TEU on order, 45% of its own fleet. Hapag-Lloyd: 0.49M TEU, 20% (Alphaliner).",
-  "speakerNotes": "Req 1, orderbook tab of the team doc. Range: BIMCO >14M TEU (42%), Linerlytica 15.6M (45%), Taylor 16.2M (46.5%). 2028-29 deliveries (~10.3M TEU) are close to 30% of today's fleet. Drivers section to be rewritten.",
+  "speakerNotes": "About 2 minutes. Beat 1: 16.2M TEU (state the 14-16.2 range), point at 2028. Beat 2: MSC/COSCO 45-51% vs Hapag-Lloyd 20%. Beat 3: four drivers in one line each, then the banner. Hand-over to Req 2: fleet +9-12% a year against demand +3-6%. BIMCO 14M/42% verified: https://maritime-executive.com/article/overcapacity-looms-over-container-shipping-as-supply-pressure-mounts",
   "pending": false,
   "id": "s02-orderbook",
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
-  "budgetSec": 80,
+  "budgetSec": 120,
   "headline": "A record orderbook is heading for the water",
-  "layout": "zoom"
+  "layout": "orderbook",
+  "carriers": {
+    "title": "Orderbook by carrier, M TEU (share of own fleet)",
+    "rows": [
+      {
+        "name": "MSC",
+        "teu": 3.38,
+        "ships": 183,
+        "ratio": 45
+      },
+      {
+        "name": "COSCO Group",
+        "teu": 1.88,
+        "ships": 155,
+        "ratio": 51
+      },
+      {
+        "name": "Maersk",
+        "teu": 1.81,
+        "ships": 138,
+        "ratio": 38
+      },
+      {
+        "name": "CMA CGM",
+        "teu": 1.68,
+        "ships": 162,
+        "ratio": 37
+      },
+      {
+        "name": "Evergreen",
+        "teu": 0.84,
+        "ships": 74,
+        "ratio": 41
+      },
+      {
+        "name": "Hapag-Lloyd",
+        "teu": 0.49,
+        "ships": 62,
+        "ratio": 20,
+        "rank": 8,
+        "highlight": true
+      }
+    ],
+    "callout": "MSC and COSCO are betting on scale (45–51% of their fleets on order). Hapag-Lloyd keeps a disciplined 20%.",
+    "note": "Highest ratio: Wan Hai, 78%. Source: Alphaliner via El Estrecho Digital, 2026."
+  },
+  "drivers": [
+    {
+      "title": "Decarbonisation rules",
+      "line": "EEXI/CII, EU ETS and FuelEU make old ships dearer to run; the open IMO Net-Zero vote forces early fuel bets."
+    },
+    {
+      "title": "Economies of scale",
+      "line": "About 40 megamax (~24,000 TEU) orders pending, but the cost per slot only falls when ships sail full."
+    },
+    {
+      "title": "Pandemic war chest",
+      "line": "About $536bn EBIT in 2021–22 lets carriers fund newbuilds from their own cash."
+    },
+    {
+      "title": "Alliance realignment",
+      "line": "Since Gemini and MSC's solo network (Feb 2025), owned tonnage is the weapon for market share."
+    }
+  ],
+  "banner": "Fallacy of composition: each order is rational for one carrier, but together they make a supply wave that demand is unlikely to absorb in 2027–29 (Drewry: 'unavoidable' in 2027–28)."
 }

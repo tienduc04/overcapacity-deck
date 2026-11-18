@@ -68,13 +68,12 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 
 .sources { position: absolute; left: var(--edge); bottom: var(--margin); max-width: 1300px; font: 400 18px var(--mono); color: var(--muted); }
 
-/* Scenes 2 (zoom) and 3 (port): figures in a readout sliding in from the left. */
+/* Scene 3 (port): figures in a readout sliding in from the left. */
 .slide--port .chart { height: auto; gap: 0; }
 .slide--port .chart-body { display: none; } /* the 3D stacks are the chart; the title is its legend */
-.slide--zoom .numbers, .slide--port .numbers { top: 300px; padding: 28px 36px; gap: 28px; background: rgba(10, 17, 24, 0.6); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.slide--zoom .numbers.is-hidden, .slide--port .numbers.is-hidden { transform: translateX(-80px); }
-.slide--zoom .number-card, .slide--port .number-card { width: 440px; padding-top: 0; border-top: 0; }
-.slide--zoom .number-value { font-size: 104px; color: var(--supply); }
+.slide--port .numbers { top: 300px; padding: 28px 36px; gap: 28px; background: rgba(10, 17, 24, 0.6); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.slide--port .numbers.is-hidden { transform: translateX(-80px); }
+.slide--port .number-card { width: 440px; padding-top: 0; border-top: 0; }
 
 /* Scene 4 (map): custom readouts on the left, the lane legend top right, a big REOPEN SUEZ button. */
 .slide--map .numbers, .slide--map .side, .slide--map .extra { display: none; }
@@ -207,11 +206,41 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--carriers .headline { width: 1400px; }
 .slide--carriers .c-col { top: 265px; width: 820px; }
 
-/* Bar chart drawn in HTML (chart.bars): value on top, year below. */
-.chart-bars { flex: 1; display: flex; gap: 28px; align-items: flex-end; padding-top: 14px; }
-.bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; }
-.bar-fill { background: linear-gradient(var(--supply), rgba(243, 112, 33, 0.35)); min-height: 4px; }
-.bar-value { font: 800 30px var(--head); text-align: center; margin-bottom: 6px; }
-.bar-label { font: 500 18px var(--mono); letter-spacing: 0.12em; text-align: center; color: var(--muted); margin-top: 8px; }
-.slide--zoom .chart { background: rgba(10, 17, 24, 0.6); padding: 18px 24px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.slide--zoom .bullets { padding: 18px 24px 18px 44px; margin: 0; background: rgba(10, 17, 24, 0.6); font-size: 23px; line-height: 1.38; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+/* Scene 2 (orderbook): three beats, one per reveal step. */
+.slide--orderbook .numbers, .slide--orderbook .side, .slide--orderbook .extra { display: none; }
+.ob-beat { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.45s ease, transform 0.45s ease; }
+.ob-panel { background: rgba(10, 17, 24, 0.68); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.ob-panel .t { font: 500 18px var(--head); letter-spacing: 0.28em; text-transform: uppercase; }
+.ob-panel .n, .ob-kpi .n { font: 400 16px/1.4 'Inter', var(--head); color: var(--muted); }
+.ob-kpis { position: absolute; left: var(--edge); top: 280px; width: 600px; display: flex; flex-direction: column; gap: 16px; }
+.ob-kpi { padding: 16px 26px; background: rgba(10, 17, 24, 0.68); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.ob-kpi .v { display: inline; font: 800 72px/1 var(--head); color: var(--supply); font-variant-numeric: tabular-nums; }
+.ob-kpi .u { display: inline; margin-left: 12px; font: 500 22px var(--head); letter-spacing: 0.2em; text-transform: uppercase; }
+.ob-kpi .l { margin-top: 6px; font: 400 21px/1.35 'Inter', var(--head); }
+.ob-kpi .n { margin-top: 4px; }
+.ob-wave { position: absolute; right: var(--edge); top: 280px; width: 760px; padding: 22px 30px; }
+.ob-bars { height: 380px; display: flex; gap: 48px; align-items: flex-end; margin-top: 18px; }
+.ob-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; text-align: center; }
+.ob-bar b { font: 500 22px var(--mono); color: var(--risk); margin-bottom: 4px; }
+.ob-bar .val { font: 800 38px var(--head); margin-bottom: 8px; }
+.ob-bar i { display: block; background: linear-gradient(var(--supply), rgba(243, 112, 33, 0.3)); min-height: 4px; }
+.ob-bar .yr { margin-top: 10px; font: 500 20px var(--mono); letter-spacing: 0.12em; color: var(--muted); }
+.ob-wave .key { margin-top: 16px; font: 500 17px var(--head); letter-spacing: 0.16em; text-transform: uppercase; }
+.ob-wave .key b { color: var(--risk); margin-right: 8px; }
+.ob-wave .n { margin-top: 8px; }
+.ob-callout { position: absolute; left: var(--edge); top: 300px; width: 560px; padding: 26px 32px; }
+.ob-callout p { margin: 0 0 14px; font: 400 30px/1.35 'Inter', var(--head); }
+.ob-carriers { position: absolute; right: var(--edge); top: 280px; width: 1000px; padding: 24px 32px; }
+.ob-carriers .t { margin-bottom: 16px; }
+.ob-row { display: grid; grid-template-columns: 280px 1fr 90px 80px; gap: 18px; align-items: center; height: 62px; font: 500 24px var(--head); color: rgba(232, 238, 244, 0.75); }
+.ob-row .track i { display: block; height: 26px; background: rgba(159, 178, 198, 0.45); }
+.ob-row .teu, .ob-row .pct { font-family: var(--mono); text-align: right; }
+.ob-row.hl { color: #fff; font-weight: 800; }
+.ob-row.hl .track i { background: var(--supply); box-shadow: 0 0 18px rgba(243, 112, 33, 0.6); }
+.ob-row.hl .pct { color: var(--supply); }
+.ob-grid { position: absolute; left: var(--edge); right: var(--edge); top: 280px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.ob-driver { padding: 22px 30px; }
+.ob-driver b { font: 500 20px var(--mono); color: var(--supply); letter-spacing: 0.16em; }
+.ob-driver .h { margin-top: 4px; font: 800 30px var(--head); text-transform: uppercase; }
+.ob-driver p { margin: 8px 0 0; font: 400 23px/1.38 'Inter', var(--head); }
+.ob-banner { position: absolute; left: var(--edge); right: var(--edge); top: 720px; padding: 22px 32px; border: 2px solid var(--risk); background: rgba(40, 8, 6, 0.72); font: 500 25px/1.4 'Inter', var(--head); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
