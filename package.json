@@ -13,7 +13,8 @@
     "build:container": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_container.py -- public/models/container.glb",
     "build:propeller": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_propeller.py -- public/models/propeller.glb",
     "build:bridge": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_bridge.py -- public/models/bridge.glb",
-    "build:harbour": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_harbour.py -- public/models/harbour.glb"
+    "build:harbour": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_harbour.py -- public/models/harbour.glb",
+    "preview:glb": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/preview_eevee.py --"
   },
   "type": "module",
   "private": true,
