@@ -217,6 +217,7 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .c-card .pts li::marker { color: var(--supply); }
 .slide--carriers .headline { width: 1400px; }
 .slide--carriers .c-col { top: 265px; width: 820px; }
+.c-card .close { margin-top: 16px; padding: 14px 18px; background: rgba(240, 128, 40, 0.14); border-left: 3px solid var(--supply); font: 600 22px/1.4 'Inter', var(--head); }
 
 /* Scene 2 (orderbook): three beats, one per reveal step. */
 .slide--orderbook .numbers, .slide--orderbook .side, .slide--orderbook .extra { display: none; }

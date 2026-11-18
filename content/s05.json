@@ -2,29 +2,19 @@
   "steps": 5,
   "keyNumbers": [
     {
-      "value": "0-25%",
-      "unit": "of a year's deliveries",
-      "label": "May slip into the next year (our ESTIMATE: no clean source for this cycle)",
-      "note": "Alphaliner: longest lead times since the 2005-07 boom.",
-      "source": "Own ESTIMATE; Alphaliner (lead times)",
-      "url": "",
-      "date": "2026",
-      "status": "sample"
-    },
-    {
       "value": "0.008",
       "unit": "M TEU",
-      "label": "Scrapped in 2025, the lowest in 20 years, against a record 0.655 in 2016",
+      "label": "Scrapped in 2025, against a record 0.655 M TEU in 2016",
       "note": "2026 forecasts: ~0.14 (BIMCO) to over 0.4 (Drewry), revised down. Ships over 25 years: ~1.6 M TEU (BIMCO).",
       "source": "Alphaliner via Global Maritime Hub; BIMCO; Drewry via Seatrade",
       "url": "",
-      "date": "Jan to Sep 2026",
+      "date": "2025 (Alphaliner actuals)",
       "status": "sample"
     },
     {
       "value": "42.2",
-      "unit": "% fuel per day",
-      "label": "From 16 to 12 knots under the simplified cube rule: about 58% less fuel per day (illustrative)",
+      "unit": "% of previous fuel use per day",
+      "label": "From 16 to 12 knots under the simplified cube rule: an illustrative saving of about 57.8%",
       "note": "Class example from Req 5. Per voyage the saving is smaller, since the trip takes longer.",
       "source": "Req 5 class example (cube rule)",
       "url": "",
@@ -43,7 +33,7 @@
   "bullets": [],
   "theory": "Sample: supply-side adjustment.",
   "case": "Sample: one carrier’s response.",
-  "speakerNotes": "Req 5 slide text from the team doc: slide 1 lever wording, slide 2 table, slide 3 network design and consolidation.",
+  "speakerNotes": "Sanjoy, about 3.5 min. Order follows the 'Sanjoy (slides)' tab; detail points from the 'Sanjoy' tab. Slow steaming: 42.2% is the class cube-rule example, say 'illustrative'. Scrapping: 0.008 M TEU is Alphaliner (Req 1). Close on the four goals. Ask Sanjoy for sources for any further figures.",
   "pending": false,
   "id": "s05-carriers",
   "owner": "Sarkar Sanjoy",
@@ -56,11 +46,34 @@
     {
       "title": "Fleet management",
       "line": "Adjust vessel deployment and charter commitments.",
+      "number": null,
+      "points": [
+        "Fleet redeployment: shift vessels towards routes with stronger cargo demand",
+        "Charter adjustment: reduce chartered capacity when contracts permit",
+        "Lay-up: temporarily withdraw vessels from active service",
+        "Vessel-size adjustment: match deployed capacity to route demand",
+        "Enough total capacity can still mean an imbalance on single routes"
+      ]
+    },
+    {
+      "title": "Slow steaming",
+      "line": "Reduce speed to absorb effective capacity and save fuel.",
+      "number": 1,
+      "points": [
+        "Fuel use rises steeply with speed (simplified cube rule)",
+        "Slower rotations absorb excess capacity: ships take longer per loop",
+        "Trade-off: longer transit times, and more ships for the same weekly frequency"
+      ]
+    },
+    {
+      "title": "Scrapping",
+      "line": "Permanently remove older vessels, to reduce fleet supply.",
       "number": 0,
       "points": [
-        "Fleet deployment: shift vessels towards stronger-demand routes, to improve utilisation",
-        "Charter adjustment: reduce chartered capacity when contracts permit, for flexibility",
-        "Lay-up: temporarily withdraw vessels, to reduce active capacity"
+        "Owner offers the ship, a broker circulates it, demolition buyers bid, the yard recycles it",
+        "Scrap value = lightweight tonnage × scrap price per LWT",
+        "Lay-up is temporary; scrapping is permanent",
+        "Limits: owners keep ships that still pay, and newbuilds offset the removals"
       ]
     },
     {
@@ -74,33 +87,15 @@
       ]
     },
     {
-      "title": "Slow steaming",
-      "line": "Reduce speed to absorb effective capacity and save fuel.",
-      "number": 2,
-      "points": [
-        "Fuel use rises steeply with speed (simplified cube rule)",
-        "Trade-off: longer transit times, and more ships for the same weekly frequency"
-      ]
-    },
-    {
-      "title": "Scrapping",
-      "line": "Permanently remove older vessels, to reduce fleet supply.",
-      "number": 1,
-      "points": [
-        "Lay-up is temporary; scrapping is permanent",
-        "Limits: owners keep ships that still pay, scrap prices matter, newbuilds offset the removals"
-      ]
-    },
-    {
       "title": "Consolidation",
       "line": "Combine overlapping services and coordinate capacity.",
       "number": null,
       "points": [
         "Combine overlapping or underutilised services and reduce duplicated capacity",
         "Coordinate vessel deployment between carriers, keep transit times and reliability",
-        "Example: Hapag-Lloyd and Maersk's Gemini Cooperation (2025)",
-        "Managing overcapacity is not simply about removing ships"
-      ]
+        "Example: Hapag-Lloyd and Maersk's Gemini Cooperation (2025)"
+      ],
+      "close": "Managing overcapacity is not simply about removing ships. Carriers balance four goals: control capacity, competitive transit times, lower costs, reliable service."
     }
   ]
 }
