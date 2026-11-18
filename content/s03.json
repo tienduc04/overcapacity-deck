@@ -2,70 +2,149 @@
   "steps": 3,
   "keyNumbers": [
     {
-      "value": "3.0",
+      "value": "+6.2",
       "unit": "%",
-      "label": "Drewry 2026 throughput forecast (1.8% in March)",
-      "source": "Drewry, via Req 2 notes (source to add)",
+      "label": "2025 port throughput growth",
+      "note": "Drewry; source to confirm (the team doc cites the World Container Index, a freight-rate index)",
+      "source": "Drewry, Req 2 notes (source to add)",
       "url": "",
-      "date": "Jun 2026",
+      "date": "2025",
       "status": "unverified"
     },
     {
-      "value": "5.1",
+      "value": "+5.1",
       "unit": "%",
-      "label": "Container volume growth, Jan–Jul 2026",
-      "source": "BIMCO, via Req 2 notes (source to add)",
+      "label": "Container volumes, Jan–Jul 2026",
+      "note": "BIMCO",
+      "source": "BIMCO, Req 2 notes (source to add)",
       "url": "",
       "date": "2026",
+      "status": "unverified"
+    },
+    {
+      "value": "3.0–4.0",
+      "unit": "%",
+      "label": "2026 full-year estimate",
+      "note": "Drewry raised 1.8% → 3.0% (Jun); Maersk ~4% market growth",
+      "source": "Drewry; Maersk, Req 2 notes (source to add)",
+      "url": "",
+      "date": "Jun 2026",
       "status": "unverified"
     }
   ],
   "chart": {
     "type": "3D stacks, 1 box = 1 pp",
-    "title": "Net fleet growth (orange) vs port throughput growth (cyan), % per year",
+    "title": "Fleet growth (orange) vs demand growth (cyan), %",
     "series": {
       "years": [
-        2026,
-        2027,
-        2028,
-        2029,
-        2030
+        "2026",
+        "2027",
+        "2027"
+      ],
+      "tags": [
+        "Now",
+        "Hormuz shut",
+        "Hormuz open"
       ],
       "fleet": [
-        4.2,
-        8.1,
-        11.2,
-        8.2,
-        3.2
+        4.6,
+        9.0,
+        9.0
       ],
       "demand": [
-        3.0,
-        4.2,
-        2.3,
-        2.9,
-        2.5
+        3.5,
+        1.5,
+        3.5
+      ],
+      "fleetText": [
+        "+4.6",
+        "~9",
+        "~9"
+      ],
+      "demandText": [
+        "3–4",
+        "0.5–2.5",
+        "2.5–4.5"
       ]
     },
-    "source": "Drewry Container Forecaster Issue 2 (29 Jun 2026), via a research summary, original not checked; placeholder until Req 2",
+    "source": "BIMCO (fleet, 2027 ship demand); Drewry and Maersk (2026 throughput), via Req 2 notes",
     "url": "",
-    "date": "2026-06-29",
-    "status": "sample"
+    "date": "2026",
+    "status": "unverified"
   },
-  "bullets": [
-    "AI goods: the WTO raised its 2026 world trade forecast from 1.9% to 3.9%",
-    "Trade re-routed, not destroyed: Asian exports to Africa and South America",
-    "Front-loading ahead of tariffs",
-    "Risks: a long Hormuz closure, tariff payback, an AI slowdown"
-  ],
-  "theory": "UNCTAD: containerised trade +2.3% a year in 2026–2030. BIMCO 2027 ship demand: +0.5–2.5% if Hormuz stays closed, +2.5–4.5% if it reopens, against fleet growth of about 9%.",
-  "case": "Hapag-Lloyd: volumes −0.7% in Q1 2026 (weather, Hormuz) and +1.5% in H1; Jebel Ali about −30% in Q1.",
-  "speakerNotes": "Built from the Req 2 script (no slide text given). Maersk assumes about 4% market growth for 2026. Drewry: a long Hormuz closure could cut 2026 growth to 0.5-1.3%. All numbers need sources.",
+  "case": {
+    "title": "Uneven carrier impact",
+    "points": [
+      "Hapag-Lloyd: volumes −0.7% in Q1 2026, +1.5% in H1 (bad weather, Hormuz closure)",
+      "Jebel Ali: port throughput about −30% in Q1 2026"
+    ],
+    "note": "The market grew faster than some carriers did."
+  },
+  "speakerNotes": "Aryan, about 3.5 min. Beat 1: resilience 2025-26 and three drivers. Beat 2: Hapag-Lloyd and Jebel Ali, then three risks. Beat 3: the table and the 3D stacks; say which demand measure each row uses. Stacks use mid-points of the ranges. Ask Aryan for: the source of +6.2% (2025), links for every figure, and yearly demand 2028-2030 (low/mid/high) for Req 6.",
   "pending": false,
   "id": "s03-demand",
   "owner": "Aryan",
   "speakerKey": "aryan",
   "budgetSec": 210,
   "headline": "Demand grows, but slower than the fleet",
-  "layout": "port",
-  "theoryLabel": "Outlook"
+  "layout": "demand",
+  "drivers": [
+    {
+      "title": "AI capex boom",
+      "line": "Servers and chips lifted the WTO's 2026 trade forecast from 1.9% (Mar) to 3.9% (Oct)."
+    },
+    {
+      "title": "Trade re-routing",
+      "line": "Cargo redirected, not destroyed: strong Asian exports, Chinese pivot to Africa and South America."
+    },
+    {
+      "title": "Tariff front-loading",
+      "line": "Retailers pulled orders forward ahead of new tariff deadlines."
+    }
+  ],
+  "risks": [
+    {
+      "title": "Hormuz and oil",
+      "line": "A long closure and high oil prices could cut 2026 growth to 0.5–1.3% (Drewry)."
+    },
+    {
+      "title": "Tariff payback",
+      "line": "Front-loading now means an inventory hangover and a restocking slump later."
+    },
+    {
+      "title": "AI capex cooling",
+      "line": "A slowdown in AI investment removes a main pillar of trade growth (WTO: risks high)."
+    }
+  ],
+  "table": {
+    "head": [
+      "",
+      "Demand",
+      "Fleet"
+    ],
+    "rows": [
+      [
+        "2026",
+        "3.0–4.0%<small>port throughput · Drewry, Maersk</small>",
+        "+4.6%<small>BIMCO</small>"
+      ],
+      [
+        "2027 · Hormuz shut",
+        "0.5–2.5%<small>ship demand · BIMCO</small>",
+        "~9%<small>gap 6.5–8.5 pp</small>"
+      ],
+      [
+        "2027 · Hormuz open",
+        "2.5–4.5%<small>ship demand · BIMCO</small>",
+        "~9%<small>gap 4.5–6.5 pp</small>"
+      ],
+      [
+        "2026–30",
+        "+2.3% / yr<small>containerised trade · UNCTAD</small>",
+        "~9 / 12.1 / ~10%<small>Drewry net, 2027–29</small>"
+      ]
+    ],
+    "note": "Three demand measures: port throughput, ship demand (includes distance) and trade volume. Compare within a row."
+  },
+  "banner": "The equation in one line: 2027 fleet growth (~9%) is 2 to 3.6 times BIMCO's ship-demand growth, even if Hormuz reopens (2.5–4.5%)."
 }

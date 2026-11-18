@@ -7,13 +7,16 @@ import { createOcean, createSky, loadHdr, sunDirection } from './sea.js';
 import { dressAll, loadSurfaces } from './materials.js';
 
 // Scene 3 as a live 3D world: a container terminal at blue hour, wet apron, a ship at berth and a
-// ship-to-shore crane. The crane travels along the quay and stacks boxes into a bar chart, one box per
-// percentage point: orange = net fleet growth, cyan = port throughput growth, one pair of stacks per year.
+// ship-to-shore crane. In front of the crane three boxes (scripts/blender/build_cargo.py) blow open to show
+// the demand drivers as holograms, a Hapag-Lloyd box steps aside for the case study, and red brackets lock
+// on the risks. Last, the boxes turn hollow (cargo fills ~40%) while the crane stacks the supply-demand
+// chart behind them, one box per percentage point: orange = fleet growth, cyan = demand growth.
 // Axes: x along the quay, y up, the sea at z < 0, the apron and the camera at z > 0. Units: metres.
 
 const BOX = { w: 2.44, h: 2.59, l: 12.19 }; // 40 ft high cube; long side across the quay (z)
 const TIER = 2.62; // stacking pitch
 const CHART = { z: 46, spacing: 13, pair: 1.45 }; // apron row of the stacks; x between years; half gap in a pair
+const HERO = { z: 80, xs: [-5, 0, 5], hl: { from: [-13, 80, 0], to: [-11, 88, -Math.PI / 2] } }; // the three boxes; the Hapag-Lloyd box: x, z, yaw
 const COLOURS = { fleet: '#d2601f', demand: '#1f9fb3' };
 const CRANE = { legs: [6, 34], gauge: 30, girderX: 8, boomY: 43, boomZ: [-52, 58], apex: 70 };
 const WATER_Y = -3.5;
@@ -28,17 +31,17 @@ const LOOK = { Box: { surface: 'side', detail: 0.6, normal: 0.6 } };
 // Camera poses per reveal step: position p, look-at t.
 const ARRIVE = { p: [-8, 9, 92], t: [0, 12, CHART.z] }; // close under the crane, where scene 2's transition lands
 const POSES = [
-  { p: [-70, 16, 160], t: [8, 24, 0] }, // wide: crane, ship, the empty apron
-  { p: [-16, 20, 128], t: [-16, 10, CHART.z] }, // the chart, right of the HUD figures
-  { p: [0, 95, 160], t: [0, 0, CHART.z - 4] }, // high, small in the middle between the HUD columns
+  { p: [11, 8.5, HERO.z + 29], t: [0, 1.4, HERO.z] }, // the three boxes, blown open, between the HUD columns
+  { p: [-3, 8.5, HERO.z + 30], t: [-4, 1.6, HERO.z + 2] }, // pulled back left: the Hapag-Lloyd box and the risks
+  { p: [-20, 46, 126], t: [-20, 0, 58] }, // high, panned left so boxes and chart sit right of the table
 ];
 
 const ease = (x) => x * x * (3 - 2 * x);
 
-// series: { years, fleet, demand } in % per year (null = no figure: no stack).
+// series: { years, tags, fleet, demand, fleetText, demandText }: % per year (null = no figure: no stack).
 export async function createPortWorld(series) {
   const loader = new GLTFLoader();
-  const [shipGltf, surfaces, hdr] = await Promise.all([loader.loadAsync('models/ship.glb'), loadSurfaces(SURFACES), loadHdr(), document.fonts.load('800 120px Montserrat')]);
+  const [shipGltf, cargoGltf, surfaces, hdr] = await Promise.all([loader.loadAsync('models/ship.glb'), loader.loadAsync('models/cargo.glb'), loadSurfaces(SURFACES), loadHdr(), document.fonts.load('800 120px Montserrat')]);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.5, 12000);
   const sun = sunDirection(new THREE.Vector3(0, 0, -1), SUN.elevation, SUN.offset);
@@ -93,6 +96,9 @@ export async function createPortWorld(series) {
   const laser = createLaser();
   scene.add(laser.group);
 
+  const hero = createHero(cargoGltf.scene);
+  scene.add(hero.group);
+
   // Light: cool sky fill, a dim moon, warm floodlights (the first rides on the crane) with light cones.
   const moon = new THREE.DirectionalLight(0x8fa8d8, 1.0);
   moon.position.set(-200, 300, 250);
@@ -103,6 +109,10 @@ export async function createPortWorld(series) {
     { at: [-70, 34, 72], aim: [-30, 0, CHART.z - 4] },
     { at: [70, 34, 72], aim: [30, 0, CHART.z - 4] },
   ];
+  const heroLight = new THREE.SpotLight(0xffd2a0, 9000, 120, 0.5, 0.7, 2); // warm key on the three boxes
+  heroLight.position.set(8, 24, HERO.z + 16);
+  heroLight.target.position.set(0, 0, HERO.z);
+  scene.add(heroLight, heroLight.target);
   floods.forEach((f, i) => {
     const s = new THREE.SpotLight(0xffc98a, 22000, 190, 0.55, 0.65, 2);
     s.position.set(...f.at);
@@ -122,7 +132,9 @@ export async function createPortWorld(series) {
   scene.add(dust);
 
   // Animated state: cam = pose shown, built = boxes placed so far (chart.count when complete).
-  const state = { cam: pose(0), built: 0, scan: 1 };
+  // open: walls blown off (beat 1); split: the Hapag-Lloyd box aside; risk: red brackets; hollow: boxes as wireframe with cargo.
+  const BEATS = [{ open: 1, split: 0, risk: 0, hollow: 0 }, { open: 1, split: 1, risk: 1, hollow: 0 }, { open: 0, split: 1, risk: 0, hollow: 1 }];
+  const state = { cam: pose(0), built: 0, scan: 1, ...BEATS[0] };
   let tl = null;
   let ready = false;
   let craneX = 0;
@@ -138,7 +150,7 @@ export async function createPortWorld(series) {
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       // Bake the environment from the dusk dome, so the sea and the metal reflect its glow.
       skyMesh.visible = false;
-      sky.bake(renderer, { hide: [ocean, quay, floor, ...rails, ship, shore.group, crane.group, holder, yard.contact, chart.contact, laser.group, dust, ...cones, ...chart.labels], hdr, envIntensity: ENV_INTENSITY });
+      sky.bake(renderer, { hide: [ocean, quay, floor, ...rails, ship, shore.group, crane.group, holder, yard.contact, chart.contact, laser.group, dust, ...cones, ...chart.labels, hero.group], hdr, envIntensity: ENV_INTENSITY });
       scene.background = new THREE.Color(0x050a14);
       ready = true;
     },
@@ -149,14 +161,19 @@ export async function createPortWorld(series) {
     // Show a reveal step: animated (on screen), or at once (arriving from another scene).
     go(step, instant = false) {
       tl?.kill();
-      const built = step >= 1 ? chart.count : 0;
+      const built = step >= 2 ? chart.count : 0;
+      const beat = BEATS[Math.min(step, BEATS.length - 1)];
       if (instant) {
-        Object.assign(state, { cam: pose(step), built, scan: 1 });
-        // Arriving at step 0: start close and pull back to the wide shot, under the transition.
-        if (step === 0) tl = gsap.timeline({ delay: 1 }).fromTo(state.cam, flat(ARRIVE), { ...pose(0), duration: 4.5, ease: 'sine.inOut', immediateRender: true }); // delay: scene 2's lead-out
+        Object.assign(state, { cam: pose(step), built, scan: 1, ...beat });
+        // Arriving at step 0: start under the crane, pull back to the three boxes, then blow them open.
+        if (step === 0)
+          tl = gsap
+            .timeline({ delay: 1 }) // delay: scene 2's lead-out
+            .fromTo(state.cam, flat(ARRIVE), { ...pose(0), duration: 4.5, ease: 'sine.inOut', immediateRender: true })
+            .fromTo(state, { open: 0 }, { open: 1, duration: 1.6, ease: 'power3.out', immediateRender: true }, 3.2);
         return;
       }
-      tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0);
+      tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0).to(state, { ...beat, duration: 1.6, ease: 'power2.inOut' }, 0.3);
       if (built > state.built) {
         // The crane stacks the boxes one by one, the laser follows, then goes back to sweeping.
         tl.to(state, { scan: 0, duration: 0.4 }, 0.6).to(state, { built, duration: chart.count * PER_BOX, ease: 'none' }, 0.8).to(state, { scan: 1, duration: 0.8 });
@@ -170,6 +187,7 @@ export async function createPortWorld(series) {
       dust.material.uniforms.uTime.value = t;
       shore.twinkle(t);
       chart.place(state.built);
+      hero.update(state, t);
       // The crane follows the box being placed along the quay; the trolley runs out along the boom.
       const carried = chart.carried;
       const targetX = carried ? carried.x : 0;
@@ -178,10 +196,11 @@ export async function createPortWorld(series) {
       if (carried) spreaderAt.set(carried.x, carried.y + BOX.h / 2 + 0.5, carried.z);
       else spreaderAt.set(craneX, CRANE.boomY - 14 + Math.sin(t * 0.8) * 0.3, CHART.z); // hanging idle over the apron
       crane.reach(spreaderAt, t);
-      // Laser: sweeps the apron, or marks the stack being built.
-      const sweep = 30 * Math.sin(t * 0.45); // over the chart only, clear of the HUD figures
+      // Laser: scans the three boxes (beats 1-2), sweeps the chart, or marks the stack being built.
+      const onHero = 1 - state.hollow;
+      const sweep = THREE.MathUtils.lerp(30, 7, onHero) * Math.sin(t * 0.45); // clear of the HUD figures
       const lx = carried ? THREE.MathUtils.lerp(sweep, carried.x, 1 - state.scan) : sweep;
-      laser.aim(crane.trolleyWorld(tmp), lx, t);
+      laser.aim(crane.trolleyWorld(tmp), lx, t, THREE.MathUtils.lerp(CHART.z, HERO.z, onHero));
       const c = state.cam;
       camera.position.set(c.px + 0.8 * Math.sin(t * 0.13) + lean.x * 2, c.py + 0.4 * Math.sin(t * 0.21) + lean.y * 1.2, c.pz);
       camera.lookAt(c.tx, c.ty, c.tz);
@@ -312,7 +331,7 @@ const WetShader = {
 
 // Stacks for each year: fleet (orange, left) and demand (cyan, right), one box per percentage point
 // (rounded), placed one at a time by the crane: year by year, bottom to top. Labels on the apron.
-function chartStacks({ years, fleet, demand }, geo, mat) {
+function chartStacks({ years, tags = [], fleet, demand, fleetText = [], demandText = [] }, geo, mat) {
   const slots = []; // { x, y, colour, order }
   const x0 = -((years.length - 1) * CHART.spacing) / 2;
   const xs = years.map((_, i) => x0 + i * CHART.spacing);
@@ -332,7 +351,7 @@ function chartStacks({ years, fleet, demand }, geo, mat) {
   const m = new THREE.Matrix4();
   const bottoms = slots.filter((s) => s.y === BOX.h / 2);
   const contact = contactShadows(bottoms.length);
-  const out = { mesh, contact, count: slots.length, carried: null, labels: years.map((y, i) => yearLabel(y, fleet[i], demand[i], xs[i])) };
+  const out = { mesh, contact, count: slots.length, carried: null, labels: years.map((y, i) => yearLabel(y, tags[i], fleetText[i] ?? fmt(fleet[i]), demandText[i] ?? fmt(demand[i]), xs[i])) };
   let shown = -1;
   // Boxes with order < built are down; the next one is carried in by the crane (in along the boom,
   // then lowered); the rest are not there yet.
@@ -362,22 +381,28 @@ function chartStacks({ years, fleet, demand }, geo, mat) {
   return out;
 }
 
-// Painted on the apron in front of the stacks: the year, and the two figures in their colours.
-function yearLabel(year, fleet, demand, x) {
+const fmt = (v) => (v == null ? 'n/a' : `+${v.toFixed(1)}`);
+
+// Painted on the apron in front of the stacks: the year, its scenario tag, and the two figures in their colours.
+function yearLabel(year, tag, fleet, demand, x) {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 256;
   const g = canvas.getContext('2d');
   g.textAlign = 'center';
-  g.font = '800 104px Montserrat';
+  g.font = '800 92px Montserrat';
   g.fillStyle = '#f4f1ec';
-  g.fillText(year, 256, 104);
-  g.font = '800 64px Montserrat';
-  const fmt = (v) => (v == null ? 'n/a' : `+${v.toFixed(1)}`);
+  g.fillText(year, 256, 86);
+  if (tag) {
+    g.font = '600 40px Montserrat';
+    g.fillStyle = '#9fb2c6';
+    g.fillText(tag.toUpperCase(), 256, 138);
+  }
+  g.font = '800 54px Montserrat';
   g.fillStyle = COLOURS.fleet;
-  g.fillText(fmt(fleet), 136, 210);
+  g.fillText(fleet, 136, 220);
   g.fillStyle = '#4fd8ea';
-  g.fillText(fmt(demand), 376, 210);
+  g.fillText(demand, 376, 220);
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;
   map.anisotropy = 8;
@@ -681,14 +706,14 @@ function createLaser() {
   group.add(fan, line);
   return {
     group,
-    aim(from, x, t) {
+    aim(from, x, t, z = CHART.z) {
       const p = fanGeo.attributes.position;
       const half = (BOX.l + 6) / 2;
       p.setXYZ(0, from.x, from.y - 1.5, from.z);
-      p.setXYZ(1, x, 0.08, CHART.z - half);
-      p.setXYZ(2, x, 0.08, CHART.z + half);
+      p.setXYZ(1, x, 0.08, z - half);
+      p.setXYZ(2, x, 0.08, z + half);
       p.needsUpdate = true;
-      line.position.set(x, 0.09, CHART.z);
+      line.position.set(x, 0.09, z);
       line.material.opacity = 0.75 + 0.25 * Math.sin(t * 9);
     },
   };
@@ -700,4 +725,110 @@ function pose(step) {
 
 function flat({ p, t }) {
   return { px: p[0], py: p[1], pz: p[2], tx: t[0], ty: t[1], tz: t[2] };
+}
+
+// --- hero boxes --------------------------------------------------------------------------------------
+
+// The Blender props: three boxes in parts (Frame, WallL, WallR, Roof) that blow open into a technical
+// wireframe with a hologram inside, a Hapag-Lloyd box that steps aside, red risk brackets, and the cargo
+// (~40% of the box) shown when the boxes turn hollow. update(state) reads open, split, risk and hollow (0..1).
+function createHero(src) {
+  const group = new THREE.Group();
+  const get = (n) => src.getObjectByName(n);
+  const template = get('Box');
+  const edgeMat = (c) => new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0, depthWrite: false, fog: false });
+  const fades = []; // { mesh, edges, kind }: kind 'wall' wires up when open or hollow, 'frame' only when hollow
+  const ghost = (part, kind) =>
+    part.traverse((o) => {
+      if (!o.isMesh) return;
+      o.material = o.material.clone();
+      o.material.transparent = true;
+      o.material.side = THREE.DoubleSide;
+      o.castShadow = o.receiveShadow = true;
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 35), edgeMat(new THREE.Color(0.35, 2.2, 2.6)));
+      o.add(edges);
+      fades.push({ mesh: o, edges, kind });
+    });
+  const holo = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.2, 1.3, 1.6), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false });
+  const holoEdges = edgeMat(new THREE.Color(0.5, 3.2, 3.6));
+  const red = edgeMat(new THREE.Color(3.2, 0.35, 0.25));
+  const cargoMats = [];
+
+  const boxes = HERO.xs.map((x, i) => {
+    const b = template.clone(true);
+    b.position.set(x, 0, HERO.z);
+    const parts = Object.fromEntries(['Frame', 'WallL', 'WallR', 'Roof'].map((n) => [n, b.getObjectByName(n)]));
+    ghost(parts.Frame, 'frame');
+    for (const n of ['WallL', 'WallR', 'Roof']) ghost(parts[n], 'wall');
+    const icon = get(['IconAI', 'IconRoute', 'IconTariff'][i]).clone();
+    icon.material = holo;
+    icon.position.set(0, 1.35, 0);
+    icon.add(new THREE.LineSegments(new THREE.EdgesGeometry(icon.geometry, 20), holoEdges));
+    const cargo = get('Cargo').clone(true);
+    cargo.position.set(0, 0, 0);
+    cargo.traverse((o) => {
+      if (!o.isMesh) return;
+      o.material = o.material.clone();
+      o.material.transparent = true;
+      o.castShadow = o.receiveShadow = true;
+      cargoMats.push(o.material);
+    });
+    const brackets = new THREE.LineSegments(bracketGeometry(BOX.w + 1.2, BOX.h + 0.8, BOX.l + 1.2), red);
+    brackets.position.y = -0.2;
+    b.add(icon, cargo, brackets);
+    group.add(b);
+    return { parts, icon, cargo, phase: i * 2.1 };
+  });
+
+  const hl = template.clone(true);
+  hl.add(get('Lettering').clone());
+  hl.traverse((o) => o.isMesh && (o.castShadow = o.receiveShadow = true));
+  group.add(hl);
+
+  return {
+    group,
+    update(s, t) {
+      for (const b of boxes) {
+        b.parts.WallL.position.x = -1.4 * s.open;
+        b.parts.WallR.position.x = 1.4 * s.open;
+        b.parts.WallL.rotation.z = 0.1 * s.open;
+        b.parts.WallR.rotation.z = -0.1 * s.open;
+        b.parts.Roof.position.y = 1.7 * s.open;
+        b.icon.rotation.y = 0.5 * Math.sin(t * 0.6 + b.phase);
+        b.icon.position.y = 1.35 + 0.08 * Math.sin(t * 1.3 + b.phase);
+        b.icon.visible = s.open * (1 - s.hollow) > 0.01;
+        b.cargo.visible = s.hollow > 0.01;
+      }
+      for (const f of fades) {
+        const wire = f.kind === 'wall' ? Math.max(s.open, s.hollow) : s.hollow;
+        f.mesh.material.opacity = 1 - 0.9 * wire;
+        f.mesh.material.depthWrite = wire < 0.02;
+        f.edges.material.opacity = 0.7 * wire;
+      }
+      holo.opacity = 0.35 * s.open * (1 - s.hollow);
+      holoEdges.opacity = 0.9 * s.open * (1 - s.hollow);
+      red.opacity = s.risk * (0.65 + 0.35 * Math.sin(t * 4));
+      for (const m of cargoMats) m.opacity = s.hollow;
+      const [x0, z0, y0] = HERO.hl.from;
+      const [x1, z1, y1] = HERO.hl.to;
+      const k = ease(s.split);
+      hl.position.set(THREE.MathUtils.lerp(x0, x1, k), 0, THREE.MathUtils.lerp(z0, z1, k));
+      hl.rotation.y = THREE.MathUtils.lerp(y0, y1, k);
+    },
+  };
+}
+
+// Corner brackets of a box w x h x l standing on y = 0 (three short legs at each of the 8 corners).
+function bracketGeometry(w, h, l) {
+  const pts = [];
+  const leg = 1.1;
+  for (const sx of [-1, 1])
+    for (const sy of [0, 1])
+      for (const sz of [-1, 1]) {
+        const c = new THREE.Vector3((sx * w) / 2, sy * h, (sz * l) / 2);
+        pts.push(c, c.clone().add(new THREE.Vector3(-sx * leg, 0, 0)));
+        pts.push(c, c.clone().add(new THREE.Vector3(0, sy ? -leg : leg, 0)));
+        pts.push(c, c.clone().add(new THREE.Vector3(0, 0, -sz * leg)));
+      }
+  return new THREE.BufferGeometry().setFromPoints(pts);
 }

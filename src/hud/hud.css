@@ -244,3 +244,26 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .ob-driver .h { margin-top: 4px; font: 800 30px var(--head); text-transform: uppercase; }
 .ob-driver p { margin: 8px 0 0; font: 400 23px/1.38 'Inter', var(--head); }
 .ob-banner { position: absolute; left: var(--edge); right: var(--edge); top: 720px; padding: 22px 32px; border: 2px solid var(--risk); background: rgba(40, 8, 6, 0.72); font: 500 25px/1.4 'Inter', var(--head); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+/* Scene 3 (demand): beats over the port world; panels reuse the scene 2 (ob-) styles. */
+.slide--demand .numbers, .slide--demand .side, .slide--demand .extra { display: none; }
+.dm-kpis { width: 520px; }
+.dm-cards { position: absolute; right: var(--edge); top: 280px; width: 540px; display: flex; flex-direction: column; gap: 16px; }
+.dm-cards .ob-driver { border-left-color: var(--demand); }
+.dm-cards .ob-driver b { color: var(--demand); }
+.dm-cards .ob-driver.risk { border-left-color: var(--risk); }
+.dm-cards .ob-driver.risk b { color: var(--risk); }
+.dm-cards .ob-driver .h { font-size: 26px; }
+.dm-cards .ob-driver p { font-size: 21px; }
+.dm-case { position: absolute; left: var(--edge); top: 300px; width: 520px; padding: 24px 30px; }
+.dm-case ul { margin: 14px 0 12px; padding-left: 1.1em; font: 400 24px/1.4 'Inter', var(--head); }
+.dm-case li + li { margin-top: 10px; }
+.dm-table { position: absolute; left: var(--edge); top: 280px; width: 720px; padding: 20px 26px; }
+.dm-table table { width: 100%; border-collapse: collapse; font: 500 22px/1.25 var(--head); }
+.dm-table th, .dm-table td { padding: 10px 8px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(232, 238, 244, 0.15); }
+.dm-table tr:first-child th { font-size: 15px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+.dm-table td:nth-child(2) { color: #4fd8ea; }
+.dm-table td:nth-child(3) { color: var(--supply); }
+.dm-table small { display: block; margin-top: 3px; font: 400 15px 'Inter', var(--head); color: var(--muted); }
+.dm-table .n { margin-top: 10px; }
+.dm-banner { border-color: var(--supply); background: rgba(40, 20, 6, 0.72); top: 800px; }

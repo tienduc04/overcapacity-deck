@@ -53,3 +53,28 @@ def box(bm, x0, x1, y0, y1, z0, z1, mat=0, color=None, col_layer=None, skip=(), 
             loop[uv].uv = ((co[a] - uv_origin[a]) / uv_scale, (co[b] - uv_origin[b]) / uv_scale)
             if color is not None:
                 loop[col_layer] = (*color, 1.0)
+
+
+def corrugation(u, pitch, depth):
+    """Trapezoid sheet profile: depth (towards the inside) at position u along the sheet."""
+    f = (u / pitch) % 1.0
+    if f < 0.3:
+        return 0.0
+    if f < 0.5:
+        return depth * (f - 0.3) / 0.2
+    if f < 0.8:
+        return depth
+    return depth * (1.0 - (f - 0.8) / 0.2)
+
+
+def profile_points(length, pitch):
+    """Break points of the trapezoid profile along [0, length]."""
+    pts = []
+    k = 0
+    while k * pitch < length:
+        for f in (0.0, 0.3, 0.5, 0.8):
+            u = k * pitch + f * pitch
+            if u < length:
+                pts.append(u)
+        k += 1
+    return pts + [length]

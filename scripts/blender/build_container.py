@@ -17,7 +17,7 @@ import bpy
 import bmesh
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from kit import box, link, material, srgb  # noqa: E402
+from kit import box, corrugation, link, material, profile_points, srgb  # noqa: E402
 
 argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
 OUT = argv[0] if argv else "public/models/container.glb"
@@ -41,31 +41,6 @@ M = {
     "paint": material("Kerb", "#ffffff", 0.7, vcol=True),
     "shore": material("Shore", "#3c4048", 0.9),
 }
-
-
-def corrugation(u, pitch, depth):
-    """Trapezoid sheet profile: depth (towards the inside) at position u along the sheet."""
-    f = (u / pitch) % 1.0
-    if f < 0.3:
-        return 0.0
-    if f < 0.5:
-        return depth * (f - 0.3) / 0.2
-    if f < 0.8:
-        return depth
-    return depth * (1.0 - (f - 0.8) / 0.2)
-
-
-def profile_points(length, pitch):
-    """Break points of the trapezoid profile along [0, length]."""
-    pts = []
-    k = 0
-    while k * pitch < length:
-        for f in (0.0, 0.3, 0.5, 0.8):
-            u = k * pitch + f * pitch
-            if u < length:
-                pts.append(u)
-        k += 1
-    return pts + [length]
 
 
 def build_shell():
