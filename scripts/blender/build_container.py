@@ -42,7 +42,7 @@ M = {
     "shore": material("Shore", "#3c4048", 0.9),
     "holo": material("Holo", "#4fd8ea", 0.3),  # three.js swaps it for an additive hologram
 }
-DOCK_X, DOCK_HALF = 0.75, 1.0  # hologram berth across the closed end: centre x, half span across the box
+GANTRY_HALF, GANTRY_TOP = 1.06, 2.2  # goliath crane: half span across the box, girder underside (m)
 
 
 def build_shell():
@@ -209,27 +209,22 @@ def build_shore():
 
 
 def build_gantry():
-    """Goliath crane over the hologram newbuild: legs near the side walls, twin girders across the box.
-    The trolley is its own object (origin at its centre) so three.js can run it along the girders (y)."""
+    """Goliath crane straddling the hologram newbuild, centred on x = 0 so three.js can run it along the
+    box with the build front: legs by the side walls, twin girders across, the trolley in the middle."""
     bm = bmesh.new()
-    top = 1.9
+    top = GANTRY_TOP
     for s in (1, -1):
-        y = s * DOCK_HALF
-        for x in (DOCK_X - 0.32, DOCK_X + 0.32):  # two posts per leg, a sill and cross braces between them
+        y = s * GANTRY_HALF
+        for x in (-0.28, 0.28):  # two posts per leg, a sill and cross braces between them
             box(bm, x - 0.035, x + 0.035, y - 0.035, y + 0.035, 0.0, top, 0)
-        box(bm, DOCK_X - 0.4, DOCK_X + 0.4, y - 0.06, y + 0.06, 0.0, 0.08, 0)  # sill beam on the rail
-        for z in (0.55, 1.2):
-            box(bm, DOCK_X - 0.32, DOCK_X + 0.32, y - 0.02, y + 0.02, z, z + 0.04, 0)
-    for x in (DOCK_X - 0.16, DOCK_X + 0.16):  # twin girders
-        box(bm, x - 0.05, x + 0.05, -DOCK_HALF - 0.08, DOCK_HALF + 0.08, top, top + 0.16, 0)
-    box(bm, DOCK_X - 0.4, DOCK_X + 0.4, -DOCK_HALF - 0.08, DOCK_HALF + 0.08, top + 0.16, top + 0.2, 0)  # walkway
-    link("Gantry", bm, [M["holo"]])
-    bm = bmesh.new()
-    box(bm, -0.24, 0.24, -0.12, 0.12, -0.12, 0.12, 0)  # crab
-    box(bm, -0.04, 0.04, -0.04, 0.04, -0.3, -0.12, 0)  # hook block
-    ob = link("Trolley", bm, [M["holo"]])
-    ob.location = (DOCK_X, 0, top - 0.06)
-    return ob
+        box(bm, -0.36, 0.36, y - 0.06, y + 0.06, 0.0, 0.08, 0)  # sill beam on the rail
+        for z in (0.7, 1.5):
+            box(bm, -0.28, 0.28, y - 0.02, y + 0.02, z, z + 0.04, 0)
+    for x in (-0.15, 0.15):  # twin girders
+        box(bm, x - 0.05, x + 0.05, -GANTRY_HALF - 0.06, GANTRY_HALF + 0.06, top, top + 0.16, 0)
+    box(bm, -0.24, 0.24, -0.14, 0.14, top - 0.2, top, 0)  # trolley (crab) between the girders
+    box(bm, -0.04, 0.04, -0.04, 0.04, top - 0.38, top - 0.2, 0)  # hook block
+    return link("Gantry", bm, [M["holo"]])
 
 
 build_shell()
