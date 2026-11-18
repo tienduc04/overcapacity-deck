@@ -27,7 +27,7 @@ const LOOK = {
   Frame: { surface: 'rust', detail: 0.5, normal: 0.4 },
   Door: { surface: 'rust', detail: 0.5, normal: 0.4 },
 };
-const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings', 'Carton', 'Pallet', 'Strap', 'Label', 'Ink']; // Carton..Ink: the delivery-year stacks
+const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings'];
 // Neighbours in the stack: [bay, tier, row, colour]. Bay -1 is behind the closed end, tier -1 below,
 // row -1 inboard (-z); the sea side (+z) and the door end stay open for the camera.
 const STACK = [
@@ -40,7 +40,7 @@ const POSES = {
   side: { p: [LI / 2 + 3.6, 6.1, 13.2], t: [LI / 2, 1.3, 0] },
   front: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
   doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
-  inside: { p: [LI - 1.2, 1.45, 0.25], t: [0, 1.15, -0.75] }, // aimed so the year stacks sit between the HUD columns
+  inside: { p: [LI - 1.2, 1.45, 0.25], t: [0, 1.15, -0.75] }, // aimed so the hologram berth sits between the HUD columns
   out: { p: [LI + 9, 2.4, 0.4], t: [0, 1.2, 0] }, // backed out through the doors, still facing in
 };
 
@@ -86,6 +86,10 @@ export async function createContainerWorld() {
   });
   scene.add(set, stack(shell, door, door2), deck());
 
+  // The orderbook as a hologram: a newbuild on a berth across the closed end, under a goliath crane.
+  const yard = newbuild(shipGltf.scene, set.getObjectByName('Gantry'), set.getObjectByName('Trolley'));
+  scene.add(yard.group);
+
   // A ship crossing the harbour mouth, seen through the doors now and then.
   const ship = shipGltf.scene;
   ship.rotation.y = Math.PI / 2; // bow (+x in the model) towards -z: right to left
@@ -122,7 +126,8 @@ export async function createContainerWorld() {
     init(renderer) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      sky.bake(renderer, { hide: [ocean, set, ship, dust], hdr, envIntensity: ENV_INTENSITY });
+      renderer.localClippingEnabled = true; // the newbuild's build front
+      sky.bake(renderer, { hide: [ocean, set, ship, dust, yard.group], hdr, envIntensity: ENV_INTENSITY });
       // Inside, the sky is only seen through the doors: a much weaker environment light.
       set.traverse((o) => {
         if (!o.isMesh || !INSIDE.includes(o.material.name)) return;
@@ -163,10 +168,74 @@ export async function createContainerWorld() {
       door.rotation.y = doorAngle * state.door + creak;
       door2.rotation.y = -door.rotation.y;
       ship.position.z = LANE.range - ((t * LANE.speed) % (2 * LANE.range));
+      yard.update(t);
       // Hand-held: a little drift and breathing on top of the pose.
       const c = state.cam;
       camera.position.set(c.px + 0.06 * Math.sin(t * 0.31) + lean.x * 0.15, c.py + 0.03 * Math.sin(t * 0.9) + lean.y * 0.1, c.pz + 0.06 * Math.sin(t * 0.23));
       camera.lookAt(c.tx, c.ty + 0.02 * Math.sin(t * 0.6), c.tz + lean.x * 0.2);
+    },
+  };
+}
+
+// Hologram newbuild growing stern to bow (clipping planes at the build front) on a glowing berth; the
+// unbuilt part shows as faint lines. The goliath crane (Gantry, Trolley from build_container.py) turns
+// hologram too, and its trolley and laser follow the build front. Blender DOCK_X, DOCK_HALF = BERTH.x, 1.0.
+const BERTH = { x: 0.75, len: 1.9, cycle: 10, build: 7 }; // centre x and hull length (m); loop and build time (s)
+
+function newbuild(shipScene, gantry, trolley) {
+  // Normal blending: added light would wash cyan out to white against the orange walls.
+  const glow = (color, opacity, extra = {}) => ({ color, opacity, transparent: true, depthWrite: false, fog: false, ...extra });
+  const CYAN = 0x4fe8ff;
+  const front = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // keeps z >= build front: the built part
+  const rest = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0); // keeps the rest
+  const fill = new THREE.MeshBasicMaterial(glow(0x00c8e6, 0.28, { side: THREE.DoubleSide, clippingPlanes: [front] }));
+  const lines = new THREE.LineBasicMaterial(glow(CYAN, 0.95, { clippingPlanes: [front] }));
+  const faint = new THREE.LineBasicMaterial(glow(CYAN, 0.14, { clippingPlanes: [rest] }));
+  const holo = (o, edgeMat) => {
+    o.material = edgeMat === lines ? fill : new THREE.MeshBasicMaterial(glow(0x00c8e6, 0.12, { side: THREE.DoubleSide }));
+    o.castShadow = o.receiveShadow = false;
+    const edges = new THREE.EdgesGeometry(o.geometry, 30);
+    o.add(new THREE.LineSegments(edges, edgeMat));
+    return edges;
+  };
+
+  const hull = shipScene.clone(true); // shares geometry with the passing ship, gets its own materials
+  hull.position.set(0, 0, 0);
+  hull.rotation.set(0, 0, 0);
+  hull.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(hull);
+  const s = BERTH.len / (box.max.x - box.min.x);
+  const c = box.getCenter(new THREE.Vector3());
+  const meshes = [];
+  hull.traverse((o) => o.isMesh && meshes.push(o));
+  for (const o of meshes) o.add(new THREE.LineSegments(holo(o, lines), faint));
+  hull.scale.setScalar(s);
+  hull.rotation.y = Math.PI / 2; // bow (+x) towards -z, to the right seen from the doors; stern at +z
+  hull.position.set(BERTH.x - c.z * s, 0.03 - box.min.y * s, c.x * s);
+
+  const solid = new THREE.LineBasicMaterial(glow(CYAN, 0.55));
+  for (const o of [gantry, trolley]) holo(o, solid);
+  const grid = new THREE.GridHelper(2.2, 22, CYAN, CYAN);
+  Object.assign(grid.material, { transparent: true, opacity: 0.35, depthWrite: false, fog: false }); // colour stays a THREE.Color
+  grid.scale.x = 0.6;
+  grid.position.set(BERTH.x, 0.005, 0);
+  const top = (box.max.y - box.min.y) * s * 0.55; // about the deck line
+  const laser = new THREE.Mesh(new THREE.BoxGeometry(0.012, 1, 0.012), new THREE.MeshBasicMaterial(glow(new THREE.Color(0.6, 2.6, 3), 1, { blending: THREE.AdditiveBlending })));
+  const beamTop = trolley.position.y - 0.3;
+  laser.scale.y = beamTop - top;
+  laser.position.set(BERTH.x, (beamTop + top) / 2, 0);
+  const group = new THREE.Group().add(hull, grid, laser);
+
+  return {
+    group,
+    update(t) {
+      const k = Math.min(1, (t % BERTH.cycle) / BERTH.build);
+      const z = BERTH.len / 2 - k * k * (3 - 2 * k) * BERTH.len; // the build front, stern to bow
+      front.constant = -z;
+      rest.constant = z;
+      trolley.position.z = z;
+      laser.position.z = z;
+      laser.visible = k < 1;
     },
   };
 }
