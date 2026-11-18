@@ -15,7 +15,8 @@
     "build:bridge": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_bridge.py -- public/models/bridge.glb",
     "build:harbour": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_harbour.py -- public/models/harbour.glb",
     "preview:glb": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/preview_eevee.py --",
-    "build:cargo": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_cargo.py -- public/models/cargo.glb"
+    "build:cargo": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_cargo.py -- public/models/cargo.glb",
+    "build:mapship": "\"%LOCALAPPDATA%\\Programs\\Blender\\blender-5.3.0-windows-x64\\blender.exe\" -b --factory-startup --python scripts/blender/build_mapship.py -- public/models/mapship.glb"
   },
   "type": "module",
   "private": true,

@@ -66,10 +66,6 @@
     "shut": "Capacity absorbed by routing",
     "open": "Suez route open: capacity returning"
   },
-  "button": {
-    "label": "Reopen Suez",
-    "done": "Suez reopened"
-  },
   "legend": [
     "Cape route: busy",
     "Suez route: shut",
@@ -141,5 +137,39 @@
         "The carrier's dilemma: each wants to return first, but all returning at once floods the market"
       ]
     }
-  ]
+  ],
+  "gauge": {
+    "title": "Asia–Europe ships using Suez",
+    "marks": [
+      {
+        "at": 8,
+        "label": "Crisis"
+      },
+      {
+        "at": 36,
+        "label": "Early Oct 2026"
+      },
+      {
+        "at": 80,
+        "label": "Before the crisis"
+      }
+    ],
+    "byStep": [
+      8,
+      8,
+      36,
+      36,
+      80,
+      80
+    ],
+    "notes": [
+      "Shut: traffic goes round the Cape",
+      "Shut: traffic goes round the Cape",
+      "About 50% of normal container capacity is back",
+      "About 50% of normal container capacity is back",
+      "Full return expected around Q1 2027",
+      "Full return expected around Q1 2027"
+    ],
+    "source": "Req 3–4 notes (page 'The return has started')"
+  }
 }

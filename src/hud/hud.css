@@ -77,16 +77,16 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 
 /* Scene 4 (map): custom readouts on the left, the lane legend top right, a big REOPEN SUEZ button. */
 .slide--map .numbers, .slide--map .side, .slide--map .extra { display: none; }
-.m-col { position: absolute; left: var(--edge); top: 335px; width: 640px; display: flex; flex-direction: column; gap: 22px; }
-.m-banner { padding: 14px 22px; border: 1px solid rgba(255, 90, 70, 0.75); background: rgba(40, 8, 6, 0.6); color: #ff7a62; font: 500 20px var(--head); letter-spacing: 0.26em; text-transform: uppercase; transition: color 0.6s, border-color 0.6s, background 0.6s; }
+.m-col { position: absolute; right: var(--edge); top: 250px; width: 400px; display: flex; flex-direction: column; gap: 14px; }
+.m-banner { position: absolute; left: var(--edge); top: 262px; width: 600px; box-sizing: border-box; padding: 12px 22px; border: 1px solid rgba(255, 90, 70, 0.75); background: rgba(40, 8, 6, 0.6); color: #ff7a62; font: 500 20px var(--head); letter-spacing: 0.26em; text-transform: uppercase; transition: color 0.6s, border-color 0.6s, background 0.6s; }
 .slide--map[data-open='1'] .m-banner { border-color: rgba(0, 240, 255, 0.7); background: rgba(4, 30, 36, 0.6); color: var(--demand); }
-.m-card { padding: 22px 30px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.m-card { padding: 16px 22px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .slide--map[data-open='1'] .m-card { border-left-color: var(--demand); }
-.m-card .v { font: 800 92px/1 var(--head); }
-.m-card .u { margin-left: 12px; font: 500 22px var(--head); letter-spacing: 0.2em; text-transform: uppercase; color: var(--supply); }
+.m-card .v { font: 800 60px/1 var(--head); }
+.m-card .u { margin-left: 10px; font: 500 18px var(--head); letter-spacing: 0.2em; text-transform: uppercase; color: var(--supply); }
 .slide--map[data-open='1'] .m-card .u { color: var(--demand); }
-.m-card .l { margin-top: 10px; font: 400 24px/1.35 'Inter', var(--head); }
-.m-card .n { margin-top: 10px; font: 400 19px/1.4 'Inter', var(--head); color: var(--muted); }
+.m-card .l { margin-top: 8px; font: 400 19px/1.35 'Inter', var(--head); }
+.m-card .n { margin-top: 8px; font: 400 15px/1.4 'Inter', var(--head); color: var(--muted); }
 .slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
 .slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map:not([data-at='0']):not([data-at='1']):not([data-at='2']) .m-a, .slide--map:not([data-at='4']) .m-c { display: none; }
 .m-legend { position: absolute; right: var(--edge); top: 112px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); }
@@ -95,10 +95,22 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .m-legend .suez i { background: #ff5a40; box-shadow: 0 0 10px #ff5a40; }
 .slide--map[data-open='1'] .m-legend .suez i { background: var(--demand); box-shadow: 0 0 10px var(--demand); }
 .m-legend .note { font-size: 14px; letter-spacing: 0.1em; color: var(--muted); }
-.m-reopen { position: absolute; left: 1060px; top: 860px; width: 380px; height: 96px; border: 2px solid var(--demand); background: rgba(4, 30, 36, 0.78); color: #fff; font: 800 24px var(--head); letter-spacing: 0.24em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 28px rgba(0, 240, 255, 0.45); animation: m-pulse 2s ease-in-out infinite; transition: opacity 0.4s; }
-.m-reopen.done { animation: none; cursor: default; border-color: rgba(0, 240, 255, 0.4); color: var(--demand); box-shadow: none; }
-.slide--map:not([data-at='2']) .m-reopen { opacity: 0; pointer-events: none; }
-@keyframes m-pulse { 50% { box-shadow: 0 0 46px rgba(0, 240, 255, 0.85); } }
+/* Share of Asia-Europe ships using Suez: a track with the three reference marks and a fill per step. */
+.m-gauge { padding: 16px 22px 18px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--demand); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.m-gauge .t { font: 500 15px var(--head); letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.m-gauge .track { position: relative; height: 12px; margin: 40px 0 34px; background: rgba(255, 255, 255, 0.08); }
+.m-gauge .track i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #ff5a40, var(--demand)); box-shadow: 0 0 14px rgba(0, 240, 255, 0.5); transition: width 2.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.m-gauge .track b { position: absolute; top: -6px; width: 2px; height: 24px; background: rgba(255, 255, 255, 0.7); }
+.m-gauge .track b span { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font: 700 17px var(--head); white-space: nowrap; }
+.m-gauge .track b em { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font: 400 13px 'Inter', var(--head); font-style: normal; color: var(--muted); white-space: nowrap; }
+.m-gauge .track b:first-of-type em, .m-gauge .track b:first-of-type span { left: 0; transform: none; }
+.m-gauge .n { font: 400 17px/1.35 'Inter', var(--head); }
+.slide--map .pages { left: var(--edge); right: auto; top: 330px; width: 600px; }
+.slide--map .page { padding: 20px 26px; }
+.slide--map .page-title { font-size: 26px; }
+.slide--map .page-points { font-size: 20px; }
+.slide--map .page-note { font-size: 15px; }
+.slide--map .headline { width: 1300px; } /* two lines, clear of the banner */
 
 /* Scene 5 (carriers): the five responses as a stepper, one detail card for the active one. */
 .slide--carriers .numbers, .slide--carriers .side, .slide--carriers .extra { display: none; }

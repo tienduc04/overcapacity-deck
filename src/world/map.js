@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // Scene 4 as a live 3D world: a tactical sea chart of Europe, Africa and Asia, extruded from Natural Earth
 // coastlines (public domain, clipped by scripts/build-land.py). Ships run Asia -> Europe on two lanes: the
@@ -29,18 +30,22 @@ const MARKS = {
   asia: { lon: 122.6, lat: 31, label: 'SHANGHAI', port: true },
 };
 
-// Camera poses per reveal step: position p, look-at t.
+// Camera poses per reveal step: position p, look-at t. Framed so the routes sit between the text column
+// (left) and the numbers column (right).
+const WIDE = { p: [-39, 160, 64], t: [-39, 0, -1] };
 const POSES = [
-  { p: [-14, 100, 74], t: [-14, 0, -16] }, // the whole chart, Europe clear of the headline
-  { p: [-6, 64, 54], t: [-6, 0, 2] }, // Red Sea, Gulf of Aden, round the Cape
-  { p: [-14, 100, 74], t: [-14, 0, -16] }, // wide again: the button
-  { p: [-8, 96, 70], t: [-8, 0, -14] }, // traffic back on Suez
+  WIDE, // 0 Req 3: the whole detour
+  { p: [-10, 66, 30], t: [-10, 0, -15] }, // 1 Red Sea, Gulf of Aden, Hormuz
+  WIDE, // 2 Req 4: Suez traffic returning
+  { p: [-42, 96, 22], t: [-42, 0, -34] }, // 3 Europe: bunching at the ports
+  WIDE, // 4 medium term
+  WIDE, // 5 lessons
 ];
 
 const ease = (x) => x * x * (3 - 2 * x);
 
 export async function createMapWorld() {
-  const land = await (await fetch('data/land.json')).json();
+  const [land, shipGltf] = await Promise.all([fetch('data/land.json').then((r) => r.json()), new GLTFLoader().loadAsync('models/mapship.glb')]);
   await document.fonts.load('800 56px Montserrat');
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 16 / 9, 1, 2000);
@@ -122,7 +127,8 @@ export async function createMapWorld() {
             vec3 cyan = vec3(0.35, 2.4, 3.2);
             vec3 red = vec3(1.7, 0.2, 0.12);
             vec3 col; float a;
-            if (uKind < 0.5) { col = mix(red, cyan, uOpen); a = mix(0.35, 1.0, uOpen) * mix(0.55 + 0.45 * dash, 1.0, uOpen * 0.6 + 0.0); }
+            if (uKind < 0.5) { col = mix(red, cyan, smoothstep(0.0, 0.4, uOpen)); // cyan as soon as traffic is back; the ship count shows how much
+              a = mix(0.35, 1.0, uOpen) * mix(0.55 + 0.45 * dash, 1.0, uOpen * 0.6 + 0.0); }
             else { col = amber; a = mix(1.0, 0.3, uOpen) * (0.6 + 0.4 * dash); }
             gl_FragColor = vec4(col * a, 1.0);
           }`,
@@ -133,10 +139,14 @@ export async function createMapWorld() {
     );
   scene.add(lane(trunkSuez, 0), lane(trunkCape, 1));
 
-  // Ships: small orange hulls along each lane; counts follow `open`.
+  // Ships: low-poly container ships (scripts/blender/build_mapship.py, length 1, bow +x) along each lane;
+  // counts follow `open`.
   const N = 26;
-  const shipGeo = new THREE.BoxGeometry(1.7, 0.45, 0.6);
-  const shipMat = new THREE.MeshStandardMaterial({ color: 0xe8702a, roughness: 0.5, emissive: 0xff7a2a, emissiveIntensity: 0.9 });
+  let shipGeo = null;
+  shipGltf.scene.traverse((o) => o.isMesh && (shipGeo = o.geometry));
+  shipGeo.scale(3.2, 3.2, 3.2);
+  shipGeo.translate(0, 0.22, 0); // sits on top of the lane tube, not inside it
+  const shipMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, emissive: 0x6a4a30, emissiveIntensity: 1.2 }); // lit enough to read against the dark sea
   const ships = [new THREE.InstancedMesh(shipGeo, shipMat, N), new THREE.InstancedMesh(shipGeo, shipMat, N)];
   ships.forEach((s) => (s.frustumCulled = false));
   scene.add(...ships);
@@ -154,6 +164,17 @@ export async function createMapWorld() {
     } else {
       const dot = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 2.2, 2.4) }));
       g.add(dot);
+    }
+    if (m.sub) {
+      // A red cross over the chokepoint while it is shut; fades as it reopens.
+      const xMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 0.35, 0.25), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+      for (const a of [Math.PI / 4, -Math.PI / 4]) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 0.55), xMat);
+        bar.rotation.y = a;
+        bar.position.y = 0.3;
+        g.add(bar);
+      }
+      g.userData.cross = xMat;
     }
     const sprite = label(m.label);
     sprite.position.set(0, 4.2, 0);
@@ -182,15 +203,12 @@ export async function createMapWorld() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     },
-    // Move to the pose for a reveal step; open: Suez open (animated, or at once when `instant`).
+    // Move to the pose for a reveal step; open: how far Suez traffic is back, 0 shut .. 1 fully back
+    // (animated, or at once when `instant`).
     go(step, open, instant = false) {
       tl?.kill();
-      if (instant) return void Object.assign(state, { cam: pose(step), open: open ? 1 : 0 });
-      tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0).to(state, { open: open ? 1 : 0, duration: open ? 3.2 : 1.2, ease: 'power2.inOut' }, 0);
-    },
-    // Reopen Suez without moving the camera (the button).
-    setOpen(open) {
-      gsap.to(state, { open: open ? 1 : 0, duration: open ? 3.2 : 1.2, ease: 'power2.inOut', overwrite: 'auto' });
+      if (instant) return void Object.assign(state, { cam: pose(step), open });
+      tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0).to(state, { open, duration: 3.2, ease: 'power2.inOut' }, 0.4);
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
@@ -216,8 +234,10 @@ export async function createMapWorld() {
       const pulse = 1 + 0.18 * Math.sin(t * 3);
       for (const id of ['bab', 'suez']) {
         const g = markers[id];
-        g.userData.ring.material.color.setRGB(3 - 2.7 * o, 0.4 + 1.8 * o, 0.3 + 2.7 * o);
+        const k = Math.min(1, o * 2.5);
+        g.userData.ring.material.color.setRGB(3 - 2.7 * k, 0.4 + 1.8 * k, 0.3 + 2.7 * k);
         g.userData.ring.scale.setScalar(pulse);
+        g.userData.cross.opacity = 1 - Math.min(1, o * 2.2);
       }
       for (const id of ['hormuz', 'cape']) {
         markers[id].userData.ring.material.color.setRGB(3, 1.5, 0.3);
