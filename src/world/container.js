@@ -27,7 +27,7 @@ const LOOK = {
   Frame: { surface: 'rust', detail: 0.5, normal: 0.4 },
   Door: { surface: 'rust', detail: 0.5, normal: 0.4 },
 };
-const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings'];
+const INSIDE = ['Wall', 'Frame', 'Floor', 'Fittings', 'Carton', 'Pallet', 'Strap', 'Label', 'Ink']; // Carton..Ink: the delivery-year stacks
 // Neighbours in the stack: [bay, tier, row, colour]. Bay -1 is behind the closed end, tier -1 below,
 // row -1 inboard (-z); the sea side (+z) and the door end stay open for the camera.
 const STACK = [
@@ -40,7 +40,7 @@ const POSES = {
   side: { p: [LI / 2 + 3.6, 6.1, 13.2], t: [LI / 2, 1.3, 0] },
   front: { p: [LI + 5.0, 2.6, 6.0], t: [LI - 4.5, 1.2, 0] },
   doorway: { p: [LI + 3.2, 1.5, 0], t: [0, 1.3, 0] },
-  inside: { p: [LI - 2.4, 1.45, 0.25], t: [0, 1.15, -0.35] },
+  inside: { p: [LI - 1.2, 1.45, 0.25], t: [0, 1.15, -0.75] }, // aimed so the year stacks sit between the HUD columns
   out: { p: [LI + 9, 2.4, 0.4], t: [0, 1.2, 0] }, // backed out through the doors, still facing in
 };
 

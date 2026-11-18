@@ -40,7 +40,15 @@ M = {
     "quay": material("Quay", "#8d8b86", 0.9),
     "paint": material("Kerb", "#ffffff", 0.7, vcol=True),
     "shore": material("Shore", "#3c4048", 0.9),
+    "carton": material("Carton", "#b58a5c", 0.85),
+    "pallet": material("Pallet", "#8a6a45", 0.9),
+    "strap": material("Strap", "#d9d4c7", 0.6),
+    "label": material("Label", "#ece8df", 0.7),
+    "ink": material("Ink", "#1b1b1b", 0.6),
 }
+# Gross deliveries 2027-29 in M TEU (Yang Chen 2026b, as on slide 2's chart; status unverified there).
+# Each stack has one carton layer per ~1 M TEU, so the three heights echo the chart.
+DELIVERIES = {"2027": 3.43, "2028": 5.98, "2029": 4.35}
 
 
 def build_shell():
@@ -206,11 +214,59 @@ def build_shore():
     return link("Shore", bm, [M["shore"]])
 
 
+def text_mesh(body, size, mat):
+    """Flat lettering facing +x, reading left to right from inside the box looking at the closed end."""
+    from mathutils import Matrix
+
+    cu = bpy.data.curves.new(body, "FONT")
+    cu.body, cu.size, cu.extrude, cu.align_x, cu.align_y = body, size, 0.003, "CENTER", "CENTER"
+    tmp = bpy.data.objects.new("tmp", cu)
+    bpy.context.collection.objects.link(tmp)
+    me = bpy.data.meshes.new_from_object(tmp.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    bpy.data.objects.remove(tmp)
+    me.transform(Matrix(((0, 0, 1), (1, 0, 0), (0, 1, 0))).to_4x4())  # text x -> +y, y -> +z, normal -> +x
+    me.materials.append(mat)
+    return me
+
+
+def build_cargo():
+    """Three pallet stacks against the closed end, one per delivery year, each with a year placard."""
+    rng = random.Random(5)  # own stream: the rest of the build keeps its random sequence
+    bm = bmesh.new()
+    x0, x1 = 0.14, 1.14
+    for (year, teu), yc in zip(DELIVERIES.items(), (-0.68, 0.0, 0.68)):  # 2027 on the left seen from the doors
+        y0, y1 = yc - 0.31, yc + 0.31
+        box(bm, x0, x1, y0, y1, 0.0, 0.14, 1)  # pallet
+        layers = round(teu)
+        for k in range(layers):
+            z = 0.14 + k * 0.33
+            for i in range(2):
+                for j in range(2):
+                    jx, jy = rng.uniform(-0.012, 0.012), rng.uniform(-0.012, 0.012)
+                    cx, cy = x0 + i * 0.5 + jx, y0 + j * 0.31 + jy
+                    box(bm, cx + 0.01, cx + 0.49, cy + 0.01, cy + 0.3, z, z + 0.32, 0)
+        top = 0.14 + layers * 0.33
+        for yy in (y0 + 0.14, y1 - 0.17):  # two straps over the top and down the front
+            box(bm, x1 + 0.005, x1 + 0.02, yy, yy + 0.03, 0.14, top, 2)
+            box(bm, x0, x1 + 0.02, yy, yy + 0.03, top, top + 0.012, 2)
+        box(bm, x1 + 0.02, x1 + 0.03, yc - 0.26, yc + 0.26, 0.36, 0.72, 3)  # placard
+        ob = bpy.data.objects.new("Year" + year, text_mesh(year, 0.22, M["ink"]))
+        bpy.context.collection.objects.link(ob)
+        ob.location = (x1 + 0.034, yc, 0.55)
+    ob = link("Cargo", bm, [M["carton"], M["pallet"], M["strap"], M["label"]])
+    mod = ob.modifiers.new("Bevel", "BEVEL")  # rounded edges catch the light from the doors
+    mod.width, mod.segments, mod.limit_method, mod.harden_normals = 0.008, 2, "ANGLE", True
+    for f in ob.data.polygons:
+        f.use_smooth = True
+    return ob
+
+
 build_shell()
 build_floor()
 build_door()
 build_quay()
 build_shore()
+build_cargo()
 bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_apply=True)
 faces = sum(len(o.data.polygons) for o in bpy.data.objects if o.type == "MESH")
 print(f"[build_container] wrote {OUT}: {len(bpy.data.objects)} objects, {faces} faces")
