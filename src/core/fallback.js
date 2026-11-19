@@ -34,7 +34,7 @@ export function loadPlate(n, title) {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => resolve(placeholderPlate(n, title));
-    img.src = `/plates/s${pad(n)}.jpg`;
+    img.src = `plates/s${pad(n)}.jpg`;
   });
 }
 
