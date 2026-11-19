@@ -1,5 +1,5 @@
 {
- "source": "container-scenarios simulate.py via model.run_model, 5,000 runs, seed 42 (state of 6 Nov 2026)",
+ "source": "container-scenarios simulate.py via model.run_model, 5,000 runs, seed 42 (GitHub main b15900d, 18 Nov 2026)",
  "kind": "scenarios = median of the runs within +-4 percentile points of the 2030 utilisation index P90 / P50 / P10; fan = per-year percentiles",
  "units": {
   "gap_pp": "supply growth minus demand growth, percentage points per year (> 0 = overcapacity)",
@@ -15,126 +15,129 @@
  "seed": 42,
  "fan_gap_pp": {
   "optimistic": [
-   2.17,
-   11.41,
-   5.65,
-   -0.64
+   1.92,
+   7.09,
+   4.08,
+   -1.64
   ],
   "base": [
-   4.44,
-   13.67,
-   7.52,
-   1.44
+   5.71,
+   10.51,
+   7.42,
+   1.89
   ],
   "downside": [
-   7.7,
-   16.52,
-   10.23,
-   3.54
+   9.45,
+   13.97,
+   10.84,
+   5.32
   ]
  },
  "fan_util_idx": {
   "optimistic": [
-   98.0,
-   87.5,
-   81.9,
-   81.7
+   98.2,
+   90.9,
+   86.3,
+   86.4
   ],
   "base": [
-   95.9,
-   84.3,
-   78.4,
-   77.3
+   94.8,
+   85.9,
+   80.1,
+   78.7
   ],
   "downside": [
-   93.1,
-   81.3,
-   75.1,
-   73.1
+   91.4,
+   81.2,
+   74.3,
+   71.5
   ]
  },
  "scenarios": {
   "optimistic": {
    "n": 400,
    "gap_pp": [
-    2.84,
-    12.14,
-    6.3,
-    -0.11
+    2.99,
+    8.01,
+    5.28,
+    -0.51
    ],
    "util_idx": [
-    97.4,
-    86.7,
-    81.8,
-    81.7
+    97.2,
+    90.3,
+    86.1,
+    86.4
    ],
    "drivers": {
-    "demand_shock_pp": 1.15,
-    "scrapping_total_mteu": 2.42,
-    "slippage": 0.144,
-    "suez_release_mteu": 1.61,
-    "deliveries_2030_mteu": 1.84,
+    "demand_shift_pp": 2.257,
+    "scrapping_total_mteu": 2.429,
+    "slippage_2028": 0.249,
+    "suez_release_mteu": 0.957,
+    "deliveries_2030_mteu": 1.888,
+    "hormuz_closed_share": 0.39,
     "suez_year_share": {
-     "2027": 0.28,
-     "2028": 0.37,
-     "2029": 0.15,
-     "never": 0.19
+     "2027": 0.57,
+     "2028": 0.2,
+     "2029": 0.1,
+     "never": 0.14
     }
    }
   },
   "base": {
    "n": 400,
    "gap_pp": [
-    4.29,
-    13.75,
-    7.47,
-    1.41
+    5.73,
+    10.66,
+    7.28,
+    1.83
    ],
    "util_idx": [
-    96.0,
-    84.0,
-    78.4,
-    77.3
+    94.8,
+    85.7,
+    80.1,
+    78.7
    ],
    "drivers": {
-    "demand_shock_pp": -0.03,
-    "scrapping_total_mteu": 2.22,
-    "slippage": 0.122,
-    "suez_release_mteu": 1.67,
-    "deliveries_2030_mteu": 2.03,
+    "demand_shift_pp": -0.006,
+    "scrapping_total_mteu": 2.303,
+    "slippage_2028": 0.243,
+    "suez_release_mteu": 0.94,
+    "deliveries_2030_mteu": 2.029,
+    "hormuz_closed_share": 0.5,
     "suez_year_share": {
-     "2027": 0.33,
-     "2028": 0.41,
-     "2029": 0.18,
+     "2027": 0.6,
+     "2028": 0.21,
+     "2029": 0.1,
      "never": 0.09
     }
    }
   },
   "downside": {
-   "n": 399,
+   "n": 400,
    "gap_pp": [
-    5.58,
-    15.13,
-    9.04,
-    2.89
+    7.97,
+    12.99,
+    9.97,
+    4.34
    ],
    "util_idx": [
-    94.8,
-    81.9,
-    75.2,
-    73.1
+    92.7,
+    82.0,
+    74.6,
+    71.5
    ],
    "drivers": {
-    "demand_shock_pp": -1.15,
-    "scrapping_total_mteu": 2.06,
-    "slippage": 0.105,
-    "suez_release_mteu": 1.79,
-    "deliveries_2030_mteu": 2.2,
+    "demand_shift_pp": -2.271,
+    "scrapping_total_mteu": 2.101,
+    "slippage_2028": 0.23,
+    "suez_release_mteu": 0.99,
+    "deliveries_2030_mteu": 2.08,
+    "hormuz_closed_share": 0.54,
     "suez_year_share": {
-     "2027": 0.3,
-     "2028": 0.39,
-     "2029": 0.28,
-     "never": 0.03
+     "2027": 0.59,
+     "2028": 0.21,
+     "2029": 0.1,
+     "never": 0.1
     }
    }
   }

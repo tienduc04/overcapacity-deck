@@ -1,164 +1,298 @@
 {
-  "steps": 4,
+  "steps": 5,
   "keyNumbers": [
     {
-      "value": "-0.1",
+      "value": "-0.5",
       "unit": "pp",
       "label": "Supply growth minus demand growth in 2030, optimistic",
-      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
+      "source": "Req 6 model (simulate.py, GitHub main b15900d), 5,000 runs, seed 42",
       "url": "",
-      "date": "2026-11-06",
+      "date": "2026-11-18",
       "status": "model"
     },
     {
-      "value": "+1.4",
+      "value": "+1.8",
       "unit": "pp",
       "label": "Supply growth minus demand growth in 2030, base",
-      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
+      "source": "Req 6 model (simulate.py, GitHub main b15900d), 5,000 runs, seed 42",
       "url": "",
-      "date": "2026-11-06",
+      "date": "2026-11-18",
       "status": "model"
     },
     {
-      "value": "+2.9",
+      "value": "+4.3",
       "unit": "pp",
       "label": "Supply growth minus demand growth in 2030, downside",
-      "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
+      "source": "Req 6 model (simulate.py, GitHub main b15900d), 5,000 runs, seed 42",
       "url": "",
-      "date": "2026-11-06",
+      "date": "2026-11-18",
       "status": "model"
     }
   ],
   "chart": {
     "type": "fan",
     "title": "Supply-demand gap 2027-2030, fan of 5,000 runs",
-    "source": "Req 6 model (simulate.py), 5,000 runs, seed 42, 6 Nov 2026",
+    "source": "Req 6 model (simulate.py, GitHub main b15900d), 5,000 runs, seed 42",
     "url": "",
-    "date": "2026-11-06",
+    "date": "2026-11-18",
     "status": "model"
   },
   "bullets": [],
   "theory": "Sample: scenario planning.",
   "case": "Sample: signposts to watch.",
-  "speakerNotes": "Every number here is [MODEL] until the model runs.",
+  "speakerNotes": "Tien Duc, about 3.5 min. Step 1: how it is built (pipeline). Step 2: fan, peak +10.5 in 2028, even P10 is +7.1. Step 3: three scenarios, they split on demand. Step 4: reverse stress test, no realistic way out of 2028. Step 5: 14 of 14 variants hold, signposts, and say the band is probably too tight. Numbers from container-scenarios GitHub main b15900d (18 Nov 2026); re-export public/data/scenarios.json if the model changes.",
   "pending": false,
   "id": "s06-scenarios",
   "owner": "Tien Duc",
   "speakerKey": "tien-duc",
-  "budgetSec": 180,
+  "budgetSec": 210,
   "headline": "Three futures for 2030: optimistic, base, downside",
   "layout": "scenarios",
   "definition": "Optimistic = the carriers' view: a tight market with little overcapacity",
   "inputs": [
     {
-      "k": "Fleet at start of 2027",
-      "v": "34.5 M TEU",
+      "k": "Fleet · orderbook",
+      "v": "34.5 · 15.12 M TEU (orderbook range 14.0 to 16.2)",
       "tag": "SOURCE",
-      "by": "Taylor 2026"
-    },
-    {
-      "k": "Orderbook",
-      "v": "15.12 M TEU (range 14.0 to 16.2)",
-      "tag": "SOURCE",
-      "by": "Alphaliner; BIMCO, Linerlytica, Taylor"
+      "by": "Taylor 2026; Alphaliner Oct 2026"
     },
     {
       "k": "Deliveries 2027 / 28 / 29",
       "v": "3.43 / 5.98 / 4.35 M TEU",
       "tag": "SOURCE",
-      "by": "Alphaliner schedule"
+      "by": "Alphaliner schedule, Oct 2026"
     },
     {
       "k": "Deliveries 2030",
       "v": "0.64 · 2.0 · 3.36 M TEU",
       "tag": "DERIVED",
-      "by": "low · mid · high"
+      "by": "low · mid · high, from the orderbook"
     },
     {
       "k": "Demand growth 2027-30",
-      "v": "4.2 · 2.3 · 2.9 · 2.5 %, plus a shock of 1 pp",
+      "v": "4.2 · 2.3 · 2.9 · 2.5 %, ± 2.5 pp a year",
       "tag": "SOURCE + ESTIMATE",
-      "by": "Drewry Issue 2"
+      "by": "Drewry Issue 2; spread from past forecast errors"
     },
     {
       "k": "Scrapping per year",
       "v": "0.14 to 0.30 · 0.30 to 0.60 · 0.70 M TEU",
       "tag": "ESTIMATE",
-      "by": "low · base · high; record is 0.655 (Alphaliner)"
+      "by": "low · base · high; record 0.655 (Alphaliner)"
     },
     {
       "k": "Suez return",
-      "v": "2027 30% · 2028 40% · 2029 20% · never 10%",
+      "v": "2027 60% · 2028 20% · 2029 10% · never 10%; 0.4 to 1.5 M TEU still on the Cape",
       "tag": "ESTIMATE",
-      "by": "Drewry CF Issue 3; Linerlytica"
+      "by": "Clarksons, Alphaliner, Seatrade (Oct 2026)"
+    },
+    {
+      "k": "Hormuz closed in 2027",
+      "v": "50%, demand −2 pp",
+      "tag": "ESTIMATE",
+      "by": "BIMCO closed and open cases"
     },
     {
       "k": "Delivery slippage",
-      "v": "0 to 25% of a year",
+      "v": "2027 5 to 15% · 2028-30 15 to 33%",
       "tag": "ESTIMATE",
-      "by": "no clean source"
+      "by": "calibrated on 2009, 2011 and 2021-25"
     }
   ],
   "fan": {
-    "value": "+13.7",
+    "value": "+10.5",
     "unit": "pp in 2028",
     "label": "Median gap at the peak: 5.98 M TEU of deliveries land in 2028 (Alphaliner)",
     "note": "Band = P10 to P90 of 5,000 runs. Gap above zero: supply grows faster than demand.",
-    "insight": "The utilisation index stays near 77 even when the gap closes: the overhang does not go away, it just stops growing."
+    "insight": "Even the optimistic edge is +7.1 pp in 2028: 9 runs in 10 show more than 7 pp of overcapacity at the peak."
   },
   "scenarios": [
     {
       "id": "optimistic",
       "name": "Optimistic",
       "sub": "tight market, carriers’ view",
-      "story": "Demand runs about 1.2 pp a year above Drewry’s path and a share of deliveries slips: the gap is back to about zero by 2030.",
+      "story": "Demand runs about 2.3 pp a year above Drewry’s path: the gap peaks at +8.0 in 2028 and is back to about zero by 2030.",
       "act": "Hold newbuild slots back, add no new orders, keep scrapping steady."
     },
     {
       "id": "base",
       "name": "Base",
       "sub": "Drewry demand path",
-      "story": "Demand follows Drewry, about 12% of deliveries slip and 2.2 M TEU are scrapped over 2027 to 2030: the gap peaks near +14 in 2028 and is +1.4 in 2030.",
+      "story": "Demand follows Drewry, about a quarter of the 2028 deliveries slip and 2.3 M TEU are scrapped: the gap peaks at +10.7 in 2028 and is +1.8 in 2030.",
       "act": "Blank sailings and slow steaming to protect rates, scrap the oldest ships."
     },
     {
       "id": "downside",
       "name": "Downside",
       "sub": "weak demand",
-      "story": "Demand runs about 1.2 pp a year below Drewry and little scrapping happens: overcapacity is still +2.9 pp in 2030.",
+      "story": "Demand runs about 2.3 pp a year below Drewry and less is scrapped: the gap peaks at +13.0 and is still +4.3 in 2030.",
       "act": "Deeper blank sailings, scrap beyond the 0.655 M TEU record (needs yards) and consolidate."
     }
   ],
   "assumptions": {
     "optimistic": {
-      "Demand shock": "+1.1 pp a year",
+      "Demand vs Drewry": "+2.3 pp a year",
       "Scrapping 2027-30": "2.4 M TEU",
-      "Slippage": "14%",
-      "Deliveries 2030": "1.8 M TEU"
+      "Slippage 2028": "25%",
+      "Hormuz closed": "39% of runs",
+      "Deliveries 2030": "1.9 M TEU"
     },
     "base": {
-      "Demand shock": "0.0 pp a year",
-      "Scrapping 2027-30": "2.2 M TEU",
-      "Slippage": "12%",
+      "Demand vs Drewry": "0.0 pp a year",
+      "Scrapping 2027-30": "2.3 M TEU",
+      "Slippage 2028": "24%",
+      "Hormuz closed": "50% of runs",
       "Deliveries 2030": "2.0 M TEU"
     },
     "downside": {
-      "Demand shock": "-1.1 pp a year",
+      "Demand vs Drewry": "-2.3 pp a year",
       "Scrapping 2027-30": "2.1 M TEU",
-      "Slippage": "10%",
-      "Deliveries 2030": "2.2 M TEU"
+      "Slippage 2028": "23%",
+      "Hormuz closed": "54% of runs",
+      "Deliveries 2030": "2.1 M TEU"
     }
   },
-  "spread": "The three paths differ mostly in demand (about 1.2 pp a year either way). The year Suez returns barely separates them.",
+  "spread": "The three paths differ mostly in demand (about 2.3 pp a year either way). Suez timing, slippage and 2030 deliveries barely separate them.",
   "signposts": [
     "Demand against Drewry’s +4.2% for 2027: the biggest swing between our three paths.",
-    "Ships still on Cape routes (about 250 in Sep 2026, Linerlytica): a quick fall means Suez capacity returns early.",
-    "Scrapping against about 0.3 M TEU in 2027 (2025 actual: 0.008, record: 0.655).",
+    "Suez share of Asia–Europe capacity (36% in early Oct 2026, Clarksons): a quick rise means Cape capacity returns early.",
+    "Hormuz reopening: BIMCO’s 2027 ship demand is 2 pp higher in its open case.",
     "Slippage and new orders after Oct 2026, ahead of the 5.98 M TEU due in 2028."
   ],
   "limits": [
-    "Not modelled: Hormuz closure, port congestion, slow steaming, consolidation.",
-    "Ranges are our own estimates: the fan is a simulation, not a forecast.",
-    "Scenarios are the median of the runs around P10, P50 and P90 of the 2030 utilisation index."
-  ]
+    "Not modelled: port congestion, slow steaming, consolidation, Hormuz after 2027, new orders after Oct 2026.",
+    "The band is probably too tight: only 5 of 10 published fleet forecasts fall inside our P10 to P90.",
+    "Ranges are our own estimates: a simulation, not a forecast. Scenarios = median of the runs around P10, P50 and P90 of the 2030 utilisation index."
+  ],
+  "pipeline": [
+    {
+      "k": "Data",
+      "v": "3 labels",
+      "l": "Every value tagged SOURCE, DERIVED or ESTIMATE, with name and date"
+    },
+    {
+      "k": "Validate",
+      "v": "61 OK",
+      "l": "4 WARN and 2 FAIL, both expected: source gaps and Drewry's above-record scrapping"
+    },
+    {
+      "k": "Model",
+      "v": "4 years",
+      "l": "Fleet + deliveries − scrapping − Cape absorption, against demand"
+    },
+    {
+      "k": "Monte Carlo",
+      "v": "5,000",
+      "l": "runs, 12 random inputs, linked: an early Suez return pushes scrapping up"
+    },
+    {
+      "k": "Stress tests",
+      "v": "8",
+      "l": "tests against published numbers, 14 assumption variants, a reverse stress test"
+    }
+  ],
+  "stress": {
+    "title": "What would it take to avoid overcapacity in 2028?",
+    "items": [
+      {
+        "k": "Demand alone",
+        "need": 12.7,
+        "needText": "12.7%",
+        "needLabel": "growth needed in 2028 (Drewry: 2.3%)",
+        "ref": 13.1,
+        "refText": "13.1%",
+        "refLabel": "best year in the sample (2010 rebound)",
+        "max": 15,
+        "verdict": "Matching the best year on record"
+      },
+      {
+        "k": "Scrapping alone",
+        "need": null,
+        "needText": "Never",
+        "needLabel": "even at 15 times the base path",
+        "ref": null,
+        "refText": "4.3 M TEU",
+        "refLabel": "ships built 2005 or earlier cap it",
+        "max": 1,
+        "verdict": "Not enough old ships to scrap"
+      },
+      {
+        "k": "Slippage alone",
+        "need": 88,
+        "needText": "88%",
+        "needLabel": "of 2028 deliveries pushed to 2029",
+        "ref": 33,
+        "refText": "33%",
+        "refLabel": "2009 crisis, the worst on record",
+        "max": 100,
+        "verdict": "Far beyond anything seen"
+      }
+    ],
+    "combo": "Even demand +3 pp and 40% slippage together still leave +4.8 pp in 2028.",
+    "reading": "No overcapacity in 2028 is not a realistic scenario.",
+    "source": "robustness.py T4 and T8 (reverse stress test), other inputs at their median"
+  },
+  "robustness": {
+    "title": "Does the result survive other assumptions?",
+    "rows": [
+      [
+        "Base",
+        10.6
+      ],
+      [
+        "Suez all back in 2027",
+        10.5
+      ],
+      [
+        "Suez late",
+        10.8
+      ],
+      [
+        "Demand: narrow spread",
+        10.4
+      ],
+      [
+        "Demand: incl. tariff error",
+        10.7
+      ],
+      [
+        "Slippage x 0.5",
+        12.1
+      ],
+      [
+        "Slippage x 1.5",
+        9.1
+      ],
+      [
+        "No slippage",
+        13.5
+      ],
+      [
+        "Hormuz closed 0%",
+        10.6
+      ],
+      [
+        "Hormuz closed 90%",
+        10.6
+      ],
+      [
+        "Suez: full diversion left",
+        11.6
+      ],
+      [
+        "Suez: almost none left",
+        10.0
+      ],
+      [
+        "Tight stack",
+        9.4
+      ],
+      [
+        "Loose stack",
+        12.0
+      ]
+    ],
+    "summary": "14 of 14 assumption variants: the median still peaks in 2028, falls to 2030, and even P10 shows overcapacity in 2028.",
+    "source": "robustness.py T7, 2,000 runs per variant"
+  }
 }

@@ -23,9 +23,10 @@ const POSES = [
   { p: [-3.4, 2.6, 14.5], t: [-3.4, 2.3, 0] }, // the whole bridge, screens right of the inputs table
   { p: [-2.3, 2.4, 8.2], t: [-2.3, 2.4, 0] }, // the fan on the centre screen, right of the readout
   { p: [0, 3.0, 14.4], t: [0, 2.15, 0] }, // three screens high in the frame, cards below
-  { p: [-0.6, 2.8, 11.5], t: [-3.1, 2.9, -3] }, // out towards the window: signposts on the left
+  { p: [0, 3.0, 14.4], t: [0, 2.15, 0] }, // the three screens again: one stress test each, panel below
+  { p: [-2.3, 2.4, 8.2], t: [-2.3, 2.4, 0] }, // the robustness grid on the centre screen, signposts on the left
 ];
-const MODE = ['dim', 'fan', 'paths', 'util']; // what the screens draw per step
+const MODE = ['dim', 'fan', 'paths', 'stress', 'robust']; // what the screens draw per step
 
 const ease = (x) => x * x * (3 - 2 * x);
 
@@ -79,7 +80,10 @@ export async function createBridgeWorld(data) {
 
   const draw = (mode) => {
     for (const s of screens) {
-      paint(s.ctx, s.name, mode === 'fan' && s.name !== 'base' ? 'dim' : mode, data); // the fan lives on the centre screen
+      const solo = (mode === 'fan' || mode === 'robust') && s.name !== 'base'; // these live on the centre screen
+      if (mode === 'stress') paintStress(s.ctx, data.stress.items[ORDER.indexOf(s.name)]);
+      else if (mode === 'robust' && !solo) paintRobust(s.ctx, data.robustness);
+      else paint(s.ctx, s.name, solo ? 'dim' : mode, data);
       s.tex.needsUpdate = true;
     }
   };
@@ -231,6 +235,88 @@ function paint(g, name, mode, data) {
     g.fillText('MODEL OUTPUT · CARRIERS’ VIEW', 60, h - 28);
   }
   g.globalAlpha = 1;
+}
+
+// One reverse stress test per screen: what a single lever would need to close the 2028 gap, against the record.
+function paintStress(g, it) {
+  const { w, h } = SCREEN_PX;
+  screenBg(g);
+  g.textAlign = 'left';
+  g.fillStyle = '#F37021';
+  g.font = '800 58px Montserrat';
+  g.fillText(it.k.toUpperCase(), 60, 100);
+  g.fillStyle = 'rgba(210, 225, 235, 0.85)';
+  g.font = '500 26px Montserrat';
+  g.fillText('TO CLOSE THE 2028 GAP', 60, 146);
+  const bar = (y, label, text, frac, color) => {
+    g.fillStyle = 'rgba(190, 215, 230, 0.85)';
+    g.font = '500 26px Montserrat';
+    g.fillText(label.toUpperCase(), 60, y);
+    g.fillStyle = 'rgba(120, 170, 200, 0.16)';
+    g.fillRect(60, y + 18, w - 120, 70);
+    if (frac != null) {
+      g.save();
+      g.fillStyle = color;
+      g.shadowColor = color;
+      g.shadowBlur = 24;
+      g.fillRect(60, y + 18, (w - 120) * Math.min(1, frac), 70);
+      g.restore();
+    }
+    g.fillStyle = '#ffffff';
+    g.font = '800 54px Montserrat';
+    g.textAlign = 'right';
+    g.fillText(text, w - 76, y + 74);
+    g.textAlign = 'left';
+  };
+  bar(270, `Needed: ${it.needLabel}`, it.needText, it.need == null ? null : it.need / it.max, '#F37021');
+  bar(470, `Record: ${it.refLabel}`, it.refText, it.ref == null ? null : it.ref / it.max, '#22d6e6');
+  g.fillStyle = '#f4f1ec';
+  g.font = '700 34px Montserrat';
+  g.fillText(it.verdict.toUpperCase(), 60, h - 90);
+  g.fillStyle = 'rgba(190, 215, 230, 0.85)';
+  g.font = '500 24px Montserrat';
+  g.fillText('REVERSE STRESS TEST · OTHER INPUTS AT MEDIAN', 60, h - 28);
+}
+
+// The assumption sweep: median 2028 gap per variant, all of them still a 2028 peak.
+function paintRobust(g, rob) {
+  const { w, h } = SCREEN_PX;
+  screenBg(g);
+  g.textAlign = 'left';
+  g.fillStyle = '#22d6e6';
+  g.font = '800 58px Montserrat';
+  g.fillText('14 OF 14 HOLD', 60, 96);
+  g.fillStyle = 'rgba(210, 225, 235, 0.85)';
+  g.font = '500 24px Montserrat';
+  g.fillText('MEDIAN GAP 2028 (PP) PER ASSUMPTION VARIANT', 60, 138);
+  const x0 = 470, x1 = w - 150, max = 15;
+  rob.rows.forEach(([name, v], i) => {
+    const y = 182 + i * 40;
+    g.fillStyle = 'rgba(210, 225, 235, 0.9)';
+    g.font = '500 23px Montserrat';
+    g.fillText(name.toUpperCase(), 60, y + 22);
+    g.fillStyle = i ? 'rgba(244, 241, 236, 0.75)' : '#F37021';
+    g.fillRect(x0, y + 4, ((x1 - x0) * v) / max, 24);
+    g.fillStyle = '#ffffff';
+    g.fillText(v.toFixed(1), x0 + ((x1 - x0) * v) / max + 12, y + 24);
+    g.fillStyle = '#22d6e6';
+    g.font = '800 26px Montserrat';
+    g.fillText('✓', w - 70, y + 24);
+  });
+  g.fillStyle = 'rgba(190, 215, 230, 0.85)';
+  g.font = '500 22px Montserrat';
+  g.fillText('HOLDS = PEAK IN 2028, FALLING TO 2030, P10 2028 STILL ABOVE ZERO', 60, h - 24);
+}
+
+function screenBg(g) {
+  const { w, h } = SCREEN_PX;
+  const bg = g.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, '#071420');
+  bg.addColorStop(1, '#040b13');
+  g.globalAlpha = 1;
+  g.fillStyle = bg;
+  g.fillRect(0, 0, w, h);
+  g.textBaseline = 'alphabetic';
 }
 
 // --- sky and sea ---------------------------------------------------------------------------------------
