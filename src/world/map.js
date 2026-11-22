@@ -29,6 +29,11 @@ const MARKS = {
   rtm: { lon: 4.2, lat: 52, label: 'ROTTERDAM', port: true },
   asia: { lon: 122.6, lat: 31, label: 'SHANGHAI', port: true },
 };
+// Chart layer for s04 step 0 (atlas-style overview): region names and Singapore, faded in by chart(true).
+const REGIONS = [
+  ['EUROPE', 24, 47, 1.3], ['AFRICA', 20, 6, 1.3], ['ASIA', 100, 27, 1.3], ['INDIAN OCEAN', 72, -12, 1],
+  ['ATLANTIC OCEAN', -26, -8, 1], ['MEDITERRANEAN SEA', 16, 33.2, 0.7], ['RED SEA', 33.5, 20.5, 0.7], ['ARABIAN SEA', 64, 15, 0.7],
+];
 
 // Camera poses per reveal step: position p, look-at t. Framed so the routes sit between the text column
 // (left) and the numbers column (right).
@@ -40,6 +45,7 @@ const POSES = [
   { p: [-42, 96, 22], t: [-42, 0, -34] }, // 3 Europe: bunching at the ports
   WIDE, // 4 medium term
   WIDE, // 5 lessons
+  { p: [6, 172, 76], t: [6, 0, 1] }, // 6 s04 overview: the whole Asia-Europe trip, both routes centred
 ];
 
 const ease = (x) => x * x * (3 - 2 * x);
@@ -204,6 +210,23 @@ export async function createMapWorld() {
     markers[id] = g;
   }
 
+  // Chart layer: hidden unless chart(true); only s04 turns it on, so s04b's own map never shows it.
+  const chartMats = [];
+  const chartSprite = (text, lon, lat, k, muted) => {
+    const sp = label(text, muted ? '#9fc3d6' : '#f2f6fa');
+    sp.material.opacity = 0;
+    sp.scale.multiplyScalar(k);
+    sp.position.copy(at(lon, lat, LAND_H + 1.5));
+    chartMats.push(sp.material);
+    scene.add(sp);
+  };
+  for (const [text, lon, lat, k] of REGIONS) chartSprite(text, lon, lat, k, k < 1.2);
+  chartSprite('SINGAPORE', 103.8, -1.8, 0.75, false);
+  const sgDot = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 2.2, 2.4), transparent: true, opacity: 0 }));
+  sgDot.position.copy(at(103.8, 1.3, LANE_Y + 0.1));
+  chartMats.push(sgDot.material);
+  scene.add(sgDot);
+
   const state = { cam: pose(0), open: 0, hero: -1 }; // hero: 0..1 along its run, -1 hidden
   let tl = null;
   let ready = false;
@@ -231,6 +254,10 @@ export async function createMapWorld() {
       state.hero = -1;
       if (instant) return void Object.assign(state, { cam: pose(step), open });
       tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0).to(state, { open, duration: 3.2, ease: 'power2.inOut' }, 0.4);
+    },
+    // Show or hide the chart layer (region names, Singapore).
+    chart(on, instant = false) {
+      gsap.to(chartMats, { opacity: on ? 1 : 0, duration: instant ? 0 : 0.8, ease: 'power1.inOut', overwrite: true });
     },
     // Scene 4 -> 5 bridge, from the Red Sea close-up (pose 1, shut): Suez reopens, the lead ship sails up the
     // Red Sea and through the canal, then the camera pulls out to the wide view (pose `toStep`).
@@ -294,8 +321,8 @@ export async function createMapWorld() {
   };
 }
 
-// A text sprite: bold, white, always on top.
-function label(text) {
+// A text sprite: bold, white (or the given colour), always on top.
+function label(text, color = '#f2f6fa') {
   const canvas = document.createElement('canvas');
   canvas.width = 768;
   canvas.height = 112;
@@ -306,7 +333,7 @@ function label(text) {
   g.lineWidth = 10;
   g.strokeStyle = 'rgba(3,10,20,0.9)';
   g.strokeText(text, 384, 58);
-  g.fillStyle = '#f2f6fa';
+  g.fillStyle = color;
   g.fillText(text, 384, 58);
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;

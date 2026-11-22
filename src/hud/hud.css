@@ -88,13 +88,24 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .m-card .l { margin-top: 8px; font: 400 19px/1.35 'Inter', var(--head); }
 .m-card .n { margin-top: 8px; font: 400 15px/1.4 'Inter', var(--head); color: var(--muted); }
 .slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
-.slide--choke:not([data-at='0']) :is(.m-col, .m-banner) { display: none; }
+.slide--choke:not([data-at='1']) :is(.m-col, .m-banner) { display: none; }
+/* Step 0: route callouts over the overview map (positions fit map.js pose 6). */
+.k-routes > * { position: absolute; opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+.slide--choke[data-at='0'] .k-routes > * { opacity: 1; }
+.k-route { width: 380px; box-sizing: border-box; padding: 16px 22px; background: rgba(8, 13, 19, 0.9); border: 2px solid; text-align: center; }
+.k-route .h { font: 800 22px/1.15 var(--head); text-transform: uppercase; letter-spacing: 0.04em; }
+.k-route .d { margin-top: 10px; font: 800 40px/1 var(--head); color: #f2f6fa; }
+.k-route .t { margin-top: 6px; font: 500 24px var(--head); color: #f2f6fa; }
+.k-route .x { margin-top: 10px; font: 500 17px 'Inter', var(--head); color: var(--muted); }
+.k-route.suez { left: 1010px; top: 236px; width: 340px; border-color: #ff5a40; } .k-route.suez .h { color: #ff7a62; }
+.k-route.cape { left: 1230px; top: 640px; border-color: #f0a030; } .k-route.cape .h { color: #f0a030; }
+.k-routes .n { right: var(--edge); top: 214px; font: 500 15px var(--head); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 /* Scene 4 (Akshaya, Req 3): steps 1-4 are full-width screens from her doc, over the dimmed map. */
 .k-screens { position: absolute; left: var(--edge); right: var(--edge); top: 268px; }
 .k-screen { position: absolute; inset: 0 0 auto 0; display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(24px); pointer-events: none; transition: opacity 0.45s ease, transform 0.45s ease; }
-.slide--choke[data-at='1'] .k-screen[data-n='1'], .slide--choke[data-at='2'] .k-screen[data-n='2'],
-.slide--choke[data-at='3'] .k-screen[data-n='3'], .slide--choke[data-at='4'] .k-screen[data-n='4'] { opacity: 1; transform: none; }
-.slide--choke:not([data-at='0']) .headline { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8); }
+.slide--choke[data-at='2'] .k-screen[data-n='2'], .slide--choke[data-at='3'] .k-screen[data-n='3'],
+.slide--choke[data-at='4'] .k-screen[data-n='4'] { opacity: 1; transform: none; }
+.slide--choke:not([data-at='0'], [data-at='1']) .headline { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8); }
 .k-t { margin: 0; font: 800 30px/1.1 var(--head); text-transform: uppercase; color: var(--supply); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8); }
 .k-row { display: grid; gap: 18px; }
 .k-row.n3 { grid-template-columns: repeat(3, 1fr); }

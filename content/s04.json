@@ -33,7 +33,7 @@
   "bullets": [],
   "theory": "Sample: effective vs nominal capacity.",
   "case": "Sample: Red Sea since 2023.",
-  "speakerNotes": "Akshaya, Req 3. Step 0: longer routes (Suez vs Cape). Step 1: three capacity losses (3.6 M TEU, 1.7 M TEU, 5–7%). Step 2: main causes. Step 3: market impact with vs without disruptions. Step 4: how disruptions hide overcapacity, nominal vs effective capacity. Hand over to Akib ('When the Detours End'). Figures from her Req 3 document; sources still to be named.",
+  "speakerNotes": "Akshaya, Req 3. Step 0: the map, Suez route vs Cape route (~10,000 nm / 31 days vs ~13,000 nm / 41 days). Step 1: longer routes absorb capacity (1.6 M TEU, ~250 ships). Step 2: three capacity losses (3.6 M TEU, 1.7 M TEU, 5–7%). Step 3: main causes. Step 4: how disruptions hide overcapacity, nominal vs effective capacity. Hand over to Akib ('When the Detours End'). Figures from her Req 3 document; sources still to be named.",
   "pending": false,
   "id": "s04-chokepoints",
   "owner": "Akshaya",
@@ -51,7 +51,7 @@
   ],
   "pages": [
     {
-      "at": 0,
+      "at": 1,
       "title": "Longer routes absorb vessel capacity",
       "points": [
         "Red Sea security threats forced carriers round the Cape of Good Hope",
@@ -127,33 +127,6 @@
       ]
     },
     {
-      "title": "Impact on the global shipping market",
-      "table": {
-        "head": [
-          "Without disruptions",
-          "With disruptions"
-        ],
-        "rows": [
-          [
-            "More available vessel capacity",
-            "Less effective capacity"
-          ],
-          [
-            "More vessels available for cargo",
-            "Vessels spend longer sailing and waiting"
-          ],
-          [
-            "Greater pressure from new deliveries",
-            "Some new capacity gets absorbed"
-          ],
-          [
-            "Potential downward pressure on freight rates",
-            "Capacity remains relatively tight"
-          ]
-        ]
-      }
-    },
-    {
       "title": "How do disruptions hide overcapacity?",
       "flow": [
         {
@@ -195,5 +168,21 @@
         "note": "Schematic, not to scale"
       }
     }
-  ]
+  ],
+  "routes": [
+    {
+      "kind": "suez",
+      "name": "Suez Canal route",
+      "dist": "~10,000 nm",
+      "days": "~31 days"
+    },
+    {
+      "kind": "cape",
+      "name": "Around the Cape of Good Hope",
+      "dist": "~13,000 nm",
+      "days": "~41 days",
+      "delta": "+3,000 nm · +10 days per voyage"
+    }
+  ],
+  "routesNote": "Asia–Europe, one way"
 }

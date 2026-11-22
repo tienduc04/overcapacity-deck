@@ -7,12 +7,13 @@ const world = () =>
     .then((m) => m.createMapWorld())
     .then((w) => (map = w));
 
-const scene = createScene({ title: 'Chokepoints', speaker: 'Akshaya', transition: 'radarWipe', content, world });
+const scene = createScene({ title: 'Detours & Disruptions', speaker: 'Akshaya', transition: 'radarWipe', content, world });
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false; // on screen: steps animate; arriving from another scene jumps
 
-// Map pose per step. The last step must end on pose 1 (Red Sea close-up, Suez shut): s04b starts on that frame.
-const POSE = [0, 1, 1, 1, 1];
+// Map pose per step: 6 overview, 0 wide, 1 Red Sea close-up. The last step must end on pose 1 (Suez shut):
+// s04b starts on that frame.
+const POSE = [6, 0, 1, 1, 1];
 
 const div = (cls, html = '') => Object.assign(document.createElement('div'), { className: cls, innerHTML: html });
 const card = (cls, n) =>
@@ -25,7 +26,8 @@ const table = (t) =>
 const capacity = (c) =>
   `<div class="k-cap"><div class="bar"><u style="width:100%"></u><span>${c.nominal}</span></div><div class="bar eff"><u style="width:72%"></u><s style="width:28%">${c.lost}</s><span>${c.effective}</span></div><div class="n">${c.note}</div></div>`;
 
-// Step 0: longer routes (the shared page panel) with the two key numbers. Steps 1-4: one screen each from Akshaya's doc.
+// Step 0: the route map with a callout per route. Step 1: longer routes (the shared page panel) with the two
+// key numbers. Steps 2-4: one screen each from Akshaya's doc.
 scene.init = (ctx) => {
   base.init.call(scene, ctx);
   scene.slide.classList.add('slide--choke');
@@ -37,7 +39,7 @@ scene.init = (ctx) => {
   const screens = div('k-screens');
   content.screens.forEach((sc, i) => {
     const s = div('k-screen', `<h2 class="k-t">${sc.title}</h2>`);
-    s.dataset.n = i + 1;
+    s.dataset.n = i + 2;
     if (sc.cards) s.append(div(`k-row n${sc.cards.length}`, sc.cards.map(kcard).join('')));
     if (sc.table) s.append(div('k-row', table(sc.table)));
     if (sc.flow) s.append(div('k-row n4 flow', sc.flow.map(kcard).join('')));
@@ -45,13 +47,16 @@ scene.init = (ctx) => {
     if (sc.note) s.append(div('k-note', sc.note));
     screens.append(s);
   });
-  scene.slide.append(banner, col, legend, screens);
+  const routes = div('k-routes', content.routes.map((r) =>
+    `<div class="k-route ${r.kind}"><div class="h">${r.name}</div><div class="d">${r.dist}</div><div class="t">${r.days}</div>${r.delta ? `<div class="x">${r.delta}</div>` : ''}</div>`).join('') + `<div class="n">${content.routesNote}</div>`);
+  scene.slide.append(banner, col, legend, screens, routes);
 };
 
 scene.reveal = (step) => {
   base.reveal(step);
   scene.slide.dataset.at = step;
   map?.go(POSE[step], 0, !active);
+  map?.chart(step === 0, !active);
 };
 scene.enter = (tl) => {
   active = true;
