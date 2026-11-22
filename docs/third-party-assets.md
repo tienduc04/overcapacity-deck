@@ -35,9 +35,3 @@ CC BY 4.0, modified.* The Blender ship (`public/models/ship.glb`) is still used 
 | Harbour (own work) | - | this project | Scene 7 harbour at dawn: brick warehouses, quay, container terminal with cranes, built by `scripts/blender/build_harbour.py` (`npm run build:harbour`) | `public/models/harbour.glb` (no third-party asset) |
 | Cargo container (own work) | - | this project | Scene 3 hero containers: corrugated walls, doors, palletised cartons, HAPAG-LLOYD lettering and three hologram icons, built by `scripts/blender/build_cargo.py` (`npm run build:cargo`) | `public/models/cargo.glb` (no third-party asset) |
 | Map ship (own work) | - | this project | Scene 4 low-poly container ship (190 faces, vertex colours) that runs along the lanes, built by `scripts/blender/build_mapship.py` (`npm run build:mapship`) | `public/models/mapship.glb` (no third-party asset) |
-
-## gl-transitions (MIT)
-
-| Asset | Source | Author | Used in | Note |
-|---|---|---|---|---|
-| ShoreWash transition | https://github.com/gl-transitions/gl-transitions/blob/master/transitions/ShoreWash.glsl | gre (gl-transitions contributors) | `shoreWash` in `src/core/renderer.js`, entering scene 3 | Ported 2026-11-22: renamed to this file's `fromColor`/`p`/`aspect()`, reuses the prelude's `vnoise`, parameters fixed as constants. MIT License, Copyright (c) 2017-present gl-transitions contributors. |
