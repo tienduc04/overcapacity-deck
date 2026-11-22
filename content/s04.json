@@ -1,11 +1,10 @@
 {
-  "steps": 6,
+  "steps": 2,
   "keyNumbers": [
     {
       "value": "1.6",
       "unit": "M TEU",
       "label": "Effective capacity absorbed by Suez and Red Sea detours",
-      "labelOpen": "Effective capacity released back to the market if Suez routing returns",
       "note": "",
       "source": "Taylor 2026, as cited in the Req 1 data",
       "url": "",
@@ -21,26 +20,6 @@
       "url": "",
       "date": "Sep 2026; Mar 2026",
       "status": "sample"
-    },
-    {
-      "value": "-5",
-      "unit": "pp",
-      "label": "Ship-demand growth if Suez normalises gradually in 2027 (vs BIMCO's own forecast)",
-      "note": "",
-      "source": "BIMCO",
-      "url": "",
-      "date": "Sep 2026",
-      "status": "sample"
-    },
-    {
-      "value": "~-10",
-      "unit": "%",
-      "label": "Ship demand once Suez is fully back, vs continued Cape routing",
-      "note": "",
-      "source": "BIMCO via forwarder.lk (secondary source)",
-      "url": "",
-      "date": "Oct 2026",
-      "status": "sample"
     }
   ],
   "chart": {
@@ -54,24 +33,22 @@
   "bullets": [],
   "theory": "Sample: effective vs nominal capacity.",
   "case": "Sample: Red Sea since 2023.",
-  "speakerNotes": "Req 3 (steps 0-1) and Req 4 (steps 2-5) slide text from the team doc. The round-trip example uses illustrative round numbers, not one real service. Figures without a source in the doc still need one.",
+  "speakerNotes": "Akshaya, Req 3 (how much capacity the detours absorb). Step 0: longer routes, step 1: operational disruptions. Hand over to Akib (next scene, 'When the Detours End'). Figures without a source in the doc still need one.",
   "pending": false,
   "id": "s04-chokepoints",
-  "owner": "Akshaya and Akib",
-  "speakerKey": "akshaya-akib",
-  "budgetSec": 420,
+  "owner": "Akshaya",
+  "speakerKey": "akshaya",
+  "budgetSec": 210,
   "headline": "Detours absorb ships until the chokepoints reopen",
   "layout": "map",
   "banner": {
-    "shut": "Capacity absorbed by routing",
-    "open": "Suez route open: capacity returning"
+    "shut": "Capacity absorbed by routing"
   },
   "legend": [
     "Cape route: busy",
     "Suez route: shut",
     "Schematic routes, not navigation data"
   ],
-  "legendOpen": "Suez route: open",
   "pages": [
     {
       "at": 0,
@@ -94,82 +71,6 @@
         "Effective capacity falls, so overcapacity is temporarily hidden"
       ],
       "note": "Nominal capacity = the whole fleet. Effective capacity = what is left after longer routes, port waiting and disruptions."
-    },
-    {
-      "at": 2,
-      "title": "The return has started",
-      "points": [
-        "Early October: about 50% of normal container capacity through Suez again",
-        "Asia–Europe ships using Suez: 8% in the crisis, 36% in early October, about 80% before",
-        "Hapag-Lloyd and Maersk moved services back from July 2026; full return expected around Q1 2027",
-        "Suez is about 3,000 nm shorter: about 10 days less, less fuel, faster delivery"
-      ]
-    },
-    {
-      "at": 3,
-      "title": "Short term: it gets messier before it gets better",
-      "points": [
-        "Bunching: Suez ships catch up with Cape ships and arrive in Europe together",
-        "Port congestion: Rotterdam, Hamburg and Antwerp have limited berths, cranes and yard space",
-        "Containers stuck in Europe: Asian exporters short of empties 8–9 weeks later",
-        "Freight rates can even spike for a while"
-      ]
-    },
-    {
-      "at": 4,
-      "title": "Medium term: the hidden overcapacity appears",
-      "points": [
-        "Vessels needed = round-trip days ÷ 7 for a weekly service",
-        "Cape: 105 ÷ 7 = 15 vessels · Suez: 84 ÷ 7 = 12 vessels → 3 freed, 20% (illustrative)",
-        "Industry-wide: about 6–11% of the fleet, roughly 2.5M TEU, comes back",
-        "Stopford: ton-miles fall, the market moves to the flat part of the supply curve",
-        "Cascading: big ships move to India, Africa and Latin America trades"
-      ]
-    },
-    {
-      "at": 5,
-      "title": "Lessons from 2008–2015, and why it may not be a crash",
-      "points": [
-        "Then: ships ordered in the 2004–08 boom kept arriving after demand fell in 2008",
-        "Carriers slow-steamed (about 730,000 TEU absorbed in 2009–10), laid up, scrapped and fought price wars",
-        "It ended with Hanjin's bankruptcy (2016) and mergers, incl. Hapag-Lloyd with CSAV (2014) and UASC (2017)",
-        "Now: top 5 control about 65% of capacity (53% in 2016), and security risk slows the return",
-        "The carrier's dilemma: each wants to return first, but all returning at once floods the market"
-      ]
     }
-  ],
-  "gauge": {
-    "title": "Asia–Europe ships using Suez",
-    "marks": [
-      {
-        "at": 8,
-        "label": "Crisis"
-      },
-      {
-        "at": 36,
-        "label": "Early Oct 2026"
-      },
-      {
-        "at": 80,
-        "label": "Before the crisis"
-      }
-    ],
-    "byStep": [
-      8,
-      8,
-      36,
-      36,
-      80,
-      80
-    ],
-    "notes": [
-      "Shut: traffic goes round the Cape",
-      "Shut: traffic goes round the Cape",
-      "About 50% of normal container capacity is back",
-      "About 50% of normal container capacity is back",
-      "Full return expected around Q1 2027",
-      "Full return expected around Q1 2027"
-    ],
-    "source": "Req 3–4 notes (page 'The return has started')"
-  }
+  ]
 }

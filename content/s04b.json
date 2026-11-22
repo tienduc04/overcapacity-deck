@@ -1,0 +1,152 @@
+{
+  "id": "s04b-detours-end",
+  "owner": "Akib",
+  "speakerKey": "akib",
+  "steps": 5,
+  "budgetSec": 210,
+  "headline": "When the Detours End",
+  "layout": "map",
+  "subhead": "What if disrupted trade lanes return to normal?",
+  "keyNumbers": [],
+  "chart": {
+    "type": "map",
+    "title": "Suez vs Cape routing (schematic)",
+    "source": "Natural Earth 1:10m land (public domain); lanes drawn schematically",
+    "url": "https://www.naturalearthdata.com",
+    "date": "",
+    "status": "verified"
+  },
+  "bullets": [],
+  "theory": "",
+  "case": "",
+  "banner": "Suez route open: capacity returning",
+  "legend": [
+    "Cape route",
+    "Suez route: open",
+    "Schematic routes, not navigation data"
+  ],
+  "screens": [
+    {
+      "title": "The return to Suez has started",
+      "cards": [
+        {
+          "head": "Who is going back",
+          "stat": "~60%",
+          "points": [
+            "of Asia–Europe services via Suez",
+            "Gemini, CMA CGM, MSC",
+            "8% crisis → 80% before"
+          ]
+        },
+        {
+          "head": "When",
+          "stat": "6–12",
+          "points": [
+            "more months to full return"
+          ]
+        },
+        {
+          "head": "Why",
+          "stat": "10 days",
+          "points": [
+            "3,000 nm shorter",
+            "Less fuel, faster delivery",
+            "Stay out = lose customers"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Short term: messier before better",
+      "cards": [
+        {
+          "head": "Bunching",
+          "stat": "",
+          "points": [
+            "Cape + Suez ships arrive together"
+          ]
+        },
+        {
+          "head": "Port congestion",
+          "stat": "",
+          "points": [
+            "Rotterdam, Hamburg, Antwerp",
+            "Limited berths, cranes, yards"
+          ]
+        },
+        {
+          "head": "Knock-on effects",
+          "stat": "8–9 wks",
+          "points": [
+            "until empty-box shortage in Asia",
+            "Reliability drops"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Medium term: the hidden overcapacity",
+      "cards": [
+        {
+          "head": "One service",
+          "stat": "15 → 12",
+          "points": [
+            "vessels: Cape vs Suez",
+            "Round trip ÷ 7 days",
+            "3 vessels freed"
+          ]
+        },
+        {
+          "head": "Whole industry",
+          "stat": "5–7%",
+          "points": [
+            "of global capacity comes back",
+            "Orderbook ~48% of fleet"
+          ]
+        },
+        {
+          "head": "Result",
+          "stat": "",
+          "points": [
+            "Fewer ton-miles → lower rates",
+            "And big ships move to India, Africa, LatAm"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Lessons from 2008–2015",
+      "cards": [
+        {
+          "head": "Then",
+          "stat": "",
+          "points": [
+            "Boom ships arrived late",
+            "Slow steaming, lay-ups, price wars",
+            "Hanjin bankrupt → mergers"
+          ]
+        },
+        {
+          "head": "Now",
+          "stat": "53% → 66%",
+          "points": [
+            "top-5 carrier share",
+            "Better capacity control"
+          ]
+        },
+        {
+          "head": "Takeaway",
+          "stat": "",
+          "points": [
+            "All return at once = flooded market",
+            "Good for shippers",
+            "Stress test for carriers"
+          ]
+        }
+      ]
+    }
+  ],
+  "source": "Akib, Req4.pptx (22 Nov 2026)",
+  "speakerNotes": "Akib, Req 4, about 3.5 min. Step 0: agenda ('Thanks Akshaya. So what happens when the detours end?'). Steps 1-4: one screen each, the three cards in the order of his notes (Req4.pptx speaker notes, steps 2-13). Close: hand over to Sanjoy. Text copied from Req4.pptx; figures have no source in the file yet.",
+  "pending": false
+}

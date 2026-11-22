@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const SHOTS = join(import.meta.dirname, 'shots');
-const content = [1, 2, 3, 4, 5, 6, 7].map((n) => JSON.parse(readFileSync(`content/s0${n}.json`, 'utf8')));
+const content = ['01', '02', '03', '04', '04b', '05', '06', '07'].map((n) => JSON.parse(readFileSync(`content/s${n}.json`, 'utf8'))); // talk order
 
 // Page errors and any request leaving localhost (the build must run offline).
 function watch(page) {
@@ -22,7 +22,7 @@ const at = async (page, i, step) => {
   await expect(body(page)).toHaveAttribute('data-step', String(step));
 };
 
-test('Right through all 7 scenes and back; headlines, screenshots, offline', async ({ page }) => {
+test('Right through all 8 scenes and back; headlines, screenshots, offline', async ({ page }) => {
   const seen = watch(page);
   await page.goto('/');
   await at(page, 0, 0);
@@ -35,7 +35,7 @@ test('Right through all 7 scenes and back; headlines, screenshots, offline', asy
     await expect(headline(page, i)).toHaveText(content[i].headline);
     await expect(headline(page, i)).toBeVisible();
     await page.waitForTimeout(500); // let the step reveal fade finish before the screenshot
-    await page.screenshot({ path: join(SHOTS, `s0${i + 1}.png`) });
+    await page.screenshot({ path: join(SHOTS, `scene${i + 1}.png`) });
     if (i < content.length - 1) {
       await page.keyboard.press('ArrowRight');
       await at(page, i + 1, 0);
@@ -44,7 +44,7 @@ test('Right through all 7 scenes and back; headlines, screenshots, offline', asy
     }
   }
   await page.keyboard.press('ArrowRight'); // end of deck: nothing happens
-  await at(page, 6, (content[6].steps ?? 3) - 1);
+  await at(page, content.length - 1, (content.at(-1).steps ?? 3) - 1);
 
   for (let i = content.length - 1; i > 0; i--) {
     for (let s = (content[i].steps ?? 3) - 1; s > 0; s--) {
@@ -61,7 +61,7 @@ test('Right through all 7 scenes and back; headlines, screenshots, offline', asy
   expect(seen.external).toEqual([]);
 });
 
-test('every control works: Space, click, buttons, 1-7, S, T, D, B, Esc, F', async ({ page }) => {
+test('every control works: Space, click, buttons, 1-8, S, T, D, B, Esc, F', async ({ page }) => {
   const seen = watch(page);
   await page.goto('/');
   await at(page, 0, 0); // app booted (fonts + plates loaded)
@@ -76,7 +76,7 @@ test('every control works: Space, click, buttons, 1-7, S, T, D, B, Esc, F', asyn
   await page.getByRole('button', { name: 'Previous' }).click();
   await at(page, 1, 1);
 
-  for (const n of [5, 3, 7, 1]) {
+  for (const n of [5, 3, 8, 1]) {
     await page.keyboard.press(String(n));
     await at(page, n - 1, 0);
     await page.keyboard.press('s');
@@ -105,8 +105,8 @@ test('every control works: Space, click, buttons, 1-7, S, T, D, B, Esc, F', asyn
   expect(seen.errors).toEqual([]);
 });
 
-// Scene n is entered through its own transition (s02 zoomBlur ... s07 dockFade).
-const TRANSITION_SECONDS = { 2: 1.6, 3: 1.8, 4: 2.0, 5: 2.0, 6: 2.2, 7: 2.4 };
+// Scene n is entered through its own transition (scene 2 zoomBlur ... scene 8 dockFade).
+const TRANSITION_SECONDS = { 2: 1.6, 3: 1.8, 4: 2.0, 5: 1.8, 6: 2.0, 7: 2.2, 8: 2.4 };
 const fromScene1 = async (page) => {
   await page.keyboard.press('1');
   await page.keyboard.press('s');
@@ -120,7 +120,7 @@ test('each transition compiles, finishes on its own within 4 s, mid-frame screen
   await page.goto('/?q=med');
   await at(page, 0, 0);
   await page.mouse.move(1500, 300); // tilt on, as in a live talk
-  for (const n of [2, 3, 4, 5, 6, 7]) {
+  for (const n of [2, 3, 4, 5, 6, 7, 8]) {
     await fromScene1(page);
     await page.keyboard.press(String(n));
     const t0 = Date.now();
@@ -187,7 +187,7 @@ test('FPS per tier, at rest and during each transition (logged for docs/machine-
     await page.waitForTimeout(800);
     const live = await countFps(page, 2000); // scene 1: the live 3D world
     const during = {};
-    for (const n of [2, 3, 4, 5, 6, 7]) {
+    for (const n of [2, 3, 4, 5, 6, 7, 8]) {
       await fromScene1(page);
       await page.keyboard.press(String(n));
       during[n] = await countFps(page, 1200); // every transition lasts at least 1.6 s

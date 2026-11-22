@@ -88,7 +88,7 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .m-card .l { margin-top: 8px; font: 400 19px/1.35 'Inter', var(--head); }
 .m-card .n { margin-top: 8px; font: 400 15px/1.4 'Inter', var(--head); color: var(--muted); }
 .slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
-.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map:not([data-at='0']):not([data-at='1']):not([data-at='2']) .m-a, .slide--map:not([data-at='4']) .m-c { display: none; }
+.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map:not([data-at='0']):not([data-at='1']):not([data-at='2']) .m-a { display: none; }
 .m-legend { position: absolute; right: var(--edge); top: 112px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); }
 .m-legend i { display: inline-block; width: 36px; height: 4px; margin-left: 14px; vertical-align: middle; }
 .m-legend .cape i { background: #f0a030; box-shadow: 0 0 10px #f0a030; }
@@ -96,21 +96,32 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--map[data-open='1'] .m-legend .suez i { background: var(--demand); box-shadow: 0 0 10px var(--demand); }
 .m-legend .note { font-size: 14px; letter-spacing: 0.1em; color: var(--muted); }
 /* Share of Asia-Europe ships using Suez: a track with the three reference marks and a fill per step. */
-.m-gauge { padding: 16px 22px 18px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid var(--demand); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.m-gauge .t { font: 500 15px var(--head); letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
-.m-gauge .track { position: relative; height: 12px; margin: 40px 0 34px; background: rgba(255, 255, 255, 0.08); }
-.m-gauge .track i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #ff5a40, var(--demand)); box-shadow: 0 0 14px rgba(0, 240, 255, 0.5); transition: width 2.6s cubic-bezier(0.4, 0, 0.2, 1); }
-.m-gauge .track b { position: absolute; top: -6px; width: 2px; height: 24px; background: rgba(255, 255, 255, 0.7); }
-.m-gauge .track b span { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font: 700 17px var(--head); white-space: nowrap; }
-.m-gauge .track b em { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font: 400 13px 'Inter', var(--head); font-style: normal; color: var(--muted); white-space: nowrap; }
-.m-gauge .track b:first-of-type em, .m-gauge .track b:first-of-type span { left: 0; transform: none; }
-.m-gauge .n { font: 400 17px/1.35 'Inter', var(--head); }
 .slide--map .pages { left: var(--edge); right: auto; top: 330px; width: 600px; }
 .slide--map .page { padding: 20px 26px; }
 .slide--map .page-title { font-size: 26px; }
 .slide--map .page-points { font-size: 20px; }
 .slide--map .page-note { font-size: 15px; }
 .slide--map .headline { width: 1300px; } /* two lines, clear of the banner */
+
+/* s04b When the Detours End (Akib, Req 4): agenda rail left, three cards per screen right. */
+.d-rail { position: absolute; left: var(--edge); top: 340px; width: 600px; display: flex; flex-direction: column; gap: 12px; }
+.d-sub { margin-bottom: 8px; font: 400 22px/1.35 'Inter', var(--head); color: var(--muted); }
+.d-item { display: flex; align-items: center; gap: 18px; padding: 14px 22px; background: rgba(10, 17, 24, 0.66); border-left: 3px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); font: 800 26px/1.15 var(--head); text-transform: uppercase; transition: opacity 0.5s, border-color 0.5s, transform 0.5s; }
+.d-item b { font: 800 34px var(--head); color: var(--demand); min-width: 30px; }
+.slide--detours:not([data-at='0']) .d-item { opacity: 0.38; }
+.slide--detours .d-item.on { opacity: 1; border-left-color: var(--demand); transform: translateX(14px); }
+.d-screens { position: absolute; right: var(--edge); top: 250px; width: 440px; }
+.d-screen { position: absolute; inset: 0 0 auto 0; display: flex; flex-direction: column; gap: 14px; pointer-events: none; }
+.d-card { padding: 16px 22px; background: rgba(10, 17, 24, 0.7); border-left: 3px solid var(--demand); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); opacity: 0; transform: translateX(40px); transition: opacity 0.45s ease, transform 0.45s ease; }
+.d-card .h { font: 500 16px var(--head); letter-spacing: 0.2em; text-transform: uppercase; color: var(--demand); }
+.d-card .v { margin-top: 6px; font: 800 52px/1 var(--head); }
+.d-card ul { margin: 10px 0 0; padding-left: 1.1em; font: 400 19px/1.35 'Inter', var(--head); }
+.d-card li + li { margin-top: 4px; }
+.d-card li::marker { color: var(--demand); }
+.slide--detours[data-at='1'] .d-screen[data-n='1'] .d-card, .slide--detours[data-at='2'] .d-screen[data-n='2'] .d-card,
+.slide--detours[data-at='3'] .d-screen[data-n='3'] .d-card, .slide--detours[data-at='4'] .d-screen[data-n='4'] .d-card { opacity: 1; transform: none; }
+.d-screen .d-card:nth-child(2) { transition-delay: 0.25s; }
+.d-screen .d-card:nth-child(3) { transition-delay: 0.5s; }
 
 /* Scene 5 (carriers): the five responses as a stepper, one detail card for the active one. */
 .slide--carriers .numbers, .slide--carriers .side, .slide--carriers .extra { display: none; }
