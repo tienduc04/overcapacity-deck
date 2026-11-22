@@ -1,5 +1,5 @@
 {
-  "steps": 2,
+  "steps": 5,
   "keyNumbers": [
     {
       "value": "1.6",
@@ -33,13 +33,13 @@
   "bullets": [],
   "theory": "Sample: effective vs nominal capacity.",
   "case": "Sample: Red Sea since 2023.",
-  "speakerNotes": "Akshaya, Req 3 (how much capacity the detours absorb). Step 0: longer routes, step 1: operational disruptions. Hand over to Akib (next scene, 'When the Detours End'). Figures without a source in the doc still need one.",
+  "speakerNotes": "Akshaya, Req 3. Step 0: longer routes (Suez vs Cape). Step 1: three capacity losses (3.6 M TEU, 1.7 M TEU, 5–7%). Step 2: main causes. Step 3: market impact with vs without disruptions. Step 4: how disruptions hide overcapacity, nominal vs effective capacity. Hand over to Akib ('When the Detours End'). Figures from her Req 3 document; sources still to be named.",
   "pending": false,
   "id": "s04-chokepoints",
   "owner": "Akshaya",
   "speakerKey": "akshaya",
   "budgetSec": 210,
-  "headline": "Detours absorb ships until the chokepoints reopen",
+  "headline": "How much capacity do longer routings and disruptions absorb?",
   "layout": "map",
   "banner": {
     "shut": "Capacity absorbed by routing"
@@ -60,17 +60,141 @@
         "Suez ~10,000 nm, 31 days · Cape ~13,000 nm, 41 days",
         "More vessels needed to keep the same weekly frequency"
       ]
+    }
+  ],
+  "screens": [
+    {
+      "title": "Operational disruptions: how much capacity is lost?",
+      "cards": [
+        {
+          "head": "1. Port congestion",
+          "stat": "3.6 M TEU",
+          "points": [
+            "More than 10% of global container capacity reportedly tied up in November 2026",
+            "Ships waiting outside ports for available berths cannot begin their next voyage",
+            "Terminal bottlenecks and vessel bunching increase waiting times",
+            "Weather disruptions can further delay port operations"
+          ]
+        },
+        {
+          "head": "2. Vessel delays",
+          "stat": "1.7 M TEU",
+          "points": [
+            "Approximately 5% of global deep-sea container capacity absorbed by vessel delays in August 2026",
+            "Late arrivals and missed schedules reduce productive vessel time",
+            "Delays at one port can affect the entire shipping rotation",
+            "Ships complete fewer voyages over a given period"
+          ]
+        },
+        {
+          "head": "3. Cape route diversions",
+          "stat": "5–7%",
+          "points": [
+            "Estimated share of global capacity absorbed by longer routing in September 2026",
+            "Longer rotations mean fewer trips per ship each year",
+            "More vessels are needed to maintain existing shipping schedules"
+          ]
+        }
+      ],
+      "note": "Figures as given in Akshaya’s Req 3 document; source names still to be added."
     },
     {
-      "at": 1,
-      "title": "Operational disruptions: how much capacity is lost?",
-      "points": [
-        "Port congestion: 3.6M TEU, over 10% of global capacity tied up (Nov 2026)",
-        "Vessel delays: 1.7M TEU, about 5% of deep-sea capacity (Aug 2026)",
-        "Cape diversions: 5–7% of global capacity (Sep 2026)",
-        "Effective capacity falls, so overcapacity is temporarily hidden"
+      "title": "Main causes of operational disruptions",
+      "cards": [
+        {
+          "head": "Port congestion",
+          "points": [
+            "Berth queues",
+            "Terminal bottlenecks",
+            "Vessel bunching"
+          ]
+        },
+        {
+          "head": "Schedule disruptions",
+          "points": [
+            "Bad weather and storms",
+            "Late vessel arrivals",
+            "Missed port connections"
+          ]
+        },
+        {
+          "head": "Longer rotations",
+          "points": [
+            "More days at sea",
+            "Longer voyage distances",
+            "Delayed vessel availability"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Impact on the global shipping market",
+      "table": {
+        "head": [
+          "Without disruptions",
+          "With disruptions"
+        ],
+        "rows": [
+          [
+            "More available vessel capacity",
+            "Less effective capacity"
+          ],
+          [
+            "More vessels available for cargo",
+            "Vessels spend longer sailing and waiting"
+          ],
+          [
+            "Greater pressure from new deliveries",
+            "Some new capacity gets absorbed"
+          ],
+          [
+            "Potential downward pressure on freight rates",
+            "Capacity remains relatively tight"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "How do disruptions hide overcapacity?",
+      "flow": [
+        {
+          "head": "1. Fleet keeps growing",
+          "points": [
+            "New container vessels continue entering the market",
+            "Fleet capacity can grow faster than cargo demand"
+          ]
+        },
+        {
+          "head": "2. Ships spend longer sailing or waiting",
+          "points": [
+            "Longer routes increase voyage durations",
+            "Port congestion creates additional waiting times",
+            "Vessels become unavailable for their next rotation for longer"
+          ]
+        },
+        {
+          "head": "3. Effective capacity falls",
+          "points": [
+            "Fewer vessel-days are available for transporting cargo",
+            "The same fleet completes fewer trips over a given period",
+            "Additional capacity is absorbed by operational inefficiencies"
+          ]
+        },
+        {
+          "head": "4. Overcapacity is temporarily delayed",
+          "points": [
+            "Some of the additional supply pressure is temporarily masked",
+            "The market may appear tighter than the underlying fleet-demand balance suggests",
+            "Shipping capacity can become available again when disruptions ease"
+          ]
+        }
       ],
-      "note": "Nominal capacity = the whole fleet. Effective capacity = what is left after longer routes, port waiting and disruptions."
+      "capacity": {
+        "nominal": "Nominal capacity: total capacity of the global container fleet",
+        "effective": "Effective capacity: capacity actually available after time lost to longer sailing routes, port waiting and operational disruptions",
+        "lost": "Absorbed",
+        "note": "Schematic, not to scale"
+      }
     }
   ]
 }

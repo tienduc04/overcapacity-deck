@@ -88,7 +88,40 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .m-card .l { margin-top: 8px; font: 400 19px/1.35 'Inter', var(--head); }
 .m-card .n { margin-top: 8px; font: 400 15px/1.4 'Inter', var(--head); color: var(--muted); }
 .slide--map:not([data-open='1']) .m-open, .slide--map[data-open='1'] .m-shut { display: none; }
-.slide--map:not([data-at='1']):not([data-at='2']) .m-b, .slide--map:not([data-at='0']):not([data-at='1']):not([data-at='2']) .m-a { display: none; }
+.slide--choke:not([data-at='0']) :is(.m-col, .m-banner) { display: none; }
+/* Scene 4 (Akshaya, Req 3): steps 1-4 are full-width screens from her doc, over the dimmed map. */
+.k-screens { position: absolute; left: var(--edge); right: var(--edge); top: 268px; }
+.k-screen { position: absolute; inset: 0 0 auto 0; display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(24px); pointer-events: none; transition: opacity 0.45s ease, transform 0.45s ease; }
+.slide--choke[data-at='1'] .k-screen[data-n='1'], .slide--choke[data-at='2'] .k-screen[data-n='2'],
+.slide--choke[data-at='3'] .k-screen[data-n='3'], .slide--choke[data-at='4'] .k-screen[data-n='4'] { opacity: 1; transform: none; }
+.slide--choke:not([data-at='0']) .headline { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8); }
+.k-t { margin: 0; font: 800 30px/1.1 var(--head); text-transform: uppercase; color: var(--supply); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8); }
+.k-row { display: grid; gap: 18px; }
+.k-row.n3 { grid-template-columns: repeat(3, 1fr); }
+.k-row.n4 { grid-template-columns: repeat(4, 1fr); }
+.k-card { padding: 18px 24px; background: rgba(8, 13, 19, 0.93); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.k-card .h { font: 800 22px/1.2 var(--head); text-transform: uppercase; }
+.k-card .v { margin-top: 10px; font: 800 64px/1 var(--head); color: var(--supply); }
+.k-card ul { margin: 12px 0 0; padding-left: 1.1em; font: 400 20px/1.38 'Inter', var(--head); }
+.k-card li + li { margin-top: 6px; }
+.k-card li::marker { color: var(--supply); }
+.k-row.flow .k-card { position: relative; }
+.k-row.flow .k-card .h { min-height: 54px; }
+.k-row.flow .k-card ul { font-size: 18px; }
+.k-row.flow .k-card:not(:last-child)::after { content: '→'; position: absolute; right: -17px; top: 14px; font: 800 26px var(--head); color: var(--supply); }
+.k-note { font: 400 15px 'Inter', var(--head); color: var(--muted); }
+.k-table { display: grid; grid-template-columns: 1fr 60px 1fr; padding: 22px 30px; background: rgba(8, 13, 19, 0.93); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); font: 400 24px/1.35 'Inter', var(--head); }
+.k-table b { padding-bottom: 12px; border-bottom: 2px solid var(--demand); font: 800 24px var(--head); text-transform: uppercase; color: var(--demand); }
+.k-table b.w { border-color: var(--supply); color: var(--supply); }
+.k-table span { padding: 16px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.k-table i { align-self: center; text-align: center; font-style: normal; color: var(--muted); }
+.k-cap { display: flex; flex-direction: column; gap: 10px; padding: 18px 24px; background: rgba(8, 13, 19, 0.93); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.k-cap .bar { position: relative; display: flex; height: 44px; }
+.k-cap .bar u { background: rgba(0, 240, 255, 0.35); border: 1px solid var(--demand); }
+.k-cap .bar.eff u { background: rgba(240, 160, 48, 0.35); border-color: var(--supply); }
+.k-cap .bar s { display: grid; place-items: center; text-decoration: none; border: 1px dashed var(--risk, #ff5a40); color: var(--risk, #ff5a40); font: 500 15px var(--head); letter-spacing: 0.16em; text-transform: uppercase; background: repeating-linear-gradient(135deg, rgba(255, 90, 64, 0.18) 0 8px, transparent 8px 16px); }
+.k-cap .bar span { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); max-width: 68%; font: 500 17px/1.2 'Inter', var(--head); }
+.k-cap .n { font: 400 14px 'Inter', var(--head); color: var(--muted); }
 .m-legend { position: absolute; right: var(--edge); top: 112px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font: 500 18px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7); }
 .m-legend i { display: inline-block; width: 36px; height: 4px; margin-left: 14px; vertical-align: middle; }
 .m-legend .cape i { background: #f0a030; box-shadow: 0 0 10px #f0a030; }

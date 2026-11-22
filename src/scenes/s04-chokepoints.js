@@ -11,25 +11,47 @@ const scene = createScene({ title: 'Chokepoints', speaker: 'Akshaya', transition
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false; // on screen: steps animate; arriving from another scene jumps
 
+// Map pose per step. The last step must end on pose 1 (Red Sea close-up, Suez shut): s04b starts on that frame.
+const POSE = [0, 1, 1, 1, 1];
+
 const div = (cls, html = '') => Object.assign(document.createElement('div'), { className: cls, innerHTML: html });
 const card = (cls, n) =>
   div(`m-card ${cls}`, `<div><span class="v">${n.value}</span><span class="u">${n.unit}</span></div><div class="l">${n.label}</div>${n.note ? `<div class="n">${n.note}</div>` : ''}`);
+const ul = (pts) => `<ul>${pts.map((p) => `<li>${p}</li>`).join('')}</ul>`;
+const kcard = (c) => `<div class="k-card"><div class="h">${c.head}</div>${c.stat ? `<div class="v">${c.stat}</div>` : ''}${ul(c.points)}</div>`;
+const table = (t) =>
+  `<div class="k-table"><b>${t.head[0]}</b><i></i><b class="w">${t.head[1]}</b>${t.rows.map(([a, b]) => `<span>${a}</span><i>→</i><span class="w">${b}</span>`).join('')}</div>`;
+// Nominal vs effective: one full bar, one shorter bar whose missing part is the capacity absorbed.
+const capacity = (c) =>
+  `<div class="k-cap"><div class="bar"><u style="width:100%"></u><span>${c.nominal}</span></div><div class="bar eff"><u style="width:72%"></u><s style="width:28%">${c.lost}</s><span>${c.effective}</span></div><div class="n">${c.note}</div></div>`;
 
-// Req 3: Suez shut, traffic round the Cape. The reopening is the next scene (s04b, Req 4).
+// Step 0: longer routes (the shared page panel) with the two key numbers. Steps 1-4: one screen each from Akshaya's doc.
 scene.init = (ctx) => {
   base.init.call(scene, ctx);
+  scene.slide.classList.add('slide--choke');
   const [a, b] = content.keyNumbers;
   const col = div('m-col');
   col.append(card('m-a', a), card('m-b', b));
   const banner = div('m-banner', content.banner.shut);
   const legend = div('m-legend', `<div class="cape">${content.legend[0]}<i></i></div><div class="suez">${content.legend[1]}<i></i></div><div class="note">${content.legend[2]}</div>`);
-  scene.slide.append(banner, col, legend);
+  const screens = div('k-screens');
+  content.screens.forEach((sc, i) => {
+    const s = div('k-screen', `<h2 class="k-t">${sc.title}</h2>`);
+    s.dataset.n = i + 1;
+    if (sc.cards) s.append(div(`k-row n${sc.cards.length}`, sc.cards.map(kcard).join('')));
+    if (sc.table) s.append(div('k-row', table(sc.table)));
+    if (sc.flow) s.append(div('k-row n4 flow', sc.flow.map(kcard).join('')));
+    if (sc.capacity) s.append(div('k-row', capacity(sc.capacity)));
+    if (sc.note) s.append(div('k-note', sc.note));
+    screens.append(s);
+  });
+  scene.slide.append(banner, col, legend, screens);
 };
 
 scene.reveal = (step) => {
   base.reveal(step);
   scene.slide.dataset.at = step;
-  map?.go(step, 0, !active);
+  map?.go(POSE[step], 0, !active);
 };
 scene.enter = (tl) => {
   active = true;
