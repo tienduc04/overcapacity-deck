@@ -151,6 +151,27 @@ export async function createMapWorld() {
   ships.forEach((s) => (s.frustumCulled = false));
   scene.add(...ships);
 
+  // Lead ship for reopen(): a bright cyan ship with a pulsing halo that sails Bab el-Mandeb -> Suez -> the Med.
+  const hero = new THREE.Group();
+  hero.add(new THREE.Mesh(shipGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.4, emissive: new THREE.Color(0.3, 2.2, 3), emissiveIntensity: 1 })));
+  const halo = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.2, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.35, 2.4, 3.2), transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
+  halo.rotation.x = -Math.PI / 2;
+  halo.position.y = 0.15;
+  hero.add(halo);
+  hero.visible = false;
+  scene.add(hero);
+  const uNear = (lon, lat) => {
+    const p = at(lon, lat, LANE_Y);
+    let best = 0;
+    for (let i = 1, d = Infinity; i <= 600; i++) {
+      const e = trunkSuez.getPointAt(i / 600).distanceTo(p);
+      if (e < d) [d, best] = [e, i / 600];
+    }
+    return best;
+  };
+  const HERO_FROM = uNear(45, 12.2); // Gulf of Aden, just before Bab el-Mandeb
+  const HERO_TO = uNear(26, 34.2); // eastern Mediterranean
+
   // Chokepoint rings and labels.
   const markers = {};
   for (const [id, m] of Object.entries(MARKS)) {
@@ -183,7 +204,7 @@ export async function createMapWorld() {
     markers[id] = g;
   }
 
-  const state = { cam: pose(0), open: 0 };
+  const state = { cam: pose(0), open: 0, hero: -1 }; // hero: 0..1 along its run, -1 hidden
   let tl = null;
   let ready = false;
   const tmp = new THREE.Vector3();
@@ -207,8 +228,20 @@ export async function createMapWorld() {
     // (animated, or at once when `instant`).
     go(step, open, instant = false) {
       tl?.kill();
+      state.hero = -1;
       if (instant) return void Object.assign(state, { cam: pose(step), open });
       tl = gsap.timeline().to(state.cam, { ...pose(step), duration: 2.2, ease: 'power2.inOut' }, 0).to(state, { open, duration: 3.2, ease: 'power2.inOut' }, 0.4);
+    },
+    // Scene 4 -> 5 bridge, from the Red Sea close-up (pose 1, shut): Suez reopens, the lead ship sails up the
+    // Red Sea and through the canal, then the camera pulls out to the wide view (pose `toStep`).
+    reopen(toStep, open) {
+      tl?.kill();
+      Object.assign(state, { cam: pose(1), open: 0, hero: 0 });
+      tl = gsap
+        .timeline({ onComplete: () => (state.hero = -1) })
+        .to(state, { open, duration: 1.4, ease: 'power2.inOut' }, 0)
+        .to(state, { hero: 1, duration: 5.8, ease: 'power1.inOut' }, 0.4) // through the canal at about 4.3 s
+        .to(state.cam, { ...pose(toStep), duration: 2.8, ease: 'power2.inOut' }, 4.4); // pull out once it is through
     },
     update(t, lean = { x: 0, y: 0 }) {
       if (!ready) return;
@@ -230,6 +263,17 @@ export async function createMapWorld() {
         }
         mesh.instanceMatrix.needsUpdate = true;
       });
+      hero.visible = state.hero >= 0;
+      if (hero.visible) {
+        const u = THREE.MathUtils.lerp(HERO_FROM, HERO_TO, state.hero);
+        trunkSuez.getPointAt(u, tmp);
+        trunkSuez.getTangentAt(u, tan);
+        side.crossVectors(tan, up).normalize();
+        lift.crossVectors(side, tan);
+        hero.matrixAutoUpdate = false;
+        hero.matrix.makeBasis(tan, lift, side).setPosition(tmp).scale(side.setScalar(2.6));
+        halo.scale.setScalar(1 + 0.25 * Math.sin(t * 6));
+      }
       // Rings: red while shut (Bab el-Mandeb, Suez), cyan once open; Hormuz and the Cape stay amber.
       const pulse = 1 + 0.18 * Math.sin(t * 3);
       for (const id of ['bab', 'suez']) {

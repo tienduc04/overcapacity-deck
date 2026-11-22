@@ -8,9 +8,12 @@ const world = () =>
     .then((m) => m.createMapWorld())
     .then((w) => (map = w));
 
-const scene = createScene({ title: 'When the Detours End', speaker: 'Akib', transition: 'laserScan', content, world });
+// Crossfade between identical frames: step 0 starts on s04's last view (Red Sea close-up, Suez shut), so the
+// cut is invisible and arrive() plays one continuous move: Suez reopens, a lead ship sails through, zoom out.
+const scene = createScene({ title: 'When the Detours End', speaker: 'Akib', transition: 'crossfade', content, world });
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false;
+let at = 0;
 
 // Per step: map camera pose (index into map.js POSES: 2 wide, 3 Europe ports) and how far Suez traffic is back.
 const POSE = [2, 2, 3, 4, 5];
@@ -44,7 +47,12 @@ scene.reveal = (step) => {
   base.reveal(step);
   scene.slide.dataset.at = step;
   scene.slide.querySelectorAll('.d-item').forEach((el, i) => el.classList.toggle('on', i + 1 === step));
-  map?.go(POSE[step], OPEN[step], !active);
+  at = step;
+  if (!active && step === 0) map?.go(1, 0, true); // same frame s04 ends on
+  else map?.go(POSE[step], OPEN[step], !active);
+};
+scene.arrive = () => {
+  if (at === 0) map?.reopen(POSE[0], OPEN[0]);
 };
 scene.enter = (tl) => {
   active = true;

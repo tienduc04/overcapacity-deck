@@ -106,7 +106,7 @@ test('every control works: Space, click, buttons, 1-8, S, T, D, B, Esc, F', asyn
 });
 
 // Scene n is entered through its own transition (scene 2 zoomBlur ... scene 8 dockFade).
-const TRANSITION_SECONDS = { 2: 1.6, 3: 1.8, 4: 2.0, 5: 1.8, 6: 2.0, 7: 2.2, 8: 2.4 };
+const TRANSITION_SECONDS = { 2: 1.6, 3: 1.8, 4: 2.0, 5: 1.2, 6: 2.0, 7: 2.2, 8: 2.4 };
 const fromScene1 = async (page) => {
   await page.keyboard.press('1');
   await page.keyboard.press('s');
