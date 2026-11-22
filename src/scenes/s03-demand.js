@@ -7,7 +7,7 @@ const world = () =>
     .then((m) => m.createPortWorld(content.chart.series))
     .then((w) => (port = w));
 
-const scene = createScene({ title: 'Demand', speaker: 'Aryan', transition: 'crossfade', content, world });
+const scene = createScene({ title: 'Demand', speaker: 'Aryan', transition: 'shoreWash', content, world });
 const base = { init: scene.init, reveal: scene.reveal, enter: scene.enter, exit: scene.exit };
 let active = false; // on screen: steps animate; arriving from another scene jumps
 const beats = [];

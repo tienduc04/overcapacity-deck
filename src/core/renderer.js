@@ -209,6 +209,116 @@ const GodRays = {
     }`,
 };
 
+// 2 -> 3: a sheet of sea water runs over the outgoing scene, foam on its front, and drains back to show
+// the new one. Port of ShoreWash by gre, gl-transitions (MIT, https://github.com/gl-transitions/gl-transitions):
+// getFromColor/progress/ratio renamed to this file's fromColor/p/aspect(); hash12 and vnoise come from the prelude.
+const shoreWash = /* glsl */ `
+const vec2 SW_DIR = vec2(1.0, 0.25); // water runs in from the left, slightly upward
+const float SW_FOAM = 0.7;
+const float SW_REFRACTION = 0.02;
+const vec4 SW_WATER = vec4(0.1, 0.6, 0.62, 0.4);
+const float SW_AA = 0.002;
+// how far the lobes of the front lead or trail, in frame heights
+const float SW_LOBE = 0.06;
+const float SW_LACE = 0.3;
+const float SW_CELL = 0.045;
+// part of the transition the SW_WATER runs up during; it drains back during the rest
+const float SW_RUNUP = 0.4;
+const float SW_FOAMW = 0.1;
+
+vec2 swHash22(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+
+// SW_FOAM: swBubbles packed side by side, white where they touch and open at their centers.
+// Sparse SW_FOAM is a faint lace; the denser it is, the brighter it is and the smaller the
+// holes, until they close (density 1)
+float swBubbles(vec2 p, float density) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  float d1 = 8.0;
+  float d2 = 8.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 o = vec2(float(x), float(y));
+      vec2 c = o + 0.15 + 0.7 * swHash22(i + o) - f;
+      float d = dot(c, c);
+      if (d < d1) {
+        d2 = d1;
+        d1 = d;
+      } else if (d < d2) {
+        d2 = d;
+      }
+    }
+  }
+  float e = sqrt(d2) - sqrt(d1);
+  float w = 0.12 + 0.6 * density;
+  return (1.0 - smoothstep(w - 0.12, w + 0.12, e)) * smoothstep(0.0, 0.35, density);
+}
+
+vec2 swMirror(vec2 v) {
+  return 1.0 - abs(1.0 - mod(v, 2.0));
+}
+
+vec4 transition(vec2 uv, float p) {
+  vec2 dir = length(SW_DIR) > 0.0 ? normalize(SW_DIR) : vec2(0.0, 1.0);
+  vec2 q = (uv - 0.5) * vec2(aspect(), 1.0);
+  // distance along the run-up, 0 at the middle of the frame, and across it
+  float a = dot(q, dir);
+  float b = dot(q, vec2(-dir.y, dir.x));
+  float extent = 0.5 * (abs(dir.x) * aspect() + abs(dir.y));
+  float start = -extent - SW_LOBE - 0.1;
+  float stop = extent + SW_LOBE + 0.01;
+
+  float up = clamp(p / SW_RUNUP, 0.0, 1.0);
+  float back = clamp((p - SW_RUNUP) / (1.0 - SW_RUNUP), 0.0, 1.0);
+  float front = mix(start, stop, 1.0 - pow(1.0 - up, 1.6)) - (stop - start) * pow(back, 1.5);
+
+  float lobes = vnoise(vec2(b * 7.0 + 3.1, p * 2.0)) * 0.7 + vnoise(vec2(b * 17.0, 5.0 + p * 3.0)) * 0.3;
+  float behind = front + SW_LOBE * (lobes - 0.5) * 2.0 - a; // > 0 under the SW_WATER
+  float sheet = smoothstep(-SW_AA, SW_AA, behind);
+
+  // the image swaps under the dense SW_FOAM right behind the running front, and finishes
+  // swapping under the SW_WATER as it stops by the far edge
+  float swapped = max(smoothstep(0.01, 0.8 * SW_FOAMW, behind), (p < SW_RUNUP ? sheet : 1.0) * smoothstep(SW_RUNUP - 0.08, SW_RUNUP, p));
+
+  vec2 rp = vec2(a * 20.0, b * 5.0 + 3.0 * vnoise(q * 4.0)) - vec2(7.0 * min(p, SW_RUNUP) - 5.0 * back, 0.0);
+  float n0 = vnoise(rp);
+  vec2 g = (vnoise(rp + vec2(0.15, 0.0)) - n0) / 0.15 * dir + (vnoise(rp + vec2(0.0, 0.15)) - n0) / 0.15 * vec2(-dir.y, dir.x);
+  float thick = sheet * smoothstep(0.0, 0.12, behind);
+  vec2 off = g * SW_REFRACTION * thick * vec2(1.0 / aspect(), 1.0);
+
+  vec4 c = mix(fromColor(swMirror(uv + off)), toColor(swMirror(uv + off)), swapped);
+  c.rgb = mix(c.rgb, SW_WATER.rgb, SW_WATER.a * sheet * (0.3 + 0.7 * smoothstep(0.0, 0.35, behind)));
+  float glint = pow(max(dot(normalize(vec3(-g, 3.0)), normalize(vec3(-0.3, 0.6, 1.0))), 0.0), 14.0);
+  c.rgb += glint * 0.4 * thick;
+
+  float wet = (1.0 - sheet) * exp(min(behind, 0.0) * 2.5) * smoothstep(SW_RUNUP, SW_RUNUP + 0.05, p) * (1.0 - smoothstep(0.7, 1.0, p));
+  c.rgb *= mix(vec3(1.0), c.rgb, 0.55 * wet);
+  c.rgb += 0.1 * wet * smoothstep(0.4, 0.9, vnoise(vec2(a * 30.0, b * 6.0)));
+
+  vec2 lp = vec2(a - 0.4 * (p < SW_RUNUP ? front : stop), b) / SW_CELL;
+  float patches = smoothstep(0.45, 0.8, 0.6 * vnoise(lp * vec2(0.4, 0.1) + 4.0) + 0.4 * vnoise(lp * 0.3 + 9.0));
+  float bandW = SW_FOAMW * (0.5 + vnoise(vec2(b * 25.0, 2.0)));
+  float density = (1.0 - smoothstep(0.0, bandW, behind)) * (1.0 - smoothstep(SW_RUNUP - 0.05, SW_RUNUP + 0.12, p));
+  density = max(density, 0.55 * patches * (1.0 - smoothstep(0.0, SW_LACE, behind)) * (1.0 - 0.5 * back));
+  density = max(density, 0.9 * (1.0 - smoothstep(0.0, 0.012 + 0.02 * vnoise(vec2(b * 40.0, 1.0)), behind)));
+  density *= sheet;
+  float f = 0.0;
+  if (density > 0.0) {
+    f = max(swBubbles(lp, density), 0.85 * swBubbles(lp * 1.7 + 7.0, density * 0.9));
+    f = max(f, 0.45 * smoothstep(0.15, 0.7, density)) * SW_FOAM;
+  }
+  c.rgb *= 1.0 - 0.25 * sheet * SW_FOAM * (1.0 - f) * smoothstep(0.0, 0.6, density);
+  c.rgb = mix(c.rgb, vec3(0.97, 0.98, 0.97), clamp(f, 0.0, 1.0));
+  float sh = smoothstep(-0.03, 0.0, behind);
+  c.rgb *= 1.0 - 0.35 * (1.0 - sheet) * sh * sh * (1.0 - smoothstep(SW_RUNUP - 0.05, SW_RUNUP, p));
+  return c;
+}
+`;
+
 export const TRANSITIONS = {
   none: { glsl: crossfade, duration: 0 },
   crossfade: { glsl: crossfade, duration: 1.2 },
@@ -218,6 +328,7 @@ export const TRANSITIONS = {
   bubbles: { glsl: bubbles, duration: 2.0 },
   glassCrash: { glsl: glassCrash, duration: 2.2 },
   dockFade: { glsl: dockFade, duration: 2.4 },
+  shoreWash: { glsl: shoreWash, duration: 2.2 },
 };
 
 const vertexShader = /* glsl */ `
