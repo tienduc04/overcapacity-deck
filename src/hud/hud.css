@@ -260,6 +260,45 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .slide--carriers .c-col { top: 265px; width: 820px; }
 .c-card .close { margin-top: 16px; padding: 14px 18px; background: rgba(240, 128, 40, 0.14); border-left: 3px solid var(--supply); font: 600 22px/1.4 'Inter', var(--head); }
 
+/* s05 additions from Sanjoy's ppt.pdf: framework (step 0), and a right-hand panel per response. */
+.c-frame { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.c-frame i { display: block; width: 2px; height: 22px; margin: 0 auto; background: var(--supply); }
+.c-frame .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 0 14px; }
+.c-box { display: flex; flex-direction: column; gap: 6px; padding: 14px 20px; border: 1px solid rgba(232, 238, 244, 0.35); background: rgba(10, 17, 24, 0.55); text-align: center; }
+.c-box b { font: 800 24px var(--head); text-transform: uppercase; letter-spacing: 0.02em; }
+.c-box span { font: 400 19px/1.35 'Inter', var(--head); color: var(--muted); }
+.c-box.top { border-color: var(--supply); }
+.c-box.goals { border-color: var(--supply); background: rgba(240, 128, 40, 0.14); }
+.c-box.goals span { color: var(--text, #e8eef4); }
+.c-side { position: absolute; right: var(--edge); top: 265px; width: 620px; display: flex; flex-direction: column; gap: 16px; }
+.c-side > div { padding: 20px 26px; background: rgba(10, 17, 24, 0.72); border-left: 3px solid var(--supply); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.c-side .t { font: 800 22px/1.25 var(--head); text-transform: uppercase; }
+.c-side .s, .c-side .n { margin-top: 6px; font: 400 17px/1.4 'Inter', var(--head); color: var(--muted); }
+.c-fuel .bar { display: grid; grid-template-columns: 1fr auto; row-gap: 8px; margin-top: 16px; font: 700 20px var(--head); }
+.c-fuel .bar em { font-style: normal; color: var(--demand); }
+.c-fuel .bar i { grid-column: 1 / 3; height: 16px; background: rgba(255, 255, 255, 0.08); }
+.c-fuel .bar u { display: block; height: 100%; background: #6a7c96; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.c-fuel .bar + .bar u { background: var(--demand); }
+.c-fuel .save { margin-top: 14px; font: 800 24px var(--head); color: var(--demand); }
+.c-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.c-vs div { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; border: 1px solid rgba(232, 238, 244, 0.25); }
+.c-vs div + div { border-color: var(--supply); }
+.c-vs b { font: 800 24px var(--head); text-transform: uppercase; }
+.c-vs span { font: 400 19px/1.35 'Inter', var(--head); }
+.c-ex svg { display: block; width: 100%; height: 130px; margin-top: 10px; }
+.c-ex svg path { stroke: var(--demand); stroke-width: 4; fill: none; }
+.c-ex svg line { stroke: rgba(232, 238, 244, 0.55); stroke-width: 2; stroke-dasharray: 4 4; }
+.c-ex svg circle { fill: #e8eef4; }
+.c-ex svg circle.hub { fill: var(--supply); }
+.c-ex svg text { fill: var(--demand); font: 500 13px var(--head); letter-spacing: 0.16em; text-transform: uppercase; text-anchor: middle; }
+.c-ex .pts { margin: 8px 0 0; padding-left: 1.1em; font: 400 19px/1.38 'Inter', var(--head); }
+.c-ex .pts li + li { margin-top: 5px; }
+.c-ex .pts li::marker { color: var(--supply); }
+.slide--carriers[data-at='0'] .c-col { width: 760px; }
+/* the framework already names all five responses; the stepper would push it into the footer */
+.slide--carriers[data-at='0'] .c-steps { display: none; }
+.slide--carriers .c-card .pts { font-size: 20px; }
+
 /* Scene 2 (orderbook): three beats, one per reveal step. */
 .slide--orderbook .numbers, .slide--orderbook .side, .slide--orderbook .extra { display: none; }
 .ob-beat { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.45s ease, transform 0.45s ease; }

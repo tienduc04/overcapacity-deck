@@ -10,8 +10,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const R = 4.2; // propeller radius (the Blender model's)
 const FOG = 0x04303c;
-// Reveal steps: fleet management, slow steaming, scrapping, network design, consolidation.
+// Reveal steps: framework overview, fleet management, slow steaming, scrapping, network design, consolidation.
 const STEPS = [
+  { rpm: 1.1, age: 0, fleet: 0, cam: { p: [-5.5, 5, 22], t: [-5.5, 0.4, 0] } }, // overview, pulled back
   { rpm: 1.5, age: 0, fleet: 0, cam: { p: [3.5, 3.5, 15], t: [-5.5, 0.4, 0] } },
   { rpm: 0.35, age: 0, fleet: 0, cam: { p: [-5.0, 0.6, 14], t: [-5.5, 0, 0] } }, // head on, turning slowly
   { rpm: 0.9, age: 1, fleet: 0, cam: { p: [6, -2, 15.5], t: [-5.5, 0, -1] } }, // low, old and worn

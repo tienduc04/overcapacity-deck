@@ -1,5 +1,5 @@
 {
-  "steps": 5,
+  "steps": 6,
   "keyNumbers": [
     {
       "value": "0.008",
@@ -10,16 +10,6 @@
       "url": "",
       "date": "2025 (Alphaliner actuals)",
       "status": "sample"
-    },
-    {
-      "value": "42.2",
-      "unit": "% of previous fuel use per day",
-      "label": "From 16 to 12 knots under the simplified cube rule: an illustrative saving of about 57.8%",
-      "note": "Class example from Req 5. Per voyage the saving is smaller, since the trip takes longer.",
-      "source": "Req 5 class example (cube rule)",
-      "url": "",
-      "date": "",
-      "status": "unverified"
     }
   ],
   "chart": {
@@ -33,7 +23,7 @@
   "bullets": [],
   "theory": "Sample: supply-side adjustment.",
   "case": "Sample: one carrier’s response.",
-  "speakerNotes": "Sanjoy, about 3.5 min. Order follows the 'Sanjoy (slides)' tab; detail points from the 'Sanjoy' tab. Slow steaming: 42.2% is the class cube-rule example, say 'illustrative'. Scrapping: 0.008 M TEU is Alphaliner (Req 1). Close on the four goals. Ask Sanjoy for sources for any further figures.",
+  "speakerNotes": "Sanjoy, about 3.5 min. Step 0: the framework (three groups of measures, four objectives). Steps 1-5 in the order of his ppt.pdf: fleet management, slow steaming (fuel bars: say 'illustrative'), scrapping (lay-up vs scrapping), network design (Gemini example), consolidation, close on the four objectives. Gemini figures from Lloyd's List / Kuehne+Nagel at launch, unverified.",
   "pending": false,
   "id": "s05-carriers",
   "owner": "Sarkar Sanjoy",
@@ -41,7 +31,6 @@
   "budgetSec": 210,
   "headline": "How can carriers respond to overcapacity?",
   "layout": "carriers",
-  "noFigure": "No sourced figure yet: Req 5 owner to add",
   "responses": [
     {
       "title": "Fleet management",
@@ -58,12 +47,28 @@
     {
       "title": "Slow steaming",
       "line": "Reduce speed to absorb effective capacity and save fuel.",
-      "number": 1,
+      "number": null,
       "points": [
         "Fuel use rises steeply with speed (simplified cube rule)",
         "Slower rotations absorb excess capacity: ships take longer per loop",
-        "Trade-off: longer transit times, and more ships for the same weekly frequency"
-      ]
+        "Trade-off: slower voyages can require additional vessels to maintain weekly service frequency"
+      ],
+      "fuel": {
+        "title": "Illustrative fuel consumption comparison",
+        "sub": "Simplified Cube Rule; 16 knots is the baseline.",
+        "bars": [
+          {
+            "k": "16 knots",
+            "v": 100
+          },
+          {
+            "k": "12 knots",
+            "v": 42.2
+          }
+        ],
+        "saving": "57.8% illustrative fuel saving",
+        "note": "Illustrative calculation, not a measured fleet-wide result. Actual consumption depends on vessel characteristics, weather, engine load and operating conditions."
+      }
     },
     {
       "title": "Scrapping",
@@ -72,8 +77,17 @@
       "points": [
         "Owner offers the ship, a broker circulates it, demolition buyers bid, the yard recycles it",
         "Scrap value = lightweight tonnage × scrap price per LWT",
-        "Lay-up is temporary; scrapping is permanent",
         "Limits: owners keep ships that still pay, and newbuilds offset the removals"
+      ],
+      "compare": [
+        {
+          "k": "Lay-up",
+          "l": "Temporary withdrawal. The vessel can return to service."
+        },
+        {
+          "k": "Scrapping",
+          "l": "Permanent removal from the commercial fleet."
+        }
       ]
     },
     {
@@ -84,7 +98,16 @@
         "Optimise routes, service loops and port rotations",
         "Match vessel size and frequency to cargo demand",
         "Improve vessel utilisation and operational efficiency"
-      ]
+      ],
+      "example": {
+        "title": "Example: Gemini Cooperation, Maersk + Hapag-Lloyd (since Feb 2025)",
+        "points": [
+          "Hub-and-spoke: mainliners call at a few hub ports, shuttles feed the regional ports",
+          "57 services at launch: 29 mainliners and 28 shuttles, about 340 ships, 3.7 M TEU",
+          "Target: over 90% schedule reliability"
+        ],
+        "source": "Lloyd’s List and Kuehne+Nagel (Jan 2025); Hapag-Lloyd Gemini page. Shuttle count differs by source (28 or 29)."
+      }
     },
     {
       "title": "Consolidation",
@@ -95,7 +118,31 @@
         "Coordinate vessel deployment between carriers, keep transit times and reliability",
         "Example: Hapag-Lloyd and Maersk's Gemini Cooperation (2025)"
       ],
-      "close": "Managing overcapacity is not simply about removing ships. Carriers balance four goals: control capacity, competitive transit times, lower costs, reliable service."
+      "close": "Managing overcapacity is not simply about removing ships. Carriers balance four goals: better utilisation, cost control, reliable services and profitability."
     }
-  ]
+  ],
+  "framework": {
+    "top": {
+      "t": "Potential overcapacity",
+      "s": "Fleet capacity grows faster than cargo demand"
+    },
+    "groups": [
+      {
+        "t": "Fleet management",
+        "s": "Deployment · Chartering · Lay-up"
+      },
+      {
+        "t": "Operational measures",
+        "s": "Slow steaming · Scrapping"
+      }
+    ],
+    "network": {
+      "t": "Network management",
+      "s": "Network design · Consolidation"
+    },
+    "goals": {
+      "t": "Management objectives",
+      "s": "Better utilisation · Cost control · Reliable services · Profitability"
+    }
+  }
 }
