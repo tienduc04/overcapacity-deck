@@ -324,6 +324,9 @@ body[data-scene='s01-hero'] #scrim { background: linear-gradient(0deg, rgba(10, 
 .c-fuel .bar u { display: block; height: 100%; background: #6a7c96; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .c-fuel .bar + .bar u { background: var(--demand); }
 .c-fuel .save { margin-top: 14px; font: 800 24px var(--head); color: var(--demand); }
+.c-out .r { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid rgba(232, 238, 244, 0.14); font: 400 19px 'Inter', var(--head); }
+.c-out .r b { font: 700 20px var(--head); color: var(--supply); white-space: nowrap; }
+.c-out .t { margin-bottom: 4px; }
 .c-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .c-vs div { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; border: 1px solid rgba(232, 238, 244, 0.25); }
 .c-vs div + div { border-color: var(--supply); }

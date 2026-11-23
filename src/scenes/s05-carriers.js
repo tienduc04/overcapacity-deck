@@ -46,6 +46,8 @@ const fuel = (f) =>
     .map((b) => `<div class="bar"><span>${b.k}</span><em>${b.v}%</em><i><u style="width:${b.v}%"></u></i></div>`)
     .join('')}<div class="save">${f.saving}</div><div class="n">${f.note}</div></div>`;
 const compare = (c) => `<div class="c-vs">${c.map((x) => `<div><b>${x.k}</b><span>${x.l}</span></div>`).join('')}</div>`;
+const outlook = (o) =>
+  `<div class="c-out"><div class="t">${o.title}</div>${o.rows.map(([k, v]) => `<div class="r"><span>${k}</span><b>${v}</b></div>`).join('')}<div class="n">${o.source}</div></div>`;
 const example = (e) =>
   `<div class="c-ex"><div class="t">${e.title}</div><svg viewBox="0 0 320 120" aria-hidden="true"><path d="M30 60 H290"/><circle class="hub" cx="110" cy="60" r="10"/><circle class="hub" cx="210" cy="60" r="10"/>${[
     [70, 18], [70, 102], [150, 102], [250, 18], [250, 102], [170, 18],
@@ -68,7 +70,7 @@ scene.reveal = (step) => {
   }
   const r = content.responses[step - 1];
   const n = r.number == null ? null : content.keyNumbers[r.number];
-  side.innerHTML = (r.fuel ? fuel(r.fuel) : '') + (r.compare ? compare(r.compare) : '') + (r.example ? example(r.example) : '');
+  side.innerHTML = (r.fuel ? fuel(r.fuel) : '') + (r.compare ? compare(r.compare) : '') + (r.outlook ? outlook(r.outlook) : '') + (r.example ? example(r.example) : '');
   card.innerHTML =
     `<div class="line">${r.line}</div>` +
     (r.points ? `<ul class="pts">${r.points.map((t) => `<li>${t}</li>`).join('')}</ul>` : '') +

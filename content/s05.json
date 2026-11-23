@@ -88,7 +88,29 @@
           "k": "Scrapping",
           "l": "Permanent removal from the commercial fleet."
         }
-      ]
+      ],
+      "outlook": {
+        "title": "2027 forecast",
+        "rows": [
+          [
+            "New vessel deliveries",
+            "2.9 M TEU"
+          ],
+          [
+            "Expected scrapping",
+            "0.5 M TEU"
+          ],
+          [
+            "Fleet capacity growth",
+            "6.8%"
+          ],
+          [
+            "Cargo demand growth",
+            "2.5–4%"
+          ]
+        ],
+        "source": "Source: Xeneta, Ocean Outlook 2027, November 2026."
+      }
     },
     {
       "title": "Network design",
